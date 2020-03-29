@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html style="background-color: white;">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Search anything</title>
+    <style>
+      #loading {
+        display: block;
+        margin: 200px auto auto;
+        font: 1em "Roboto", sans-serif;
+        width: 100px;
+        height: 100px;
+      }
+      #loader {
+        margin-bottom: 20px;
+        display: block;
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(92, 112, 128, 0.4);
+        border-radius: 50%;
+        border-top-color: rgb(92, 112, 128);
+        animation: spin 1s ease-in-out infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="loading">
+        <div id="loader"></div>
+        Loading...
+      </div>
+    </div>
+  </body>
+</html>
