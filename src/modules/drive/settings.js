@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
-import { DriveOauth, getDriveCredentials, saveDriveCredentials } from "./auth";
+import { DriveOauthButton, getDriveCredentials, saveDriveCredentials } from "./auth";
 import { notify } from "../../services/notification-service";
 
 export function DriveSettings() {
@@ -52,7 +52,7 @@ export function DriveSettings() {
           />
         </FormGroup>
         <FormGroup>
-          <DriveOauth />
+          <DriveOauthButton />
         </FormGroup>
         <Button onClick={save} icon="floppy-disk">
           Save

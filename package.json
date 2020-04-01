@@ -85,6 +85,7 @@
   "dependencies": {
     "@babel/runtime": "^7.9.2",
     "@blueprintjs/core": "^3.24.0",
+    "@types/gapi": "0.0.39",
     "@types/react": "^16.9.27",
     "@types/react-dom": "^16.9.5",
     "electron-squirrel-startup": "^1.0.0",
@@ -92,6 +93,7 @@
     "keytar": "^5.4.0",
     "lodash": "^4.17.15",
     "prop-types": "latest",
+    "qs": "^6.9.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",

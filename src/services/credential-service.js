@@ -8,3 +8,7 @@ export async function saveCredential(credentialName, value) {
 export async function getCredential(credentialName) {
   return keytar.getPassword(SERVICE_NAME, credentialName);
 }
+
+export async function deleteCredential(credentialName) {
+  return keytar.deletePassword(SERVICE_NAME, credentialName);
+}
