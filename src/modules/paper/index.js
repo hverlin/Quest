@@ -22,7 +22,7 @@ const paperFetcher = async function (url, searchData) {
   return res.json();
 };
 
-export function PaperSearchResults({ searchData = {} }) {
+export default function PaperSearchResults({ searchData = {} }) {
   const { data, error } = useSWR(
     [`https://api.dropboxapi.com/2/files/search_v2`, searchData],
     paperFetcher

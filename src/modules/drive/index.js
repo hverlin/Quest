@@ -3,7 +3,7 @@ import _ from "lodash";
 import { loadGoogleDriveClient, removeAccessToken } from "./auth";
 import { Link } from "react-router-dom";
 
-export function DriveSearchResults({ searchData = {} }) {
+export default function DriveSearchResults({ searchData = {} }) {
   const [isSignedIn, setIsSignedIn] = React.useState(null);
   const [error, setError] = React.useState(null);
   const [data, setData] = React.useState(null);

@@ -3,7 +3,7 @@ import { Card, Elevation, H5 } from "@blueprintjs/core";
 
 export function SearchCard({ name, children }) {
   return (
-    <Card elevation={Elevation.TWO} style={{ marginBottom: "10px" }}>
+    <Card elevation={Elevation.TWO}>
       <H5>{name}</H5>
       {children}
     </Card>

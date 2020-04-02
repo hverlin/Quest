@@ -3,7 +3,7 @@ import _ from "lodash";
 import React from "react";
 import { getSlackToken } from "./auth";
 
-export function SlackSearchResults({ searchData = {} }) {
+export default function SlackSearchResults({ searchData = {} }) {
   const [token, setToken] = React.useState(null);
 
   React.useEffect(() => {

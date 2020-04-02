@@ -3,7 +3,7 @@ import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
 import { getSlackToken, saveSlackToken } from "./auth";
 import { notify } from "../../services/notification-service";
 
-export function SlackSettings() {
+export default function SlackSettings() {
   const [token, setToken] = React.useState("");
 
   React.useEffect(() => {

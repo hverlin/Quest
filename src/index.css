@@ -23,3 +23,19 @@ body {
   padding: 2rem;
   margin: auto;
 }
+
+.stack {
+  --space: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.stack > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.stack > * + * {
+  margin-top: var(--space);
+}

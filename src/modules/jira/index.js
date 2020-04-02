@@ -16,7 +16,7 @@ export const jiraFetcher = async function (url) {
   return res.json();
 };
 
-export function JiraSearchResults({ searchData = {} }) {
+export default function JiraSearchResults({ searchData = {} }) {
   const url = getJiraUrl();
 
   const { data, error } = useSWR(

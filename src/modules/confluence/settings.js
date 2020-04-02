@@ -8,7 +8,7 @@ import {
 } from "./auth";
 import { notify } from "../../services/notification-service";
 
-export function ConfluenceSettings() {
+export default function ConfluenceSettings() {
   const [url, setUrl] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");

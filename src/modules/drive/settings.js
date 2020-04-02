@@ -3,7 +3,7 @@ import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
 import { DriveOauthButton, getDriveCredentials, saveDriveCredentials } from "./auth";
 import { notify } from "../../services/notification-service";
 
-export function DriveSettings() {
+export default function DriveSettings() {
   const [clientId, setClientId] = React.useState("");
   const [apiKey, setApiKey] = React.useState("");
 

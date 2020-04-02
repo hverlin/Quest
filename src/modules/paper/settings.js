@@ -3,7 +3,7 @@ import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
 import { getPaperToken, savePaperToken } from "./auth";
 import { notify } from "../../services/notification-service";
 
-export function PaperSettings() {
+export default function PaperSettings() {
   const [token, setToken] = React.useState("");
 
   React.useEffect(() => {

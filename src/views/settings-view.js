@@ -1,15 +1,15 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Card, Elevation, H1, Icon } from "@blueprintjs/core";
-import { JiraSettings } from "../modules/jira/settings";
-import { ConfluenceSettings } from "../modules/confluence/settings";
-import { SlackSettings } from "../modules/slack/settings";
-import { DriveSettings } from "../modules/drive/settings";
-import { PaperSettings } from "../modules/paper/settings";
+import { modules } from "../configuration";
 
-function SettingCard({ children }) {
+function SettingCard({ children, loading = false }) {
   return (
-    <Card elevation={Elevation.TWO} style={{ marginBottom: "10px" }}>
+    <Card
+      className={loading ? "bp3-skeleton" : ""}
+      elevation={Elevation.TWO}
+      style={{ height: loading ? "200px" : "" }}
+    >
       {children}
     </Card>
   );
@@ -28,22 +28,23 @@ export function SettingsView() {
           Credentials and keys are securely stored in the system's keychain.
         </p>
       </div>
-      <div className="settings-body">
-        <SettingCard>
-          <JiraSettings />
-        </SettingCard>
-        <SettingCard>
-          <ConfluenceSettings />
-        </SettingCard>
-        <SettingCard>
-          <SlackSettings />
-        </SettingCard>
-        <SettingCard>
-          <DriveSettings />
-        </SettingCard>
-        <SettingCard>
-          <PaperSettings />
-        </SettingCard>
+      <div className="settings-body stack">
+        {Object.keys(modules).map((moduleName) => {
+          const Module = React.lazy(() =>
+            import(
+              /* webpackPrefetch: true */
+              `../modules/${moduleName}/settings`
+            )
+          );
+
+          return (
+            <Suspense fallback={<SettingCard loading />}>
+              <SettingCard>
+                <Module />
+              </SettingCard>
+            </Suspense>
+          );
+        })}
       </div>
     </div>
   );

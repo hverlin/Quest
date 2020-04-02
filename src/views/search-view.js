@@ -1,13 +1,10 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { SearchCard } from "../components/search-card";
-import { ConfluenceSearchResults } from "../modules/confluence";
-import { PaperSearchResults } from "../modules/paper";
-import { DriveSearchResults } from "../modules/drive";
-import { SlackSearchResults } from "../modules/slack";
-import { JiraSearchResults } from "../modules/jira";
+
 import { Button, InputGroup, NonIdealState, Tooltip } from "@blueprintjs/core";
 import * as PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { modules } from "../configuration";
 
 export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
@@ -54,22 +51,19 @@ export function SearchView() {
     <>
       <SearchForm onSubmit={(input) => setSearchData({ input })} />
       {searchData.input && (
-        <div className="search-results">
-          <SearchCard name="Confluence">
-            <ConfluenceSearchResults searchData={searchData} />
-          </SearchCard>
-          <SearchCard name="Dropbox Paper">
-            <PaperSearchResults searchData={searchData} />
-          </SearchCard>
-          <SearchCard name="Google Drive">
-            <DriveSearchResults searchData={searchData} />
-          </SearchCard>
-          <SearchCard name="Slack">
-            <SlackSearchResults searchData={searchData} />
-          </SearchCard>
-          <SearchCard name="JIRA">
-            <JiraSearchResults searchData={searchData} />
-          </SearchCard>
+        <div className="search-results stack">
+          {Object.keys(modules).map((key) => {
+            const module = modules[key];
+            const ResultComponent = React.lazy(() => import(`../modules/${module.id}`));
+
+            return (
+              <Suspense fallback={<SearchCard loading />}>
+                <SearchCard name={modules[key].name}>
+                  <ResultComponent searchData={searchData} />
+                </SearchCard>
+              </Suspense>
+            );
+          })}
         </div>
       )}
       {!searchData.input && (

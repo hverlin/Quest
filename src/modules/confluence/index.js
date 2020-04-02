@@ -15,7 +15,7 @@ const confluenceFetcher = async function (url) {
   return res.json();
 };
 
-export function ConfluenceSearchResults({ searchData = {} }) {
+export default function ConfluenceSearchResults({ searchData = {} }) {
   const url = getConfluenceUrl();
 
   const { data, error } = useSWR(
