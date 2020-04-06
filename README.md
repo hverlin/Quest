@@ -1,27 +1,30 @@
-# My search
+<h1 align="center">
+QUEST
+</h1>
 
-Meta-search client that can connects to various applications and sources.
-
-The goal is to search and aggregate results from different application that you might use personal or at work.
+<p align="center">
+  ⚔️ Quest is a Unified Engine for Searching Things  ⚔️
+</p>
 
 ---
-The application uses electron and store settings locally.
-You will need to configure all the modules you want to connect to.
 
-Credentials are stored securely in your system's keychain.
+## Preface
+Meta-search client that can connects to various applications and sources. It will submit a search queries to all the configured services and aggregate the results.
 
-## Building
+---
+- The application is built with React and Electron
+- It store settings locally. Credentials are stored securely in your system's keychain.
+- You will need to configure all the modules you want to connect to.
 
-```
-npm ci
-```
+## Development
 
 ### Running
 ```
+npm ci
 npm start
 ```
 
-### Making an executable
+### Creating an executable
 ```
 npm run make
 ```
