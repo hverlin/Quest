@@ -1,10 +1,8 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
-import { getConfluenceCredentials, getConfluenceUrl } from "./auth";
 
-const confluenceFetcher = async function (url) {
-  const { username, password } = await getConfluenceCredentials();
+const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
     headers: {
@@ -15,15 +13,18 @@ const confluenceFetcher = async function (url) {
   return res.json();
 };
 
-export default function ConfluenceSearchResults({ searchData = {} }) {
-  const url = getConfluenceUrl();
+export default function ConfluenceSearchResults({
+  searchData = {},
+  configuration,
+}) {
+  const { username, password, url } = configuration.get();
 
   const { data, error } = useSWR(
     () =>
       url
         ? `${url}/rest/api/search?cql=(siteSearch ~ "${searchData.input}" and space = "ENG" and type = "page")`
         : null,
-    confluenceFetcher
+    confluenceFetcher({ username, password })
   );
 
   if (!url) {

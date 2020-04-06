@@ -1,19 +1,7 @@
 import React from "react";
- import { parse } from "url";
+import { parse } from "url";
 import { remote } from "electron";
 import qs from "qs";
-
-import {
-  deleteCredential,
-  getCredential,
-  saveCredential,
-} from "../../services/credential-service";
-import { Button } from "@blueprintjs/core";
-
-const DRIVE_CLIENT_ID = "drive-client-id";
-const DRIVE_API_KEY = "drive-api-key";
-const DRIVE_REFRESH_TOKEN = "drive-refresh-token";
-const DRIVE_ACCESS_TOKEN = "drive-access-token";
 
 const GOOGLE_AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -117,31 +105,6 @@ async function googleSignIn(clientId) {
   return fetchAccessTokens(clientId, code);
 }
 
-export async function saveDriveCredentials({ clientId, apiKey }) {
-  return Promise.all([
-    saveCredential(DRIVE_CLIENT_ID, clientId),
-    saveCredential(DRIVE_API_KEY, apiKey),
-  ]);
-}
-
-export async function removeAccessToken() {
-  return deleteCredential(DRIVE_ACCESS_TOKEN);
-}
-
-export async function removeRefreshToken() {
-  return deleteCredential(DRIVE_REFRESH_TOKEN);
-}
-
-export async function getDriveCredentials() {
-  const [clientId, apiKey, refreshToken, accessToken] = await Promise.all([
-    getCredential(DRIVE_CLIENT_ID),
-    getCredential(DRIVE_API_KEY),
-    getCredential(DRIVE_REFRESH_TOKEN),
-    getCredential(DRIVE_ACCESS_TOKEN),
-  ]);
-  return { clientId, apiKey, refreshToken, accessToken };
-}
-
 function insertGoogleDriveApiClientScript() {
   const scriptId = "google-drive-api-client";
   if (document.getElementById(scriptId)) {
@@ -172,9 +135,8 @@ function waitForGoogleClient() {
   });
 }
 
-async function revokeRefreshToken() {
-  const token = await getCredential(DRIVE_REFRESH_TOKEN);
-  if (!token) {
+export async function revokeRefreshToken({ refreshToken }) {
+  if (!refreshToken) {
     return;
   }
 
@@ -183,17 +145,15 @@ async function revokeRefreshToken() {
     await fetch(`https://oauth2.googleapis.com/revoke`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: qs.stringify({ token }),
+      body: qs.stringify({ token: refreshToken }),
     });
   } catch (e) {
     console.error(e);
   }
-
-  return removeRefreshToken();
 }
 
-export async function hasCorrectTokens() {
-  const { clientId, apiKey, refreshToken } = await getDriveCredentials();
+export function hasCorrectTokens(configuration) {
+  const { clientId, apiKey, refreshToken } = configuration;
   return !!(clientId && apiKey && refreshToken);
 }
 
@@ -203,6 +163,7 @@ async function ensureGoogleClientLoaded() {
 }
 
 export async function loadGoogleDriveClient(
+  configurationState,
   onSignedIn,
   { logInIfUnauthorized = true } = {}
 ) {
@@ -214,14 +175,14 @@ export async function loadGoogleDriveClient(
       apiKey,
       refreshToken,
       accessToken,
-    } = await getDriveCredentials();
+    } = await configurationState.get();
 
     if (!clientId || !apiKey) {
       return onSignedIn(false);
     }
 
-    if(!refreshToken && !logInIfUnauthorized) {
-      return onSignedIn(false)
+    if (!refreshToken && !logInIfUnauthorized) {
+      return onSignedIn(false);
     }
 
     try {
@@ -231,13 +192,13 @@ export async function loadGoogleDriveClient(
           : await googleSignIn(clientId);
 
         if (!refreshToken) {
-          await saveCredential(DRIVE_REFRESH_TOKEN, token.refresh_token);
+          configurationState.nested.refreshToken.set(token.refresh_token);
         }
 
-        await saveCredential(DRIVE_ACCESS_TOKEN, token.access_token);
+        configurationState.nested.accessToken.set(token.access_token);
       }
 
-      const token = await getCredential(DRIVE_ACCESS_TOKEN);
+      const { accessToken: token } = configurationState.get();
 
       window.gapi.client.setApiKey(apiKey);
       window.gapi.client.setToken({ access_token: token });
@@ -245,43 +206,8 @@ export async function loadGoogleDriveClient(
 
       onSignedIn(true);
     } catch (e) {
-      onSignedIn(false);
       console.error(e);
+      onSignedIn(false);
     }
   });
-}
-
-export function DriveOauthButton() {
-  const [isSignedIn, setIsSignedIn] = React.useState(null);
-
-  React.useEffect(() => {
-    async function checkStatus() {
-      const hasToken = await hasCorrectTokens();
-      setIsSignedIn(hasToken);
-    }
-
-    checkStatus();
-  });
-
-  async function handleSignoutClick() {
-    await Promise.all([removeAccessToken(), revokeRefreshToken()]);
-    setIsSignedIn(false);
-  }
-
-  return (
-    <div>
-      {isSignedIn || isSignedIn === null ? (
-        <Button
-          className={isSignedIn === null ? "bp3-skeleton" : ""}
-          onClick={handleSignoutClick}
-        >
-          Sign Out
-        </Button>
-      ) : (
-        <Button onClick={() => loadGoogleDriveClient(setIsSignedIn)}>
-          Authorize
-        </Button>
-      )}
-    </div>
-  );
 }

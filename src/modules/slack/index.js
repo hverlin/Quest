@@ -1,19 +1,12 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
-import { getSlackToken } from "./auth";
 
-export default function SlackSearchResults({ searchData = {} }) {
-  const [token, setToken] = React.useState(null);
+export default function SlackSearchResults({ searchData = {}, configuration }) {
+  const { token } = configuration.get();
 
-  React.useEffect(() => {
-    getSlackToken().then(setToken);
-  }, []);
-
-  const { data, error } = useSWR(() =>
-    token
-      ? `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}`
-      : null
+  const { data, error } = useSWR(
+    `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}`
   );
 
   if (error || (data && !data.ok)) return <div>Failed to load</div>;

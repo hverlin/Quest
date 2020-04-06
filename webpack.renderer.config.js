@@ -8,7 +8,6 @@ rules.push({
 });
 
 module.exports = {
-  // Put your normal webpack config below here
   module: { rules },
   plugins: [
     // output file path is wrong for files that have been imported

@@ -35,6 +35,7 @@
     "babel-loader": "^8.1.0",
     "css-loader": "^3.4.2",
     "electron": "8.2.0",
+    "electron-devtools-installer": "^2.2.4",
     "filemanager-webpack-plugin": "^2.0.5",
     "node-loader": "^0.6.0",
     "prettier": "^2.0.2",
@@ -44,6 +45,9 @@
   "dependencies": {
     "@babel/runtime": "^7.9.2",
     "@blueprintjs/core": "^3.24.0",
+    "@hookstate/core": "^1.7.1",
+    "@hookstate/devtools": "^1.7.6",
+    "@hookstate/logger": "^1.5.2",
     "@types/gapi": "0.0.39",
     "@types/react": "^16.9.27",
     "@types/react-dom": "^16.9.5",

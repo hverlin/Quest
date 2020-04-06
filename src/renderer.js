@@ -32,5 +32,11 @@ import "./index.css";
 import ReactDOM from "react-dom";
 import React from "react";
 import App from "./app";
+import { initializeStore } from "./services/storage-service";
 
-ReactDOM.render(<App />, document.getElementById("app"));
+(async () => {
+  const store = await initializeStore({
+    isProduction: process.env.NODE_ENV === "production",
+  });
+  ReactDOM.render(<App store={store} />, document.getElementById("app"));
+})();

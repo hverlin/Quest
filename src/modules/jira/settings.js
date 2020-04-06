@@ -1,46 +1,32 @@
 import React from "react";
-import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
-import {
-  getJiraCredentials,
-  getJiraUrl,
-  saveJiraCredentials,
-  storeJiraUrl,
-} from "./auth";
+import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
+import { useStateLink } from "@hookstate/core";
+import _ from "lodash";
 
-export default function JiraSettings() {
-  const [url, setUrl] = React.useState("");
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
+export default function JiraSettings({ configurationState }) {
+  const configuration = useStateLink(configurationState);
+  const localState = useStateLink(_.cloneDeep(configuration.get()));
 
-  React.useEffect(() => {
-    async function retrieveCredentials() {
-      const { username, password } = await getJiraCredentials();
-      setUsername(username);
-      setPassword(password);
-      setUrl(getJiraUrl());
-    }
-
-    retrieveCredentials();
-  }, []);
+  const { username, password, url } = localState.get();
 
   async function save(event) {
     event.preventDefault();
-    storeJiraUrl(url);
-    await saveJiraCredentials({ username, password });
+    configuration.nested.username.set(username);
+    configuration.nested.password.set(password);
+    configuration.nested.url.set(url);
     notify("Jira settings saved successfully.");
   }
 
   return (
     <>
-      <H5>JIRA</H5>
       <form onSubmit={save}>
         <FormGroup label="URL" labelFor="jira-url" labelInfo="(required)">
           <InputGroup
             id="jira-url"
             placeholder="URL (e.g. https://jira.domain.com)"
             value={url || ""}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => localState.nested.url.set(e.target.value)}
           />
         </FormGroup>
         <FormGroup
@@ -52,7 +38,7 @@ export default function JiraSettings() {
             id="jira-username"
             placeholder="username"
             value={username || ""}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => localState.nested.username.set(e.target.value)}
           />
         </FormGroup>
         <FormGroup
@@ -65,7 +51,7 @@ export default function JiraSettings() {
             placeholder="password"
             type="password"
             value={password || ""}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => localState.nested.password.set(e.target.value)}
           />
         </FormGroup>
         <Button onClick={save} icon="floppy-disk">

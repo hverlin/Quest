@@ -15,16 +15,16 @@ const swrConfig = {
   },
 };
 
-function App() {
+function App({ store }) {
   return (
     <SWRConfig value={swrConfig}>
       <HashRouter>
         <Switch>
           <Route path="/settings">
-            <SettingsView />
+            <SettingsView store={store} />
           </Route>
           <Route path="/">
-            <SearchView />
+            <SearchView store={store} />
           </Route>
         </Switch>
       </HashRouter>

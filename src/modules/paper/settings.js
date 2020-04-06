@@ -1,28 +1,23 @@
 import React from "react";
-import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
-import { getPaperToken, savePaperToken } from "./auth";
+import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
+import { useStateLink } from "@hookstate/core";
+import _ from "lodash";
 
-export default function PaperSettings() {
-  const [token, setToken] = React.useState("");
+export default function PaperSettings({ configurationState }) {
+  const configuration = useStateLink(configurationState);
+  const localState = useStateLink(_.cloneDeep(configuration.get()));
 
-  React.useEffect(() => {
-    async function retrieveCredentials() {
-      const token = await getPaperToken();
-      setToken(token);
-    }
-    retrieveCredentials();
-  }, []);
+  const { token } = localState.get();
 
   async function save(event) {
     event.preventDefault();
-    await savePaperToken(token);
+    configuration.nested.token.set(token);
     notify("Dropbox Paper token saved successfully.");
   }
 
   return (
     <>
-      <H5>Dropbox Paper</H5>
       <form onSubmit={save}>
         <FormGroup
           label="API Token"
@@ -34,7 +29,7 @@ export default function PaperSettings() {
             placeholder="API token"
             type="password"
             value={token || ""}
-            onChange={(e) => setToken(e.target.value)}
+            onChange={(e) => localState.nested.token.set(e.target.value)}
           />
         </FormGroup>
         <Button onClick={save} icon="floppy-disk">

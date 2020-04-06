@@ -1,0 +1,167 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "required": ["modules"],
+  "properties": {
+    "modules": {
+      "type": "object",
+      "required": ["confluence", "drive", "jira", "paper", "slack"],
+      "additionalProperties": false,
+      "properties": {
+        "confluence": {
+          "type": "object",
+          "required": ["enabled", "id", "name", "url", "username", "password"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "default": "confluence"
+            },
+            "name": {
+              "type": "string",
+              "default": "Confluence"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "url": {
+              "type": "string",
+              "default": ""
+            },
+            "username": {
+              "type": "string",
+              "default": "confluence-username",
+              "isPassword": true
+            },
+            "password": {
+              "type": "string",
+              "default": "confluence-password",
+              "isPassword": true
+            }
+          }
+        },
+        "drive": {
+          "type": "object",
+          "required": ["enabled", "id", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "default": "drive"
+            },
+            "name": {
+              "type": "string",
+              "default": "Google Drive"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "clientId": {
+              "type": "string",
+              "default": "drive-client-id",
+              "isPassword": true
+            },
+            "apiKey": {
+              "type": "string",
+              "default": "drive-api-key",
+              "isPassword": true
+            },
+            "refreshToken": {
+              "type": "string",
+              "default": "drive-refresh-token",
+              "isPassword": true
+            },
+            "accessToken": {
+              "type": "string",
+              "default": "drive-access-token",
+              "isPassword": true
+            }
+          }
+        },
+        "jira": {
+          "type": "object",
+          "required": ["enabled", "id", "name", "url", "username", "password"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "default": "jira"
+            },
+            "name": {
+              "type": "string",
+              "default": "JIRA"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "url": {
+              "type": "string",
+              "default": ""
+            },
+            "username": {
+              "type": "string",
+              "default": "jira-username",
+              "isPassword": true
+            },
+            "password": {
+              "type": "string",
+              "default": "jira-password",
+              "isPassword": true
+            }
+          }
+        },
+        "paper": {
+          "type": "object",
+          "required": ["enabled", "id", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "default": "paper"
+            },
+            "name": {
+              "type": "string",
+              "default": "Dropbox Paper"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "token": {
+              "type": "string",
+              "default": "paper-token",
+              "isPassword": true
+            }
+          }
+        },
+        "slack": {
+          "type": "object",
+          "required": ["enabled", "id", "name", "token"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "default": "slack"
+            },
+            "name": {
+              "type": "string",
+              "default": "Slack"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "token": {
+              "type": "string",
+              "default": "slack-token",
+              "isPassword": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

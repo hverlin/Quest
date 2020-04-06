@@ -1,10 +1,8 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
-import { getJiraCredentials, getJiraUrl } from "./auth";
 
-export const jiraFetcher = async function (url) {
-  const { username, password } = await getJiraCredentials();
+export const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
     headers: {
@@ -16,13 +14,13 @@ export const jiraFetcher = async function (url) {
   return res.json();
 };
 
-export default function JiraSearchResults({ searchData = {} }) {
-  const url = getJiraUrl();
+export default function JiraSearchResults({ searchData = {}, configuration }) {
+  const { username, password, url } = configuration.get();
 
   const { data, error } = useSWR(
     () =>
       url ? `${url}/rest/api/2/search?jql=text+~+${searchData.input}` : null,
-    jiraFetcher
+    jiraFetcher({ username, password })
   );
 
   if (!url) {

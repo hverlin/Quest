@@ -1,15 +1,17 @@
 import React from "react";
 import _ from "lodash";
-import { loadGoogleDriveClient, removeAccessToken } from "./auth";
+import { loadGoogleDriveClient } from "./auth";
 import { Link } from "react-router-dom";
 
-export default function DriveSearchResults({ searchData = {} }) {
+export default function DriveSearchResults({ searchData = {}, configuration }) {
   const [isSignedIn, setIsSignedIn] = React.useState(null);
   const [error, setError] = React.useState(null);
   const [data, setData] = React.useState(null);
 
   React.useEffect(() => {
-    loadGoogleDriveClient(setIsSignedIn, { logInIfUnauthorized: false });
+    loadGoogleDriveClient(configuration, setIsSignedIn, {
+      logInIfUnauthorized: false,
+    });
   }, [isSignedIn]);
 
   React.useEffect(() => {
@@ -28,10 +30,8 @@ export default function DriveSearchResults({ searchData = {} }) {
       } catch (e) {
         console.error(e);
         if (e?.status === 401) {
-          await Promise.all([
-            removeAccessToken(),
-            loadGoogleDriveClient(setIsSignedIn),
-          ]);
+          configuration.nested.accessToken.set(null);
+          await loadGoogleDriveClient(configuration, setIsSignedIn);
           return listFiles();
         }
         setError(e);

@@ -1,10 +1,8 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
-import { getPaperToken } from "./auth";
 
-const paperFetcher = async function (url, searchData) {
-  const token = await getPaperToken();
+const paperFetcher = (token) => async (url, searchData) => {
   const res = await fetch(url, {
     method: "POST",
     credentials: "omit",
@@ -22,10 +20,12 @@ const paperFetcher = async function (url, searchData) {
   return res.json();
 };
 
-export default function PaperSearchResults({ searchData = {} }) {
+export default function PaperSearchResults({ searchData = {}, configuration }) {
+  const { token } = configuration.get();
+
   const { data, error } = useSWR(
     [`https://api.dropboxapi.com/2/files/search_v2`, searchData],
-    paperFetcher
+    paperFetcher(token)
   );
 
   if (error) return <div>Failed to load</div>;

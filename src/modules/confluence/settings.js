@@ -1,45 +1,32 @@
+import _ from "lodash";
 import React from "react";
-import { Button, FormGroup, H5, InputGroup } from "@blueprintjs/core";
-import {
-  getConfluenceCredentials,
-  getConfluenceUrl,
-  saveConfluenceCredentials,
-  storeConfluenceUrl,
-} from "./auth";
+import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
+import { useStateLink } from "@hookstate/core";
 
-export default function ConfluenceSettings() {
-  const [url, setUrl] = React.useState("");
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
+export default function ConfluenceSettings({ configurationState }) {
+  const configuration = useStateLink(configurationState);
+  const localState = useStateLink(_.cloneDeep(configuration.get()));
 
-  React.useEffect(() => {
-    async function retrieveCredentials() {
-      const { username, password } = await getConfluenceCredentials();
-      setUsername(username);
-      setPassword(password);
-      setUrl(getConfluenceUrl());
-    }
-    retrieveCredentials();
-  }, []);
+  const { username, password, url } = localState.get();
 
   async function save(event) {
     event.preventDefault();
-    storeConfluenceUrl(url);
-    await saveConfluenceCredentials({ username, password });
+    configuration.nested.username.set(username);
+    configuration.nested.password.set(password);
+    configuration.nested.url.set(url);
     notify("Confluence settings saved successfully.");
   }
 
   return (
     <>
-      <H5>Confluence</H5>
       <form onSubmit={save}>
         <FormGroup label="URL" labelFor="confluence-url" labelInfo="(required)">
           <InputGroup
             id="confluence-url"
             placeholder="URL (e.g. https://confluence.domain.com)"
             value={url || ""}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => localState.nested.url.set(e.target.value)}
           />
         </FormGroup>
         <FormGroup
@@ -51,7 +38,7 @@ export default function ConfluenceSettings() {
             id="confluence-username"
             placeholder="username"
             value={username || ""}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => localState.nested.username.set(e.target.value)}
           />
         </FormGroup>
         <FormGroup
@@ -64,7 +51,7 @@ export default function ConfluenceSettings() {
             placeholder="password"
             type="password"
             value={password || ""}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => localState.nested.password.set(e.target.value)}
           />
         </FormGroup>
         <Button onClick={save} icon="floppy-disk">

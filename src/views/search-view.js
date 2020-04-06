@@ -2,9 +2,11 @@ import React, { Suspense } from "react";
 import { SearchCard } from "../components/search-card";
 
 import { Button, InputGroup, NonIdealState, Tooltip } from "@blueprintjs/core";
-import * as PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { modules } from "../configuration";
+import { useStateLink } from "@hookstate/core";
+
+const getModuleView = (id) =>
+  React.memo(React.lazy(() => import(`../modules/${id}`)));
 
 export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
@@ -40,26 +42,30 @@ export function SearchForm({ onSubmit }) {
   );
 }
 
-SearchForm.propTypes = {
-  onSubmit: PropTypes.func,
-};
-
-export function SearchView() {
+export function SearchView({ store }) {
+  const configuration = useStateLink(store);
   const [searchData, setSearchData] = React.useState({ input: "" });
+
+  const enabledModules = Object.entries(
+    configuration.nested.modules.nested
+  ).filter(([, module]) => module.nested.enabled.get());
 
   return (
     <>
       <SearchForm onSubmit={(input) => setSearchData({ input })} />
       {searchData.input && (
         <div className="search-results stack">
-          {Object.keys(modules).map((key) => {
-            const module = modules[key];
-            const ResultComponent = React.lazy(() => import(`../modules/${module.id}`));
+          {enabledModules.map(([id, moduleState]) => {
+            const { name } = moduleState.get();
+            const ResultComponent = getModuleView(id);
 
             return (
-              <Suspense fallback={<SearchCard loading />}>
-                <SearchCard name={modules[key].name}>
-                  <ResultComponent searchData={searchData} />
+              <Suspense key={id} fallback={<SearchCard loading />}>
+                <SearchCard name={name}>
+                  <ResultComponent
+                    searchData={searchData}
+                    configuration={moduleState}
+                  />
                 </SearchCard>
               </Suspense>
             );
@@ -71,7 +77,16 @@ export function SearchView() {
           <NonIdealState
             icon="search"
             title="Search anything"
-            description='Try searching something. e.g. "azure"'
+            description={
+              enabledModules.length === 0
+                ? "No search modules are configured."
+                : 'Try searching something. e.g. "analytics"'
+            }
+            action={
+              enabledModules.length === 0 ? (
+                <Link to="/settings">Settings</Link>
+              ) : undefined
+            }
           />
         </div>
       )}
