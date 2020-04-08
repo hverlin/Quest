@@ -3,9 +3,9 @@ import { Card, Elevation, H5 } from "@blueprintjs/core";
 
 export function SearchCard({ name, children }) {
   return (
-    <Card elevation={Elevation.TWO}>
+    <div>
       <H5>{name}</H5>
       {children}
-    </Card>
+    </div>
   );
 }

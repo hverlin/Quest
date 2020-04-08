@@ -2,10 +2,29 @@ const FileManagerPlugin = require("filemanager-webpack-plugin");
 
 const rules = require("./webpack.rules");
 
-rules.push({
-  test: /\.css$/,
-  use: [{ loader: "style-loader" }, { loader: "css-loader" }],
-});
+rules.push(
+  {
+    test: /\.module.css$/,
+    use: [
+      { loader: "style-loader" },
+      {
+        loader: "css-loader",
+        options: { modules: true },
+      },
+    ],
+  },
+  {
+    test: /\.css$/,
+    exclude: /\.module.css$/,
+    use: [
+      { loader: "style-loader" },
+      {
+        loader: "css-loader",
+        options: { modules: false },
+      },
+    ],
+  },
+);
 
 module.exports = {
   module: { rules },

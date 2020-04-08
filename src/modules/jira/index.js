@@ -1,8 +1,12 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
+import { Card, Collapse } from "@blueprintjs/core";
 
-export const jiraFetcher = ({ username, password }) => async (url) => {
+import styles from "../../components/search-results.module.css";
+import { Time } from "../../components/time";
+
+const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
     headers: {
@@ -14,8 +18,48 @@ export const jiraFetcher = ({ username, password }) => async (url) => {
   return res.json();
 };
 
+function resultItem(url) {
+  return (issue) => {
+    const {
+      id,
+      key,
+      fields: {
+        issuetype,
+        summary,
+        assignee,
+        status,
+        reporter,
+        created,
+        updated,
+      },
+    } = issue;
+    return (
+      <Card interactive key={id} onClick={() => window.open(url + "/browse/" + key)}>
+        <p>
+          <img src={issuetype?.iconUrl} alt="test" />
+          {"  "}
+          <a
+            target="_blank"
+            rel="nofollow noopener"
+            href={url + "/browse/" + key}
+          >
+            {key}
+          </a>{" "}
+          - {summary}
+        </p>
+        <p>
+          Created: <Time time={created} /> | Updated: <Time time={updated} /> |{" "}
+          {assignee.displayName} | {status.name} | reported by{" "}
+          {reporter.displayName}
+        </p>
+      </Card>
+    );
+  };
+}
+
 export default function JiraSearchResults({ searchData = {}, configuration }) {
   const { username, password, url } = configuration.get();
+  const [showMore, setShowMore] = React.useState(false);
 
   const { data, error } = useSWR(
     () =>
@@ -36,10 +80,16 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
   }
 
   return (
-    <ul>
-      {_.take(data?.issues, 5).map((issue) => (
-        <li key={issue.id}>{issue.fields.summary}</li>
-      ))}
-    </ul>
+    <div className={styles.results}>
+      <p>Showing {_.size(data.issues)} of {data.total} results</p>
+      {_.take(data.issues, 5).map(resultItem(url))}
+      {!showMore && <a onClick={() => setShowMore(!showMore)}>Show more</a>}
+      <Collapse isOpen={showMore}>
+        <div className={styles.results}>
+          {_.takeRight(data.issues, 5).map(resultItem(url))}
+        </div>
+      </Collapse>
+      {showMore && <a onClick={() => setShowMore(!showMore)}>Show less</a>}
+    </div>
   );
 }

@@ -1,7 +1,12 @@
 import React, { Suspense } from "react";
 import { SearchCard } from "../components/search-card";
 
-import { Button, InputGroup, NonIdealState, Tooltip } from "@blueprintjs/core";
+import {
+  Button,
+  InputGroup,
+  NonIdealState,
+  Tooltip,
+} from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 import { useStateLink } from "@hookstate/core";
 

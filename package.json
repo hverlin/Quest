@@ -55,6 +55,7 @@
     "electron-store": "^5.1.1",
     "keytar": "^5.4.0",
     "lodash": "^4.17.15",
+    "luxon": "^1.23.0",
     "prop-types": "latest",
     "qs": "^6.9.3",
     "react": "^16.13.1",
