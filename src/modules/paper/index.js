@@ -1,6 +1,9 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
+import styles from "../../components/search-results.module.css";
+import { Card } from "@blueprintjs/core";
+import { Time } from "../../components/time";
 
 const paperFetcher = (token) => async (url, searchData) => {
   const res = await fetch(url, {
@@ -28,19 +31,32 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
     paperFetcher(token)
   );
 
-  if (error) return <div>Failed to load</div>;
-  if (!data) return <div>Loading Dropbox Paper results...</div>;
+  if (error) {
+    return <div>Failed to load</div>;
+  }
+
+  if (!data) {
+    return <div>Loading Dropbox Paper results...</div>;
+  }
+
+  console.log(data);
+
   return (
-    <ul>
+    <div className={styles.results}>
       {_.take(data?.matches, 5).map(
         ({
           metadata: {
-            metadata: { id, name },
+            metadata: { id, name, server_modified },
           },
         }) => (
-          <li key={id}>{name}</li>
+          <Card key={id} interactive>
+            <p>{name}</p>
+            <p>
+             Last updated <Time time={server_modified} />
+            </p>
+          </Card>
         )
       )}
-    </ul>
+    </div>
   );
 }
