@@ -1,6 +1,8 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
+import styles from "../../components/search-results.module.css";
+import { Card } from "@blueprintjs/core";
 
 const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -12,6 +14,10 @@ const confluenceFetcher = ({ username, password }) => async (url) => {
   });
   return res.json();
 };
+
+function parseConfluenceMessage(message) {
+  return message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
+}
 
 export default function ConfluenceSearchResults({
   searchData = {},
@@ -42,10 +48,20 @@ export default function ConfluenceSearchResults({
   }
 
   return (
-    <ul>
+    <div className={styles.results}>
       {_.take(data?.results, 5).map((result) => (
-        <li key={result.content.id}>{result.content.title}</li>
+        <Card interactive key={result.content.id}>
+          <a target="_blank" href={url + result.url}>
+            {result.content.title}
+          </a>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: parseConfluenceMessage(result.excerpt),
+            }}
+          />
+          Updated {result.friendlyLastModified}
+        </Card>
       ))}
-    </ul>
+    </div>
   );
 }

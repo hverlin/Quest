@@ -12,7 +12,7 @@ function slackMessageParser(message, usersById) {
   return message
     .replace(urlRegex, `<a href="http$1">http$1</a>`)
     .replace(userRegex, (match, p1, p2) => {
-      return usersById ? `<a>@${usersById[p1].real_name}</a>` : p1;
+      return `<a>@${_.get(usersById, [p1, "real_name"], p1)}</a>`;
     });
 }
 
@@ -60,7 +60,7 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
         >
           <p>
             <b>
-              {usersById ? usersById[message.user].real_name : message.username}
+              {_.get(usersById, [message.user, "real_name"], message.username)}
             </b>
             :{" "}
             <span
