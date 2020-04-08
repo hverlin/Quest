@@ -13,3 +13,7 @@
 .results > * + * {
     margin-top: var(--space);
 }
+
+.results :global(.bp3-card) {
+    padding: 10px;
+}
