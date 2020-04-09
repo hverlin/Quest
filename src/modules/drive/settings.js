@@ -44,6 +44,7 @@ export function DriveOauthButton({ configurationState }) {
   );
 }
 
+// noinspection JSUnusedGlobalSymbols
 export default function DriveSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
   const localState = useStateLink(_.cloneDeep(configuration.get()));

@@ -3,6 +3,7 @@ import _ from "lodash";
 import React from "react";
 import styles from "../../components/search-results.module.css";
 import { Card } from "@blueprintjs/core";
+import { SearchCard } from "../../components/search-card";
 
 const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -48,7 +49,7 @@ export default function ConfluenceSearchResults({
   }
 
   return (
-    <div className={styles.results}>
+    <SearchCard configuration={configuration}>
       {_.take(data?.results, 5).map((result) => (
         <Card interactive key={result.content.id}>
           <a target="_blank" href={url + result.url}>
@@ -62,6 +63,6 @@ export default function ConfluenceSearchResults({
           Updated {result.friendlyLastModified}
         </Card>
       ))}
-    </div>
+    </SearchCard>
   );
 }

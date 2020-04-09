@@ -1,13 +1,15 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
-import styles from "../../components/search-results.module.css";
 import { Card } from "@blueprintjs/core";
 import { Time } from "../../components/time";
+import { SearchCard } from "../../components/search-card";
 
 const paperFetcher = (token) => async (url, searchData) => {
   const res = await fetch(url, {
     method: "POST",
+
+
     credentials: "omit",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -42,7 +44,7 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
   console.log(data);
 
   return (
-    <div className={styles.results}>
+    <SearchCard configuration={configuration}>
       {_.take(data?.matches, 5).map(
         ({
           metadata: {
@@ -57,6 +59,6 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
           </Card>
         )
       )}
-    </div>
+    </SearchCard>
   );
 }

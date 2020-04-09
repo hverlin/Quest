@@ -1,55 +1,38 @@
 import React, { Suspense } from "react";
-import { SearchCard } from "../components/search-card";
 
-import {
-  Button,
-  InputGroup,
-  NonIdealState,
-  Tooltip,
-} from "@blueprintjs/core";
+import { Card, NonIdealState, } from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 import { useStateLink } from "@hookstate/core";
+
+import styles from './search-view.module.css';
+import { SearchForm } from "../components/search-bar";
+import * as PropTypes from "prop-types";
 
 const getModuleView = (id) =>
   React.memo(React.lazy(() => import(`../modules/${id}`)));
 
-export function SearchForm({ onSubmit }) {
-  const [input, setInput] = React.useState("");
-
-  function _onSubmit(e) {
-    e.preventDefault();
-    onSubmit(input);
-  }
-
-  const searchButton = (
-    <Tooltip content="Hit Enter to search">
-      <Button icon="key-enter" minimal={true} onClick={_onSubmit} />
-    </Tooltip>
-  );
-
-  return (
-    <div className="search-form">
-      <form onSubmit={_onSubmit}>
-        <InputGroup
-          autoFocus
-          large
-          placeholder="Search something..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          type="text"
-          rightElement={searchButton}
-        />
-      </form>
-      <div style={{ marginTop: "10px" }}>
-        <Link to="/settings">Settings</Link>
-      </div>
-    </div>
-  );
+function EmptyState(props) {
+  return <div style={{marginTop: "3rem"}}>
+    <NonIdealState
+      icon="search"
+      title="Search anything"
+      description={
+        props.enabledModules.length === 0
+          ? "No search modules are configured."
+          : "Try searching something. e.g. \"analytics\""
+      }
+      action={
+        props.enabledModules.length === 0 ? (
+          <Link to="/settings">Settings</Link>
+        ) : undefined
+      }
+    />
+  </div>;
 }
 
-export function SearchView({ store }) {
+export function SearchView({store}) {
   const configuration = useStateLink(store);
-  const [searchData, setSearchData] = React.useState({ input: "" });
+  const [searchData, setSearchData] = React.useState({input: ""});
 
   const enabledModules = Object.entries(
     configuration.nested.modules.nested
@@ -57,43 +40,23 @@ export function SearchView({ store }) {
 
   return (
     <>
-      <SearchForm onSubmit={(input) => setSearchData({ input })} />
-      {searchData.input && (
-        <div className="search-results stack">
+      <SearchForm onSubmit={(input) => setSearchData({input})}/>
+      {searchData.input ? (
+        <div className={styles.searchResults}>
           {enabledModules.map(([id, moduleState]) => {
-            const { name } = moduleState.get();
             const ResultComponent = getModuleView(id);
-
             return (
-              <Suspense key={id} fallback={<SearchCard loading />}>
-                <SearchCard name={name}>
-                  <ResultComponent
-                    searchData={searchData}
-                    configuration={moduleState}
-                  />
-                </SearchCard>
+              <Suspense key={id} fallback={<Card className='bp3-skeleton'/>}>
+                <ResultComponent
+                  searchData={searchData}
+                  configuration={moduleState}
+                />
               </Suspense>
             );
           })}
         </div>
-      )}
-      {!searchData.input && (
-        <div style={{ marginTop: "3rem" }}>
-          <NonIdealState
-            icon="search"
-            title="Search anything"
-            description={
-              enabledModules.length === 0
-                ? "No search modules are configured."
-                : 'Try searching something. e.g. "analytics"'
-            }
-            action={
-              enabledModules.length === 0 ? (
-                <Link to="/settings">Settings</Link>
-              ) : undefined
-            }
-          />
-        </div>
+      ) : (
+        <EmptyState enabledModules={enabledModules}/>
       )}
     </>
   );

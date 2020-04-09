@@ -1,0 +1,13 @@
+.searchForm {
+    padding: 1rem 2rem;
+    background-color: #e1e8ed;
+}
+
+.searchForm :global(.bp3-input-group) {
+    flex-grow: 1;
+}
+
+.searchForm .settings {
+    display: block;
+    margin: auto auto auto 15px;
+}

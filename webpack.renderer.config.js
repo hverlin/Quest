@@ -35,7 +35,7 @@ module.exports = {
       onEnd: {
         copy: [
           {
-            source: ".webpack/renderer/**/*",
+            source: ".webpack/renderer/**/*!(main_window)",
             destination: ".webpack/renderer/main_window/",
           },
         ],

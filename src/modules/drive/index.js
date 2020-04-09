@@ -2,9 +2,9 @@ import React from "react";
 import _ from "lodash";
 import { loadGoogleDriveClient } from "./auth";
 import { Link } from "react-router-dom";
-import styles from "../../components/search-results.module.css";
 import { Card } from "@blueprintjs/core";
 import { Time } from "../../components/time";
+import { SearchCard } from "../../components/search-card";
 
 export default function DriveSearchResults({ searchData = {}, configuration }) {
   const [isSignedIn, setIsSignedIn] = React.useState(null);
@@ -27,7 +27,7 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
         const response = await window.gapi.client.drive.files.list({
           q: `name contains '${searchData.input}'`,
           pageSize: 5,
-          fields: "nextPageToken, files(id, name, iconLink, modifiedTime)",
+          fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
         });
         setData(response);
       } catch (e) {
@@ -61,10 +61,10 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
   }
 
   return (
-    <div className={styles.results}>
+    <SearchCard configuration={configuration}>
       {_.take(data?.result?.files, 5).map(
-        ({ name, id, iconLink, modifiedTime }) => (
-          <Card interactive key={id}>
+        ({ name, id, iconLink, modifiedTime, webViewLink }) => (
+          <Card interactive key={id} onClick={() => window.open(webViewLink)}>
             <p>
               <img src={iconLink} />
               {"  "}
@@ -76,6 +76,6 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
           </Card>
         )
       )}
-    </div>
+    </SearchCard>
   );
 }

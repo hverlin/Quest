@@ -5,6 +5,7 @@ import { Card, Collapse } from "@blueprintjs/core";
 
 import styles from "../../components/search-results.module.css";
 import { Time } from "../../components/time";
+import { SearchCard } from "../../components/search-card";
 
 const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -80,8 +81,7 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
   }
 
   return (
-    <div className={styles.results}>
-      <p>Showing {_.size(data.issues)} of {data.total} results</p>
+    <SearchCard configuration={configuration} results={`Showing ${_.size(data.issues)} of ${data.total} results`}>
       {_.take(data.issues, 5).map(resultItem(url))}
       {!showMore && <a onClick={() => setShowMore(!showMore)}>Show more</a>}
       <Collapse isOpen={showMore}>
@@ -90,6 +90,6 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
         </div>
       </Collapse>
       {showMore && <a onClick={() => setShowMore(!showMore)}>Show less</a>}
-    </div>
+    </SearchCard>
   );
 }

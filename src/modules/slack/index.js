@@ -4,6 +4,7 @@ import React from "react";
 import { Card } from "@blueprintjs/core";
 import styles from "../../components/search-results.module.css";
 import { Time } from "../../components/time";
+import { SearchCard } from "../../components/search-card";
 
 function slackMessageParser(message, usersById) {
   const urlRegex = /<http(.*)?>/gm;
@@ -23,11 +24,11 @@ async function getUsers(token) {
 
 const getUsersMemo = _.memoize(getUsers);
 
-export default function SlackSearchResults({ searchData = {}, configuration }) {
-  const { token } = configuration.get();
+export default function SlackSearchResults({searchData = {}, configuration}) {
+  const {token} = configuration.get();
   const [users, setUsers] = React.useState([]);
 
-  const { data, error } = useSWR(
+  const {data, error} = useSWR(
     `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}`
   );
 
@@ -46,12 +47,8 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
   const usersById = _.keyBy(users, "id");
 
   return (
-    <div className={styles.results}>
-      <p>
-        Showing {_.size(data?.messages?.matches)} of {data.messages.total}{" "}
-        results
-      </p>
-
+    <SearchCard configuration={configuration}
+                results={`Showing ${_.size(data?.messages?.matches)} of ${data.messages.total} results`}>
       {_.take(data?.messages?.matches, 5).map((message) => (
         <Card
           interactive
@@ -64,7 +61,7 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
             </b>
             :{" "}
             <span
-              style={{ whiteSpace: "pre-wrap" }}
+              style={{whiteSpace: "pre-wrap"}}
               dangerouslySetInnerHTML={{
                 __html: slackMessageParser(message.text, usersById),
               }}
@@ -85,6 +82,6 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
           </p>
         </Card>
       ))}
-    </div>
+    </SearchCard>
   );
 }
