@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, globalShortcut, shell } = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -6,11 +6,18 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+function centerAndFocus(window) {
+  window.show();
+  window.focus();
+  window.center();
+  window.focusOnWebView();
+}
+
+let mainWindow;
 const createWindow = () => {
   const isDev = process.env.NODE_ENV !== "production";
 
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: isDev ? 1300 : 800,
     height: 900,
     // only support frameless in prod as it breaks when devtools are open
@@ -24,15 +31,27 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools with
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
+  centerAndFocus(mainWindow)
 
+  // force opening the link with target=_blank in a browser window
   mainWindow.webContents.on('new-window', function(e, url) {
     e.preventDefault();
-    require('electron').shell.openExternal(url);
+    return shell.openExternal(url);
   });
+
+  const shortcut = 'CommandOrControl+Shift+Space';
+  if (!globalShortcut.isRegistered(shortcut)) {
+    globalShortcut.register(shortcut, () => {
+      try {
+        centerAndFocus(mainWindow)
+      } catch (e) {
+        createWindow();
+      }
+    })
+  }
 };
 
 // This method will be called when Electron has finished
@@ -41,12 +60,10 @@ const createWindow = () => {
 app.on("ready", createWindow);
 
 // Quit when all windows are closed.
-app.on("window-all-closed", () => {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+app.on("window-all-closed", (e) => {
+  // prevent quitting the app so it can be opened with the global shortcut
+  e.preventDefault();
+  e.returnValue = false;
 });
 
 app.on("activate", () => {

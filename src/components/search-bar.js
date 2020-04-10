@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Icon, InputGroup, Tooltip } from "@blueprintjs/core";
+import { Button, Hotkey, Icon, InputGroup, Tooltip } from "@blueprintjs/core";
 import styles from './search-bar.module.css'
 import { Redirect } from "react-router-dom";
 
