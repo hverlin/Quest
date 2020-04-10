@@ -7,10 +7,14 @@ if (require("electron-squirrel-startup")) {
 }
 
 const createWindow = () => {
+  const isDev = process.env.NODE_ENV !== "production";
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: isDev ? 1300 : 800,
     height: 900,
+    // only support frameless in prod as it breaks when devtools are open
+    titleBarStyle: isDev ? undefined : 'hidden',
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -21,7 +25,7 @@ const createWindow = () => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools with
-  if (process.env.NODE_ENV !== "production") {
+  if (isDev) {
     mainWindow.webContents.openDevTools();
   }
 

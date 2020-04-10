@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Card, Elevation, H1, H5, Icon, Switch } from "@blueprintjs/core";
+import styles from './settings-view.module.css'
 
 import { useStateLink } from "@hookstate/core";
 
@@ -45,8 +46,8 @@ export function SettingsView({ store }) {
   const modules = configuration.nested.modules;
 
   return (
-    <div className="settings-view">
-      <div className="settings-header">
+    <div>
+      <div className={styles.settingsHeader}>
         <Link to="/">
           <Icon icon="arrow-left" />
           <span style={{ marginLeft: "2px" }}>Back</span>
@@ -56,7 +57,7 @@ export function SettingsView({ store }) {
           Credentials and keys are securely stored in the system's keychain.
         </p>
       </div>
-      <div className="settings-body stack">
+      <div className={styles.settingsBody}>
         {Object.entries(modules.nested).map(([moduleId, moduleState]) => (
           <SettingCard key={moduleId} moduleState={moduleState} />
         ))}
