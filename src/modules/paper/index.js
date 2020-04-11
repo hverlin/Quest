@@ -4,6 +4,7 @@ import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import * as PropTypes from "prop-types";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { ExternalLink } from "../../components/external-link";
 
 const paperFetcher = (token) => async (url, searchData) => {
   const res = await fetch(url, {
@@ -25,12 +26,18 @@ const paperFetcher = (token) => async (url, searchData) => {
 };
 
 function PaperResultItem({
-  item: { metadata: { metadata: { name, server_modified } = {} } = {} } = {},
+  item: {
+    metadata: { metadata: { id, name, server_modified } = {} } = {},
+  } = {},
   isLoading = false,
 }) {
   return (
     <>
-      <p className={isLoading ? SKELETON : ""}>{name}</p>
+      <p className={isLoading ? SKELETON : ""}>
+        <ExternalLink href={`https://paper.dropbox.com/${id}`}>
+          {name}
+        </ExternalLink>
+      </p>
       <p className={isLoading ? SKELETON : ""}>
         Last updated <Time time={server_modified} />
       </p>

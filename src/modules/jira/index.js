@@ -3,6 +3,7 @@ import React from "react";
 import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { ExternalLink } from "../../components/external-link";
 
 const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -36,13 +37,9 @@ function resultItem(url) {
         <p className={isLoading ? SKELETON : ""}>
           <img src={issuetype?.iconUrl} alt="test" />
           {"  "}
-          <a
-            target="_blank"
-            rel="nofollow noopener"
-            href={url + "/browse/" + key}
-          >
+          <ExternalLink target="_blank" href={url + "/browse/" + key}>
             {key}
-          </a>{" "}
+          </ExternalLink>{" "}
           - {summary}
         </p>
         <p className={isLoading ? SKELETON : ""}>
@@ -60,7 +57,7 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
 
   const { data, error } = useSWR(
     () =>
-      url ? `${url}/rest/api/2/search?jql=text+~+${searchData.input}` : null,
+      url ? `${url}/rest/api/2/search?jql=text+~+"${searchData.input}"` : null,
     jiraFetcher({ username, password })
   );
 

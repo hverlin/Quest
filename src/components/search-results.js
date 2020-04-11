@@ -1,8 +1,6 @@
-import possibleConstructorReturn from "@babel/runtime/helpers/esm/possibleConstructorReturn";
-
 const _ = require("lodash");
 import React from "react";
-import { Card, H5 } from "@blueprintjs/core";
+import { Card, Drawer, H5 } from "@blueprintjs/core";
 import styles from "./search-results.module.css";
 
 function generateFakeItems() {
@@ -21,15 +19,13 @@ function renderItems(itemRenderer, items, onItemClick) {
             <Card
               interactive
               key={item.id ?? item.key ?? JSON.stringify(item)}
-              onClick={onItemClick}
+              onClick={() => onItemClick(item)}
             >
               {itemRenderer(item)}
             </Card>
           ))
         : generateFakeItems().map((item) => (
-            <Card interactive key={item.id}>
-              {itemRenderer(item, { isLoading: true })}
-            </Card>
+            <Card key={item.id}>{itemRenderer(item, { isLoading: true })}</Card>
           ))}
     </>
   );
@@ -40,12 +36,21 @@ export function SearchResults({
   total,
   items,
   itemRenderer,
-  onItemClick = _.noop,
   error,
 }) {
+  const [selectedItem, setSelectedItem] = React.useState(null);
   const { name } = configuration.get();
+
   return (
     <div>
+      <Drawer
+        position="bottom"
+        size={Drawer.SIZE_SMALL}
+        isOpen={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+      >
+        <Card>{selectedItem && itemRenderer(selectedItem)}</Card>
+      </Drawer>
       <div className={styles.results}>
         <div style={{ display: "flex" }}>
           <H5 style={{ flexGrow: "1" }}>{name}</H5>
@@ -53,7 +58,7 @@ export function SearchResults({
         </div>
         {error
           ? "Error when loading results"
-          : renderItems(itemRenderer, items, onItemClick)}
+          : renderItems(itemRenderer, items, (item) => setSelectedItem(item))}
       </div>
     </div>
   );

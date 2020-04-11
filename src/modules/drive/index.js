@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { ExternalLink } from "../../components/external-link";
 
 function driveItemRender(
-  { name, iconLink, modifiedTime },
+  { name, webViewLink, iconLink, modifiedTime },
   { isLoading = false } = {}
 ) {
   return (
@@ -14,7 +15,7 @@ function driveItemRender(
       <p className={isLoading ? SKELETON : ""}>
         <img src={iconLink} alt="file icon" />
         {"  "}
-        {name}
+        <ExternalLink href={webViewLink}>{name}</ExternalLink>
       </p>
       <p className={isLoading ? SKELETON : ""}>
         Last updated <Time time={modifiedTime} />

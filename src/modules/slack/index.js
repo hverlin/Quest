@@ -5,6 +5,7 @@ import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import * as PropTypes from "prop-types";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { ExternalLink } from "../../components/external-link";
 
 function slackMessageParser(message, usersById) {
   if (!message) {
@@ -15,7 +16,7 @@ function slackMessageParser(message, usersById) {
   const userRegex = /<@([A-Z0-9]+)>/gm;
 
   return message
-    .replace(urlRegex, `<a href="http$1">http$1</a>`)
+    .replace(urlRegex, `<a href="http$1" target="_blank">http$1</a>`)
     .replace(userRegex, (match, p1, p2) => {
       return `<a>@${_.get(usersById, [p1, "real_name"], p1)}</a>`;
     });
@@ -53,10 +54,10 @@ function SlackResultItem({
       </p>
       <p className={isLoading ? SKELETON : ""}>
         in{" "}
-        <a href={`slack://channel?id=${channel.id}&team=${team}`}>
+        <ExternalLink href={`slack://channel?id=${channel.id}&team=${team}`}>
           {" "}
           {channel.name}
-        </a>{" "}
+        </ExternalLink>{" "}
         | <Time time={new Date(+`${ts.split(".")[0]}000`).toISOString()} />
       </p>
     </>

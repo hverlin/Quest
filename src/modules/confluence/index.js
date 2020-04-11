@@ -2,6 +2,7 @@ import useSWR from "swr";
 import React from "react";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { ExternalLink } from "../../components/external-link";
 
 const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -50,9 +51,7 @@ export default function ConfluenceSearchResults({
       ) => (
         <>
           <p className={isLoading ? SKELETON : ""}>
-            <a target="_blank" href={url + itemUrl}>
-              {content.title}
-            </a>
+            <ExternalLink href={url + itemUrl}>{content.title}</ExternalLink>
           </p>
           <p
             dangerouslySetInnerHTML={{
