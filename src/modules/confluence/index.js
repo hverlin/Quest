@@ -1,9 +1,7 @@
 import useSWR from "swr";
-import _ from "lodash";
 import React from "react";
-import styles from "../../components/search-results.module.css";
-import { Card } from "@blueprintjs/core";
-import { SearchCard } from "../../components/search-card";
+import { SearchResults } from "../../components/search-results";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -17,7 +15,7 @@ const confluenceFetcher = ({ username, password }) => async (url) => {
 };
 
 function parseConfluenceMessage(message) {
-  return message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
+  return message && message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
 }
 
 export default function ConfluenceSearchResults({
@@ -34,35 +32,38 @@ export default function ConfluenceSearchResults({
     confluenceFetcher({ username, password })
   );
 
-  if (!url) {
-    return (
-      <div>Confluence module is not configured correctly. URL is missing.</div>
-    );
-  }
-
-  if (error) {
-    return <div>Failed to load</div>;
-  }
-
-  if (!data) {
-    return <div>Loading Confluence pages...</div>;
-  }
+  console.log(data);
 
   return (
-    <SearchCard configuration={configuration}>
-      {_.take(data?.results, 5).map((result) => (
-        <Card interactive key={result.content.id}>
-          <a target="_blank" href={url + result.url}>
-            {result.content.title}
-          </a>
+    <SearchResults
+      error={
+        !url
+          ? "Confluence module is not configured correctly. URL is missing."
+          : error
+      }
+      configuration={configuration}
+      total={data?.totalSize}
+      items={data?.results}
+      itemRenderer={(
+        { content = {}, excerpt, friendlyLastModified, url: itemUrl } = {},
+        { isLoading = false } = {}
+      ) => (
+        <>
+          <p className={isLoading ? SKELETON : ""}>
+            <a target="_blank" href={url + itemUrl}>
+              {content.title}
+            </a>
+          </p>
           <p
             dangerouslySetInnerHTML={{
-              __html: parseConfluenceMessage(result.excerpt),
+              __html: parseConfluenceMessage(excerpt),
             }}
           />
-          Updated {result.friendlyLastModified}
-        </Card>
-      ))}
-    </SearchCard>
+          <p className={isLoading ? SKELETON : ""}>
+            Updated {friendlyLastModified}
+          </p>
+        </>
+      )}
+    />
   );
 }

@@ -1,11 +1,8 @@
 import useSWR from "swr";
-import _ from "lodash";
 import React from "react";
-import { Card, Collapse } from "@blueprintjs/core";
-
-import styles from "../../components/search-results.module.css";
 import { Time } from "../../components/time";
-import { SearchCard } from "../../components/search-card";
+import { SearchResults } from "../../components/search-results";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -20,9 +17,8 @@ const jiraFetcher = ({ username, password }) => async (url) => {
 };
 
 function resultItem(url) {
-  return (issue) => {
+  return (issue, { isLoading = false } = {}) => {
     const {
-      id,
       key,
       fields: {
         issuetype,
@@ -32,11 +28,12 @@ function resultItem(url) {
         reporter,
         created,
         updated,
-      },
+      } = {},
     } = issue;
+
     return (
-      <Card interactive key={id} onClick={() => window.open(url + "/browse/" + key)}>
-        <p>
+      <>
+        <p className={isLoading ? SKELETON : ""}>
           <img src={issuetype?.iconUrl} alt="test" />
           {"  "}
           <a
@@ -48,19 +45,18 @@ function resultItem(url) {
           </a>{" "}
           - {summary}
         </p>
-        <p>
+        <p className={isLoading ? SKELETON : ""}>
           Created: <Time time={created} /> | Updated: <Time time={updated} /> |{" "}
-          {assignee.displayName} | {status.name} | reported by{" "}
-          {reporter.displayName}
+          {assignee?.displayName} | {status?.name} | reported by{" "}
+          {reporter?.displayName}
         </p>
-      </Card>
+      </>
     );
   };
 }
 
 export default function JiraSearchResults({ searchData = {}, configuration }) {
   const { username, password, url } = configuration.get();
-  const [showMore, setShowMore] = React.useState(false);
 
   const { data, error } = useSWR(
     () =>
@@ -68,28 +64,19 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
     jiraFetcher({ username, password })
   );
 
-  if (!url) {
-    return <div>JIRA module is not configured correctly. URL is missing.</div>;
-  }
-
-  if (error) {
-    return <div>Failed to load</div>;
-  }
-
-  if (!data) {
-    return <div>Loading Jira issues...</div>;
-  }
-
   return (
-    <SearchCard configuration={configuration} results={`Showing ${_.size(data.issues)} of ${data.total} results`}>
-      {_.take(data.issues, 5).map(resultItem(url))}
-      {!showMore && <a onClick={() => setShowMore(!showMore)}>Show more</a>}
-      <Collapse isOpen={showMore}>
-        <div className={styles.results}>
-          {_.takeRight(data.issues, 5).map(resultItem(url))}
-        </div>
-      </Collapse>
-      {showMore && <a onClick={() => setShowMore(!showMore)}>Show less</a>}
-    </SearchCard>
+    <SearchResults
+      error={
+        !url
+          ? "JIRA module is not configured correctly. URL is missing."
+          : error
+      }
+      configuration={configuration}
+      total={data?.total}
+      items={data?.issues}
+      itemRenderer={(item, { isLoading = false } = {}) =>
+        resultItem(url)(item, { isLoading })
+      }
+    />
   );
 }

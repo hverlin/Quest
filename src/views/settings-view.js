@@ -1,9 +1,10 @@
 import React, { Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Card, Elevation, H1, H5, Icon, Switch } from "@blueprintjs/core";
-import styles from './settings-view.module.css'
+import styles from "./settings-view.module.css";
 
 import { useStateLink } from "@hookstate/core";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const getModuleView = (id) =>
   React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
@@ -33,7 +34,7 @@ function SettingCard({ moduleState }) {
         </div>
       </div>
       <Suspense
-        fallback={<div className="bp3-skeleton" style={{ height: "200px" }} />}
+        fallback={<div className={SKELETON} style={{ height: "200px" }} />}
       >
         {enabled && <ModuleView configurationState={moduleConfiguration} />}
       </Suspense>

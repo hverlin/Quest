@@ -8,6 +8,7 @@ import {
 import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 export function DriveOauthButton({ configurationState }) {
   const configuration = configurationState.get();
@@ -26,7 +27,7 @@ export function DriveOauthButton({ configurationState }) {
     <div>
       {isSignedIn || isSignedIn === null ? (
         <Button
-          className={isSignedIn === null ? "bp3-skeleton" : ""}
+          className={isSignedIn === null ? SKELETON : ""}
           onClick={handleSignoutClick}
         >
           Sign Out

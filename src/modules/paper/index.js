@@ -1,14 +1,13 @@
 import useSWR from "swr";
-import _ from "lodash";
 import React from "react";
-import { Card } from "@blueprintjs/core";
 import { Time } from "../../components/time";
-import { SearchCard } from "../../components/search-card";
+import { SearchResults } from "../../components/search-results";
+import * as PropTypes from "prop-types";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const paperFetcher = (token) => async (url, searchData) => {
   const res = await fetch(url, {
     method: "POST",
-
 
     credentials: "omit",
     headers: {
@@ -25,6 +24,24 @@ const paperFetcher = (token) => async (url, searchData) => {
   return res.json();
 };
 
+function PaperResultItem({
+  item: { metadata: { metadata: { name, server_modified } = {} } = {} } = {},
+  isLoading = false,
+}) {
+  return (
+    <>
+      <p className={isLoading ? SKELETON : ""}>{name}</p>
+      <p className={isLoading ? SKELETON : ""}>
+        Last updated <Time time={server_modified} />
+      </p>
+    </>
+  );
+}
+
+PaperResultItem.propTypes = {
+  name: PropTypes.any,
+  time: PropTypes.any,
+};
 export default function PaperSearchResults({ searchData = {}, configuration }) {
   const { token } = configuration.get();
 
@@ -33,32 +50,14 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
     paperFetcher(token)
   );
 
-  if (error) {
-    return <div>Failed to load</div>;
-  }
-
-  if (!data) {
-    return <div>Loading Dropbox Paper results...</div>;
-  }
-
-  console.log(data);
-
   return (
-    <SearchCard configuration={configuration}>
-      {_.take(data?.matches, 5).map(
-        ({
-          metadata: {
-            metadata: { id, name, server_modified },
-          },
-        }) => (
-          <Card key={id} interactive>
-            <p>{name}</p>
-            <p>
-             Last updated <Time time={server_modified} />
-            </p>
-          </Card>
-        )
+    <SearchResults
+      error={error}
+      configuration={configuration}
+      items={data?.matches}
+      itemRenderer={(item, { isLoading } = {}) => (
+        <PaperResultItem item={item} isLoading={isLoading} />
       )}
-    </SearchCard>
+    />
   );
 }

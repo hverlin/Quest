@@ -1,38 +1,40 @@
 import React, { Suspense } from "react";
 
-import { Card, NonIdealState, } from "@blueprintjs/core";
+import { Card, NonIdealState } from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 import { useStateLink } from "@hookstate/core";
 
-import styles from './search-view.module.css';
+import styles from "./search-view.module.css";
 import { SearchForm } from "../components/search-bar";
-import * as PropTypes from "prop-types";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const getModuleView = (id) =>
   React.memo(React.lazy(() => import(`../modules/${id}`)));
 
 function EmptyState(props) {
-  return <div style={{marginTop: "3rem"}}>
-    <NonIdealState
-      icon="search"
-      title="Search anything"
-      description={
-        props.enabledModules.length === 0
-          ? "No search modules are configured."
-          : "Try searching something. e.g. \"analytics\""
-      }
-      action={
-        props.enabledModules.length === 0 ? (
-          <Link to="/settings">Settings</Link>
-        ) : undefined
-      }
-    />
-  </div>;
+  return (
+    <div style={{ marginTop: "3rem" }}>
+      <NonIdealState
+        icon="search"
+        title="Search anything"
+        description={
+          props.enabledModules.length === 0
+            ? "No search modules are configured."
+            : 'Try searching something. e.g. "analytics"'
+        }
+        action={
+          props.enabledModules.length === 0 ? (
+            <Link to="/settings">Settings</Link>
+          ) : undefined
+        }
+      />
+    </div>
+  );
 }
 
-export function SearchView({store}) {
+export function SearchView({ store }) {
   const configuration = useStateLink(store);
-  const [searchData, setSearchData] = React.useState({input: ""});
+  const [searchData, setSearchData] = React.useState({ input: "" });
 
   const enabledModules = Object.entries(
     configuration.nested.modules.nested
@@ -40,13 +42,13 @@ export function SearchView({store}) {
 
   return (
     <>
-      <SearchForm onSubmit={(input) => setSearchData({input})}/>
+      <SearchForm onSubmit={(input) => setSearchData({ input })} />
       {searchData.input ? (
         <div className={styles.searchResults}>
           {enabledModules.map(([id, moduleState]) => {
             const ResultComponent = getModuleView(id);
             return (
-              <Suspense key={id} fallback={<Card className='bp3-skeleton'/>}>
+              <Suspense key={id} fallback={<Card className={SKELETON} />}>
                 <ResultComponent
                   searchData={searchData}
                   configuration={moduleState}
@@ -56,7 +58,7 @@ export function SearchView({store}) {
           })}
         </div>
       ) : (
-        <EmptyState enabledModules={enabledModules}/>
+        <EmptyState enabledModules={enabledModules} />
       )}
     </>
   );

@@ -1,12 +1,16 @@
 import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
-import { Card } from "@blueprintjs/core";
-import styles from "../../components/search-results.module.css";
 import { Time } from "../../components/time";
-import { SearchCard } from "../../components/search-card";
+import { SearchResults } from "../../components/search-results";
+import * as PropTypes from "prop-types";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 function slackMessageParser(message, usersById) {
+  if (!message) {
+    return "";
+  }
+
   const urlRegex = /<http(.*)?>/gm;
   const userRegex = /<@([A-Z0-9]+)>/gm;
 
@@ -24,11 +28,50 @@ async function getUsers(token) {
 
 const getUsersMemo = _.memoize(getUsers);
 
-export default function SlackSearchResults({searchData = {}, configuration}) {
-  const {token} = configuration.get();
+function SlackResultItem({
+  object,
+  isLoading,
+  message: {
+    channel = {},
+    team = {},
+    text = "",
+    ts = "",
+    user = {},
+    username,
+  } = {},
+}) {
+  return (
+    <>
+      <p className={isLoading ? SKELETON : ""}>
+        <b>{_.get(object, [user, "real_name"], username)}</b>:{" "}
+        <span
+          style={{ whiteSpace: "pre-wrap" }}
+          dangerouslySetInnerHTML={{
+            __html: slackMessageParser(text, object),
+          }}
+        />
+      </p>
+      <p className={isLoading ? SKELETON : ""}>
+        in{" "}
+        <a href={`slack://channel?id=${channel.id}&team=${team}`}>
+          {" "}
+          {channel.name}
+        </a>{" "}
+        | <Time time={new Date(+`${ts.split(".")[0]}000`).toISOString()} />
+      </p>
+    </>
+  );
+}
+
+SlackResultItem.propTypes = {
+  object: PropTypes.any,
+  message: PropTypes.any,
+};
+export default function SlackSearchResults({ searchData = {}, configuration }) {
+  const { token } = configuration.get();
   const [users, setUsers] = React.useState([]);
 
-  const {data, error} = useSWR(
+  const { data, error } = useSWR(
     `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}`
   );
 
@@ -36,52 +79,19 @@ export default function SlackSearchResults({searchData = {}, configuration}) {
     getUsersMemo(token).then((u) => setUsers(u.members));
   }, []);
 
-  if (error || (data && !data.ok)) {
-    return <div>Failed to load</div>;
-  }
-
-  if (!data) {
-    return <div>Loading Slack Results...</div>;
-  }
-
-  const usersById = _.keyBy(users, "id");
-
   return (
-    <SearchCard configuration={configuration}
-                results={`Showing ${_.size(data?.messages?.matches)} of ${data.messages.total} results`}>
-      {_.take(data?.messages?.matches, 5).map((message) => (
-        <Card
-          interactive
-          key={message.iid}
-          onClick={() => window.open(message.permalink)}
-        >
-          <p>
-            <b>
-              {_.get(usersById, [message.user, "real_name"], message.username)}
-            </b>
-            :{" "}
-            <span
-              style={{whiteSpace: "pre-wrap"}}
-              dangerouslySetInnerHTML={{
-                __html: slackMessageParser(message.text, usersById),
-              }}
-            />
-          </p>
-          <p>
-            in{" "}
-            <a
-              href={`slack://channel?id=${message.channel.id}&team=${message.team}`}
-            >
-              {" "}
-              {message.channel.name}
-            </a>{" "}
-            |{" "}
-            <Time
-              time={new Date(+`${message.ts.split(".")[0]}000`).toISOString()}
-            />
-          </p>
-        </Card>
-      ))}
-    </SearchCard>
+    <SearchResults
+      error={error || (data && !data.ok)}
+      configuration={configuration}
+      total={data?.messages?.total}
+      items={data?.messages?.matches}
+      itemRenderer={(item, { isLoading } = {}) => (
+        <SlackResultItem
+          message={item}
+          isLoading={isLoading}
+          object={_.keyBy(users, "id")}
+        />
+      )}
+    />
   );
 }
