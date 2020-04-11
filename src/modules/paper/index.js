@@ -1,10 +1,25 @@
 import useSWR from "swr";
+const _ = require("lodash");
 import React from "react";
 import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import * as PropTypes from "prop-types";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
+import ReactMarkdown from "react-markdown";
+
+const paperDetailFetcher = (token) => async (id) => {
+  const res = await fetch("https://api.dropboxapi.com/2/paper/docs/download", {
+    method: "POST",
+    credentials: "omit",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Dropbox-API-Arg": `{"doc_id": "${id}", "export_format": "markdown"}`,
+    },
+  });
+
+  return res.text();
+};
 
 const paperFetcher = (token) => async (url, searchData) => {
   const res = await fetch(url, {
@@ -45,6 +60,22 @@ function PaperResultItem({
   );
 }
 
+function PaperDocDetail({ item, token }) {
+  const id = _.get(item, "metadata.metadata.id");
+
+  const { data, error } = useSWR(id, paperDetailFetcher(token));
+
+  if (error) {
+    return <p>Failed to load document: {id}</p>;
+  }
+
+  return (
+    <div className={!data ? SKELETON : ""}>
+      {data && <ReactMarkdown source={data} />}
+    </div>
+  );
+}
+
 PaperResultItem.propTypes = {
   name: PropTypes.any,
   time: PropTypes.any,
@@ -62,6 +93,9 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
       error={error}
       configuration={configuration}
       items={data?.matches}
+      itemDetailRenderer={(item) => (
+        <PaperDocDetail item={item} token={token} />
+      )}
       itemRenderer={(item, { isLoading } = {}) => (
         <PaperResultItem item={item} isLoading={isLoading} />
       )}

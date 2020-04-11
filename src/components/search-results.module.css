@@ -18,3 +18,9 @@
     padding: 10px;
     overflow: hidden;
 }
+
+
+.drawerContainer {
+    padding: 10px;
+    overflow: auto;
+}

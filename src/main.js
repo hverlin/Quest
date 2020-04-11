@@ -21,7 +21,7 @@ const createWindow = () => {
     width: isDev ? 1300 : 800,
     height: 900,
     // only support frameless in prod as it breaks when devtools are open
-    titleBarStyle: isDev ? undefined : 'hidden',
+    titleBarStyle: isDev ? undefined : "hidden",
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -34,23 +34,29 @@ const createWindow = () => {
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
-  centerAndFocus(mainWindow)
+  centerAndFocus(mainWindow);
 
   // force opening the link with target=_blank in a browser window
-  mainWindow.webContents.on('new-window', function(e, url) {
-    e.preventDefault();
-    return shell.openExternal(url);
+  mainWindow.webContents.on("new-window", async function (e, url) {
+    try {
+      if (url?.startsWith("http")) {
+        e.preventDefault();
+        await shell.openExternal(url);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   });
 
-  const shortcut = 'CommandOrControl+Shift+Space';
+  const shortcut = "CommandOrControl+Shift+Space";
   if (!globalShortcut.isRegistered(shortcut)) {
     globalShortcut.register(shortcut, () => {
       try {
-        centerAndFocus(mainWindow)
+        centerAndFocus(mainWindow);
       } catch (e) {
         createWindow();
       }
-    })
+    });
   }
 };
 

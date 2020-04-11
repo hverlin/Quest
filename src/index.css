@@ -3,3 +3,29 @@ body {
     Arial, sans-serif;
   margin: auto;
 }
+
+table, th, td {
+  border: 1px solid gray;
+}
+
+pre {
+  text-rendering: optimizeLegibility;
+  text-size-adjust: 100%;
+  text-transform: none;
+  line-height: 1.28581;
+  letter-spacing: 0;
+  font-weight: 400;
+  -webkit-box-direction: normal;
+  box-sizing: inherit;
+  -webkit-font-smoothing: auto;
+  font-family: monospace;
+  background-color: #f5f5f5;
+  color: #4a4a4a;
+  font-size: .875em;
+  overflow-x: auto;
+  padding: 1.25em 1.5em;
+  white-space: pre;
+  word-wrap: normal;
+  margin: 0 0 1em;
+}
+

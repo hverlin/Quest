@@ -25,7 +25,7 @@ function signInWithPopup(clientId) {
       response_type: "code",
       redirect_uri: getRedirectUri(clientId),
       client_id: clientId,
-      scope: "https://www.googleapis.com/auth/drive.metadata.readonly",
+      scope: "https://www.googleapis.com/auth/drive.readonly",
     })}`;
 
     function handleNavigation(url) {

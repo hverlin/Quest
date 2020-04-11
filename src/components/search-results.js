@@ -1,6 +1,6 @@
 const _ = require("lodash");
 import React from "react";
-import { Card, Drawer, H5 } from "@blueprintjs/core";
+import { Button, Card, Drawer, H5 } from "@blueprintjs/core";
 import styles from "./search-results.module.css";
 
 function generateFakeItems() {
@@ -36,20 +36,49 @@ export function SearchResults({
   total,
   items,
   itemRenderer,
+  itemDetailRenderer,
   error,
 }) {
   const [selectedItem, setSelectedItem] = React.useState(null);
+  const [drawerSize, setDrawerSize] = React.useState(Drawer.SIZE_SMALL);
   const { name } = configuration.get();
+
+  const transition =
+    drawerSize === Drawer.SIZE_LARGE
+      ? { transition: "height 0.3s ease-out" }
+      : {};
 
   return (
     <div>
       <Drawer
         position="bottom"
-        size={Drawer.SIZE_SMALL}
+        size={drawerSize}
         isOpen={!!selectedItem}
-        onClose={() => setSelectedItem(null)}
+        onClose={() => {
+          setSelectedItem(null);
+          setDrawerSize(Drawer.SIZE_SMALL);
+        }}
+        style={transition}
       >
-        <Card>{selectedItem && itemRenderer(selectedItem)}</Card>
+        <div className={styles.drawerContainer}>
+          <Button
+            icon="expand-all"
+            minimal
+            onClick={() => {
+              setDrawerSize(
+                drawerSize === Drawer.SIZE_LARGE
+                  ? Drawer.SIZE_SMALL
+                  : Drawer.SIZE_LARGE
+              );
+            }}
+          >
+            Expand
+          </Button>
+          {selectedItem &&
+            (itemDetailRenderer ? itemDetailRenderer : itemRenderer)(
+              selectedItem
+            )}
+        </div>
       </Drawer>
       <div className={styles.results}>
         <div style={{ display: "flex" }}>

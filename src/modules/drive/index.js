@@ -5,6 +5,7 @@ import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
+import { Card, H2 } from "@blueprintjs/core";
 
 function driveItemRender(
   { name, webViewLink, iconLink, modifiedTime },
@@ -21,6 +22,37 @@ function driveItemRender(
         Last updated <Time time={modifiedTime} />
       </p>
     </>
+  );
+}
+
+function DriveResultItem({ item }) {
+  const [data, setData] = React.useState();
+  const [error, setError] = React.useState();
+
+  React.useEffect(() => {
+    async function fetchData() {
+      const response = await window.gapi.client.drive.files.export({
+        fileId: item.id,
+        mimeType: "text/plain",
+      });
+      console.log(response);
+      setData(response.body);
+    }
+    fetchData().catch((e) => {
+      setError(e);
+    });
+  }, [item.id]);
+
+  return (
+    <div style={{ whiteSpace: "pre-wrap", paddingTop: "10px" }}>
+      {!error && (
+        <>
+          <H2 className={!data ? SKELETON : ""}>{item.name}</H2>
+          <p className={!data ? SKELETON : ""}>{data}</p>
+        </>
+      )}
+      {error && <Card>Preview cannot be loaded.</Card>}
+    </div>
   );
 }
 
@@ -74,6 +106,7 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
 
   return (
     <SearchResults
+      itemDetailRenderer={(item) => <DriveResultItem item={item} />}
       error={error}
       configuration={configuration}
       items={data?.result?.files}
