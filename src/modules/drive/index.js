@@ -35,7 +35,6 @@ function DriveResultItem({ item }) {
         fileId: item.id,
         mimeType: "text/plain",
       });
-      console.log(response);
       setData(response.body);
     }
     fetchData().catch((e) => {
