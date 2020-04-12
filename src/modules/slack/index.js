@@ -53,7 +53,6 @@ function SlackMessage({
   isLoading = false,
   showChannel = false,
 }) {
-  console.log(message, users);
   const timestamp = message?.ts?.split(".")[0];
 
   return (
@@ -83,7 +82,7 @@ function SlackMessage({
           </ExternalLink>{" "}
           |{" "}
           {timestamp && (
-            <Time time={new Date(+`${timestamp[0]}000`).toISOString()} />
+            <Time time={new Date(+`${timestamp}000`).toISOString()} />
           )}
         </p>
       )}
