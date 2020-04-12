@@ -19,7 +19,13 @@ function renderItems(itemRenderer, items, onItemClick) {
             <Card
               interactive
               key={item.id ?? item.key ?? JSON.stringify(item)}
-              onClick={() => onItemClick(item)}
+              onClick={(e) => {
+                // ignore clicks on links
+                if ("target" in e.target) {
+                  return;
+                }
+                onItemClick(item);
+              }}
             >
               {itemRenderer(item)}
             </Card>

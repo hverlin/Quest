@@ -55,6 +55,7 @@
     "dompurify": "^2.0.8",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^5.1.1",
+    "emoji-js": "^3.5.0",
     "keytar": "^5.4.0",
     "lodash": "^4.17.15",
     "luxon": "^1.23.0",

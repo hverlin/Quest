@@ -38,14 +38,8 @@ const createWindow = () => {
 
   // force opening the link with target=_blank in a browser window
   mainWindow.webContents.on("new-window", async function (e, url) {
-    try {
-      if (url?.startsWith("http")) {
-        e.preventDefault();
-        await shell.openExternal(url);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    e.preventDefault();
+    await shell.openExternal(url);
   });
 
   const shortcut = "CommandOrControl+Shift+Space";
