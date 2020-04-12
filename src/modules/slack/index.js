@@ -6,6 +6,7 @@ import { SearchResults } from "../../components/search-results";
 import * as PropTypes from "prop-types";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
+import domPurify from "dompurify";
 
 function slackMessageParser(message, usersById) {
   if (!message) {
@@ -48,7 +49,7 @@ function SlackResultItem({
         <span
           style={{ whiteSpace: "pre-wrap" }}
           dangerouslySetInnerHTML={{
-            __html: slackMessageParser(text, object),
+            __html: domPurify.sanitize(slackMessageParser(text, object)),
           }}
         />
       </p>

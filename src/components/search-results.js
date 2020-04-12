@@ -1,4 +1,4 @@
-const _ = require("lodash");
+import _ from "lodash";
 import React from "react";
 import { Button, Card, Drawer, H5 } from "@blueprintjs/core";
 import styles from "./search-results.module.css";
@@ -43,22 +43,17 @@ export function SearchResults({
   const [drawerSize, setDrawerSize] = React.useState(Drawer.SIZE_SMALL);
   const { name } = configuration.get();
 
-  const transition =
-    drawerSize === Drawer.SIZE_LARGE
-      ? { transition: "height 0.3s ease-out" }
-      : {};
-
   return (
     <div>
       <Drawer
-        position="bottom"
+        // position="bottom"
         size={drawerSize}
         isOpen={!!selectedItem}
         onClose={() => {
           setSelectedItem(null);
-          setDrawerSize(Drawer.SIZE_SMALL);
+          setDrawerSize(Drawer.SIZE_STANDARD);
         }}
-        style={transition}
+        style={{ transition: "all 0.3s ease-out" }}
       >
         <div className={styles.drawerContainer}>
           <Button
@@ -67,7 +62,7 @@ export function SearchResults({
             onClick={() => {
               setDrawerSize(
                 drawerSize === Drawer.SIZE_LARGE
-                  ? Drawer.SIZE_SMALL
+                  ? Drawer.SIZE_STANDARD
                   : Drawer.SIZE_LARGE
               );
             }}

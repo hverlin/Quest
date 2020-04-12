@@ -84,7 +84,9 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
         console.error(e);
         if (e?.status === 401) {
           configuration.nested.accessToken.set(null);
-          await loadGoogleDriveClient(configuration, setIsSignedIn);
+          await loadGoogleDriveClient(configuration, setIsSignedIn, {
+            logInIfUnauthorized: false,
+          });
           return listFiles();
         }
         setError(e);

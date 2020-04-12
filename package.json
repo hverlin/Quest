@@ -51,6 +51,7 @@
     "@types/gapi": "0.0.39",
     "@types/react": "^16.9.27",
     "@types/react-dom": "^16.9.5",
+    "dompurify": "^2.0.8",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^5.1.1",
     "keytar": "^5.4.0",

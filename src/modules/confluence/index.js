@@ -3,6 +3,8 @@ import React from "react";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
+import _ from "lodash";
+import domPurify from "dompurify";
 
 const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -17,6 +19,28 @@ const confluenceFetcher = ({ username, password }) => async (url) => {
 
 function parseConfluenceMessage(message) {
   return message && message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
+}
+
+function ConfluenceDetail({ item, username, password }) {
+  const link = `${_.get(item, "content._links.self")}?expand=body.view`;
+
+  const { data, error } = useSWR(
+    link,
+    confluenceFetcher({ username, password })
+  );
+
+  if (error) {
+    return <p>Failed to load document: {link}</p>;
+  }
+
+  return (
+    <div
+      className={!data ? SKELETON : ""}
+      dangerouslySetInnerHTML={{
+        __html: domPurify.sanitize(data?.body.view.value),
+      }}
+    />
+  );
 }
 
 export default function ConfluenceSearchResults({
@@ -45,6 +69,9 @@ export default function ConfluenceSearchResults({
       configuration={configuration}
       total={data?.totalSize}
       items={data?.results}
+      itemDetailRenderer={(item) => (
+        <ConfluenceDetail item={item} username={username} password={password} />
+      )}
       itemRenderer={(
         { content = {}, excerpt, friendlyLastModified, url: itemUrl } = {},
         { isLoading = false } = {}
@@ -55,7 +82,7 @@ export default function ConfluenceSearchResults({
           </p>
           <p
             dangerouslySetInnerHTML={{
-              __html: parseConfluenceMessage(excerpt),
+              __html: domPurify.sanitize(parseConfluenceMessage(excerpt)),
             }}
           />
           <p className={isLoading ? SKELETON : ""}>

@@ -1,5 +1,5 @@
 import useSWR from "swr";
-const _ = require("lodash");
+import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
