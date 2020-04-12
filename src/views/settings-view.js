@@ -18,7 +18,7 @@ function SettingCard({ moduleState }) {
     <Card elevation={Elevation.TWO}>
       <div style={{ display: "flex " }}>
         <div style={{ flexGrow: 1 }}>
-          <H5> {name}</H5>
+          <H5>{name}</H5>
         </div>
         <div>
           <Switch

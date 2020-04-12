@@ -5,7 +5,8 @@ import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
-import { Card, H2 } from "@blueprintjs/core";
+import { Card, H2, Tooltip } from "@blueprintjs/core";
+import logo from "./logo.png";
 
 function driveItemRender(
   { name, webViewLink, iconLink, modifiedTime },
@@ -14,7 +15,9 @@ function driveItemRender(
   return (
     <>
       <p className={isLoading ? SKELETON : ""}>
-        <img src={iconLink} alt="file icon" />
+        <Tooltip content={name}>
+          <img src={iconLink} alt="file icon" />
+        </Tooltip>
         {"  "}
         <ExternalLink href={webViewLink}>{name}</ExternalLink>
       </p>
@@ -107,6 +110,7 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
 
   return (
     <SearchResults
+      logo={logo}
       itemDetailRenderer={(item) => <DriveResultItem item={item} />}
       error={error}
       configuration={configuration}

@@ -4,6 +4,10 @@ const rules = require("./webpack.rules");
 
 rules.push(
   {
+    test: /\.(png|svg|jpg|gif)$/,
+    use: ["file-loader"],
+  },
+  {
     test: /\.module.css$/,
     use: [
       { loader: "style-loader" },
@@ -23,7 +27,7 @@ rules.push(
         options: { modules: false },
       },
     ],
-  },
+  }
 );
 
 module.exports = {

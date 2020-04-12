@@ -5,6 +5,7 @@ import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import _ from "lodash";
 import domPurify from "dompurify";
+import logo from "./logo.svg";
 
 const confluenceFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -57,10 +58,9 @@ export default function ConfluenceSearchResults({
     confluenceFetcher({ username, password })
   );
 
-  console.log(data);
-
   return (
     <SearchResults
+      logo={logo}
       error={
         !url
           ? "Confluence module is not configured correctly. URL is missing."

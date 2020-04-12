@@ -4,6 +4,8 @@ import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
+import logo from "./logo.svg";
+import { Tooltip } from "@blueprintjs/core";
 
 const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
@@ -35,7 +37,13 @@ function resultItem(url) {
     return (
       <>
         <p className={isLoading ? SKELETON : ""}>
-          <img src={issuetype?.iconUrl} alt="test" />
+          <Tooltip content={issuetype?.name}>
+            <img
+              src={issuetype?.iconUrl}
+              alt={issuetype?.name}
+              style={{ verticalAlign: "middle" }}
+            />
+          </Tooltip>
           {"  "}
           <ExternalLink target="_blank" href={url + "/browse/" + key}>
             {key}
@@ -63,6 +71,7 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
 
   return (
     <SearchResults
+      logo={logo}
       error={
         !url
           ? "JIRA module is not configured correctly. URL is missing."

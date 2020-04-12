@@ -36,6 +36,7 @@
     "css-loader": "^3.4.2",
     "electron": "8.2.0",
     "electron-devtools-installer": "^2.2.4",
+    "file-loader": "^6.0.0",
     "filemanager-webpack-plugin": "^2.0.5",
     "node-loader": "^0.6.0",
     "prettier": "^2.0.2",

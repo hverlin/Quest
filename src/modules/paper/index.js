@@ -7,6 +7,7 @@ import * as PropTypes from "prop-types";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import ReactMarkdown from "react-markdown";
+import logo from "./logo.svg";
 
 const paperDetailFetcher = (token) => async (id) => {
   const res = await fetch("https://api.dropboxapi.com/2/paper/docs/download", {
@@ -90,6 +91,7 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
 
   return (
     <SearchResults
+      logo={logo}
       error={error}
       configuration={configuration}
       items={data?.matches}

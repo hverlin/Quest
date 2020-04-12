@@ -32,6 +32,7 @@ function renderItems(itemRenderer, items, onItemClick) {
 }
 
 export function SearchResults({
+  logo,
   configuration,
   total,
   items,
@@ -77,12 +78,19 @@ export function SearchResults({
       </Drawer>
       <div className={styles.results}>
         <div style={{ display: "flex" }}>
-          <H5 style={{ flexGrow: "1" }}>{name}</H5>
-          {!error && total > 0 && <p>{total} results</p>}
+          {logo && (
+            <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} />
+          )}
+          <H5 style={{ flexGrow: "1", marginBottom: 0 }}>{name}</H5>
+          {!error && total > 0 && (
+            <p style={{ marginBottom: 0 }}>{total} results</p>
+          )}
         </div>
-        {error
-          ? "Error when loading results"
-          : renderItems(itemRenderer, items, (item) => setSelectedItem(item))}
+        {error ? (
+          <Card>Error when loading results</Card>
+        ) : (
+          renderItems(itemRenderer, items, (item) => setSelectedItem(item))
+        )}
       </div>
     </div>
   );

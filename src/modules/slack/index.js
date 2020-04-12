@@ -3,10 +3,11 @@ import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
 import { SearchResults } from "../../components/search-results";
-import * as PropTypes from "prop-types";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import domPurify from "dompurify";
+import { Card } from "@blueprintjs/core";
+import logo from "./logo.svg";
 
 function slackMessageParser(message, usersById) {
   if (!message) {
@@ -65,10 +66,6 @@ function SlackResultItem({
   );
 }
 
-SlackResultItem.propTypes = {
-  object: PropTypes.any,
-  message: PropTypes.any,
-};
 export default function SlackSearchResults({ searchData = {}, configuration }) {
   const { token } = configuration.get();
   const [users, setUsers] = React.useState([]);
@@ -83,6 +80,7 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
 
   return (
     <SearchResults
+      logo={logo}
       error={error || (data && !data.ok)}
       configuration={configuration}
       total={data?.messages?.total}
