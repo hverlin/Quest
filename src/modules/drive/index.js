@@ -7,6 +7,7 @@ import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import { Card, H2, Tooltip } from "@blueprintjs/core";
 import logo from "./logo.png";
+import ReactMarkdown from "react-markdown";
 
 function driveItemRender(
   { name, webViewLink, iconLink, modifiedTime },
@@ -50,7 +51,9 @@ function DriveResultItem({ item }) {
       {!error && (
         <>
           <H2 className={!data ? SKELETON : ""}>{item.name}</H2>
-          <p className={!data ? SKELETON : ""}>{data}</p>
+          <p className={!data ? SKELETON : ""}>
+            {data && <ReactMarkdown source={data} />}
+          </p>
         </>
       )}
       {error && <Card>Preview cannot be loaded.</Card>}

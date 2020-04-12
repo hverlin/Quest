@@ -41,7 +41,7 @@ export function SearchResults({
   error,
 }) {
   const [selectedItem, setSelectedItem] = React.useState(null);
-  const [drawerSize, setDrawerSize] = React.useState(Drawer.SIZE_SMALL);
+  const [drawerSize, setDrawerSize] = React.useState(Drawer.SIZE_STANDARD);
   const { name } = configuration.get();
 
   return (

@@ -14,7 +14,7 @@ function slackMessageParser(message, usersById) {
     return "";
   }
 
-  const urlRegex = /<http(.*)?>/gm;
+  const urlRegex = /<http(.*?)>/gm;
   const userRegex = /<@([A-Z0-9]+)>/gm;
 
   return message
