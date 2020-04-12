@@ -11,6 +11,7 @@ import logo from "./logo.svg";
 import EmojiJS from "emoji-js";
 
 const emojiConverter = new EmojiJS();
+const rx_colons = new RegExp(":([a-zA-Z0-9-_+]+):", "g");
 
 domPurify.addHook("afterSanitizeAttributes", (node) => {
   if ("target" in node) {
@@ -18,7 +19,7 @@ domPurify.addHook("afterSanitizeAttributes", (node) => {
   }
 });
 
-function slackMessageParser(message, usersById) {
+function slackMessageParser(message, usersById, emojis) {
   if (!message?.text) {
     return "";
   }
@@ -26,18 +27,24 @@ function slackMessageParser(message, usersById) {
   const urlRegex = /<http(.*?)>/gm;
   const userRegex = /<@([A-Z0-9]+)>/gm;
 
-  return emojiConverter
-    .replace_colons(message.text)
+  let a = message.text
+    .replace(rx_colons, (match, p1) => {
+      if (!emojis[p1]) {
+        return match;
+      }
+      return `<img src="${emojis[p1]}" style="width:1rem;height:1rem;" alt="emoji"/>`;
+    })
     .replace(urlRegex, `<a href="http$1">http$1</a>`)
     .replace(userRegex, (match, p1) => {
       const linkToUser = `slack://user?id=${p1}&team=${message.team}`;
-      console.log(linkToUser);
       return `<a href="${linkToUser}" >@${_.get(
         usersById,
         [p1, "real_name"],
         p1
       )}</a>`;
     });
+
+  return emojiConverter.replace_colons(a);
 }
 
 async function getUsers(token) {
@@ -45,11 +52,18 @@ async function getUsers(token) {
   return res.json();
 }
 
+async function getEmojis(token) {
+  const res = await fetch(`https://slack.com/api/emoji.list?token=${token}`);
+  return res.json();
+}
+
 const getUsersMemo = _.memoize(getUsers);
+const getEmojisMemo = _.memoize(getEmojis);
 
 function SlackMessage({
   message = {},
   users,
+  emojis,
   isLoading = false,
   showChannel = false,
 }) {
@@ -62,9 +76,12 @@ function SlackMessage({
         <span
           style={{ whiteSpace: "pre-wrap" }}
           dangerouslySetInnerHTML={{
-            __html: domPurify.sanitize(slackMessageParser(message, users), {
-              ALLOW_UNKNOWN_PROTOCOLS: true,
-            }),
+            __html: domPurify.sanitize(
+              slackMessageParser(message, users, emojis),
+              {
+                ALLOW_UNKNOWN_PROTOCOLS: true,
+              }
+            ),
           }}
         />
       </p>
@@ -83,14 +100,15 @@ function SlackMessage({
           |{" "}
           {timestamp && (
             <Time time={new Date(+`${timestamp}000`).toISOString()} />
-          )}
+          )}{" "}
+          | <ExternalLink href={message?.permalink}>View in Slack</ExternalLink>
         </p>
       )}
     </>
   );
 }
 
-function SlackDetail({ item, users }) {
+function SlackDetail({ item, users, emojis }) {
   return (
     <div>
       {_.compact([item?.previous_2, item.previous, item]).map(
@@ -106,7 +124,12 @@ function SlackDetail({ item, users }) {
                 marginLeft: isLast ? "" : "15px",
               }}
             >
-              <SlackMessage message={item} users={users} showChannel={isLast} />
+              <SlackMessage
+                message={item}
+                users={users}
+                emojis={emojis}
+                showChannel={isLast}
+              />
             </Card>
           );
         }
@@ -118,6 +141,7 @@ function SlackDetail({ item, users }) {
 export default function SlackSearchResults({ searchData = {}, configuration }) {
   const { token } = configuration.get();
   const [users, setUsers] = React.useState([]);
+  const [emojis, setEmojis] = React.useState([]);
 
   const { data, error } = useSWR(
     `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}`
@@ -125,6 +149,7 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
 
   React.useEffect(() => {
     getUsersMemo(token).then((u) => setUsers(u.members));
+    getEmojisMemo(token).then((e) => setEmojis(e.emoji));
   }, []);
 
   const usersById = _.keyBy(users, "id");
@@ -137,13 +162,19 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
       total={data?.messages?.total}
       items={data?.messages?.matches}
       itemDetailRenderer={(item) => (
-        <SlackDetail token={token} item={item} users={usersById} />
+        <SlackDetail
+          token={token}
+          item={item}
+          users={usersById}
+          emojis={emojis}
+        />
       )}
       itemRenderer={(item, { isLoading } = {}) => {
         return (
           <SlackMessage
             message={item}
             users={usersById}
+            emojis={emojis}
             isLoading={isLoading}
             showChannel
           />

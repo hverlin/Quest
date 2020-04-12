@@ -6,7 +6,7 @@ import { SWRConfig } from "swr";
 import { SearchView } from "./views/search-view";
 import { SettingsView } from "./views/settings-view";
 
-import { FocusStyleManager } from '@blueprintjs/core'
+import { FocusStyleManager } from "@blueprintjs/core";
 
 FocusStyleManager.onlyShowFocusOnTabs();
 

@@ -13,7 +13,7 @@ Meta-search client that can connects to various applications and sources. It wil
 
 ---
 - The application is built with React and Electron
-- It store settings locally. Credentials are stored securely in your system's keychain.
+- It stores settings locally. Credentials are stored securely in your system's keychain.
 - You will need to configure all the modules you want to connect to.
 
 ## Development
