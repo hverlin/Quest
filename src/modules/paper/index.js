@@ -2,8 +2,7 @@ import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
-import { SearchResults } from "../../components/search-results";
-import * as PropTypes from "prop-types";
+import { PaginatedSearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import ReactMarkdown from "react-markdown";
@@ -25,8 +24,8 @@ const paperDetailFetcher = (token) => async (id) => {
   return res.text();
 };
 
-const paperFetcher = (token) => async (url, searchData) => {
-  const res = await fetch(url, {
+const paperFetcher = (token) => async (url, searchData, cursor = null) => {
+  const res = await fetch(`${url}${cursor ? "/continue" : ""}_v2`, {
     method: "POST",
 
     credentials: "omit",
@@ -35,11 +34,15 @@ const paperFetcher = (token) => async (url, searchData) => {
       Accept: "application/json",
       "Content-type": "application/json",
     },
-    body: JSON.stringify({
-      query: searchData?.input,
-      include_highlights: false,
-      options: { max_results: 5 },
-    }),
+    body: JSON.stringify(
+      cursor
+        ? { cursor }
+        : {
+            query: searchData?.input,
+            include_highlights: false,
+            options: { max_results: 5 },
+          }
+    ),
   });
 
   return res.json();
@@ -73,28 +76,41 @@ function PaperDocDetail({ item, token }) {
   return <div className={!data ? SKELETON : ""}>{data && <ReactMarkdown source={data} />}</div>;
 }
 
-PaperResultItem.propTypes = {
-  name: PropTypes.any,
-  time: PropTypes.any,
-};
+function getPaperPage(token, searchData) {
+  return (wrapper) => ({ offset: cursor = null, withSWR }) => {
+    const { data, error } = withSWR(
+      useSWR([`https://api.dropboxapi.com/2/files/search`, searchData, cursor], paperFetcher(token))
+    );
+
+    if (error) {
+      return wrapper({ error, item: null });
+    }
+
+    if (!data) {
+      return wrapper({ item: null });
+    }
+
+    return data?.matches.map((item) =>
+      wrapper({
+        component: <PaperResultItem item={item} />,
+        item,
+      })
+    );
+  };
+}
+
 export default function PaperSearchResults({ searchData = {}, configuration }) {
   const { token } = configuration.get();
 
-  const { data, error } = useSWR(
-    [`https://api.dropboxapi.com/2/files/search_v2`, searchData],
-    paperFetcher(token)
-  );
-
   return (
-    <SearchResults
+    <PaginatedSearchResults
+      searchData={searchData}
       logo={logo}
-      error={error}
       configuration={configuration}
-      items={data?.matches}
       itemDetailRenderer={(item) => <PaperDocDetail item={item} token={token} />}
-      itemRenderer={(item, { isLoading } = {}) => (
-        <PaperResultItem item={item} isLoading={isLoading} />
-      )}
+      deps={[token]}
+      pageFunc={getPaperPage(token, searchData)}
+      computeNextOffset={({ data }) => (data?.cursor ? data.cursor : null)}
     />
   );
 }
