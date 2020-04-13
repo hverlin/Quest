@@ -29,11 +29,7 @@ export default function ConfluenceSettings({ configurationState }) {
             onChange={(e) => localState.nested.url.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup
-          label="Username"
-          labelFor="confluence-username"
-          labelInfo="(required)"
-        >
+        <FormGroup label="Username" labelFor="confluence-username" labelInfo="(required)">
           <InputGroup
             id="confluence-username"
             placeholder="username"
@@ -41,11 +37,7 @@ export default function ConfluenceSettings({ configurationState }) {
             onChange={(e) => localState.nested.username.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup
-          label="Password"
-          labelFor="confluence-password"
-          labelInfo="(required)"
-        >
+        <FormGroup label="Password" labelFor="confluence-password" labelInfo="(required)">
           <InputGroup
             id="confluence-password"
             placeholder="password"

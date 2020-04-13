@@ -19,11 +19,7 @@ export default function SlackSettings({ configurationState }) {
   return (
     <>
       <form onSubmit={save}>
-        <FormGroup
-          label="API Token"
-          labelFor="slack-token"
-          labelInfo="(required)"
-        >
+        <FormGroup label="API Token" labelFor="slack-token" labelInfo="(required)">
           <InputGroup
             id="slack-token"
             placeholder="API token"

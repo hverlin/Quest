@@ -1,10 +1,6 @@
 import React from "react";
 import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
-import {
-  hasCorrectTokens,
-  loadGoogleDriveClient,
-  revokeRefreshToken,
-} from "./auth";
+import { hasCorrectTokens, loadGoogleDriveClient, revokeRefreshToken } from "./auth";
 import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
@@ -12,9 +8,7 @@ import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
 export function DriveOauthButton({ configurationState }) {
   const configuration = configurationState.get();
-  const [isSignedIn, setIsSignedIn] = React.useState(
-    hasCorrectTokens(configuration)
-  );
+  const [isSignedIn, setIsSignedIn] = React.useState(hasCorrectTokens(configuration));
 
   async function handleSignoutClick() {
     await revokeRefreshToken(configuration);
@@ -26,18 +20,11 @@ export function DriveOauthButton({ configurationState }) {
   return (
     <div>
       {isSignedIn || isSignedIn === null ? (
-        <Button
-          className={isSignedIn === null ? SKELETON : ""}
-          onClick={handleSignoutClick}
-        >
+        <Button className={isSignedIn === null ? SKELETON : ""} onClick={handleSignoutClick}>
           Sign Out
         </Button>
       ) : (
-        <Button
-          onClick={() =>
-            loadGoogleDriveClient(configurationState, setIsSignedIn)
-          }
-        >
+        <Button onClick={() => loadGoogleDriveClient(configurationState, setIsSignedIn)}>
           Authorize
         </Button>
       )}
@@ -62,11 +49,7 @@ export default function DriveSettings({ configurationState }) {
   return (
     <>
       <form onSubmit={save}>
-        <FormGroup
-          label="Client Id"
-          labelFor="google-drive-client-id"
-          labelInfo="(required)"
-        >
+        <FormGroup label="Client Id" labelFor="google-drive-client-id" labelInfo="(required)">
           <InputGroup
             id="google-drive-client-id"
             placeholder="Client id"
@@ -74,11 +57,7 @@ export default function DriveSettings({ configurationState }) {
             onChange={(e) => localState.nested.clientId.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup
-          label="API Key"
-          labelFor="google-drive-api-key"
-          labelInfo="(required)"
-        >
+        <FormGroup label="API Key" labelFor="google-drive-api-key" labelInfo="(required)">
           <InputGroup
             id="google-drive-api-key"
             placeholder="API key"

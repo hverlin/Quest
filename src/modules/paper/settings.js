@@ -19,11 +19,7 @@ export default function PaperSettings({ configurationState }) {
   return (
     <>
       <form onSubmit={save}>
-        <FormGroup
-          label="API Token"
-          labelFor="dropbox-paper-token"
-          labelInfo="(required)"
-        >
+        <FormGroup label="API Token" labelFor="dropbox-paper-token" labelInfo="(required)">
           <InputGroup
             id="dropbox-paper-token"
             placeholder="API token"

@@ -8,8 +8,7 @@ import styles from "./search-view.module.css";
 import { SearchForm } from "../components/search-bar";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
-const getModuleView = (id) =>
-  React.memo(React.lazy(() => import(`../modules/${id}`)));
+const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
 function EmptyState(props) {
   return (
@@ -23,9 +22,7 @@ function EmptyState(props) {
             : 'Try searching something. e.g. "analytics"'
         }
         action={
-          props.enabledModules.length === 0 ? (
-            <Link to="/settings">Settings</Link>
-          ) : undefined
+          props.enabledModules.length === 0 ? <Link to="/settings">Settings</Link> : undefined
         }
       />
     </div>
@@ -36,9 +33,9 @@ export function SearchView({ store }) {
   const configuration = useStateLink(store);
   const [searchData, setSearchData] = React.useState({ input: "" });
 
-  const enabledModules = Object.entries(
-    configuration.nested.modules.nested
-  ).filter(([, module]) => module.nested.enabled.get());
+  const enabledModules = Object.entries(configuration.nested.modules.nested).filter(([, module]) =>
+    module.nested.enabled.get()
+  );
 
   return (
     <>
@@ -49,10 +46,7 @@ export function SearchView({ store }) {
             const ResultComponent = getModuleView(id);
             return (
               <Suspense key={id} fallback={<Card className={SKELETON} />}>
-                <ResultComponent
-                  searchData={searchData}
-                  configuration={moduleState}
-                />
+                <ResultComponent searchData={searchData} configuration={moduleState} />
               </Suspense>
             );
           })}

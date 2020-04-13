@@ -1,14 +1,14 @@
 import React from "react";
-import { Button, Hotkey, Icon, InputGroup, Tooltip } from "@blueprintjs/core";
-import styles from './search-bar.module.css'
+import { Button, InputGroup, Tooltip } from "@blueprintjs/core";
+import styles from "./search-bar.module.css";
 import { Redirect } from "react-router-dom";
 
-export function SearchForm({onSubmit}) {
+export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
   const [redirect, setRedirect] = React.useState(false);
 
   if (redirect) {
-    return <Redirect to='/settings' />
+    return <Redirect to="/settings" />;
   }
 
   function _onSubmit(e) {
@@ -18,13 +18,13 @@ export function SearchForm({onSubmit}) {
 
   const searchButton = (
     <Tooltip content="Hit Enter to search">
-      <Button icon="key-enter" minimal onClick={_onSubmit}/>
+      <Button icon="key-enter" minimal onClick={_onSubmit} />
     </Tooltip>
   );
 
   return (
     <div className={styles.searchForm}>
-      <form onSubmit={_onSubmit} style={{display: 'flex'}}>
+      <form onSubmit={_onSubmit} style={{ display: "flex" }}>
         <InputGroup
           autoFocus
           large
@@ -35,7 +35,7 @@ export function SearchForm({onSubmit}) {
           rightElement={searchButton}
         />
         <Tooltip content="Settings" className={styles.settings}>
-          <Button onClick={() => setRedirect(true)} minimal icon='settings'/>
+          <Button onClick={() => setRedirect(true)} minimal icon="settings" />
         </Tooltip>
       </form>
     </div>

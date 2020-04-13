@@ -1,24 +1,24 @@
 .settingsHeader {
-    -webkit-app-region: drag;
-    padding: 1rem 2rem;
-    background-color: #e1e8ed;
+  -webkit-app-region: drag;
+  padding: 1rem 2rem;
+  background-color: #e1e8ed;
 }
 
 .settingsBody {
-    max-width: 800px;
-    padding: 2rem;
-    margin: auto;
-    --space: 1.2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+  max-width: 800px;
+  padding: 2rem;
+  margin: auto;
+  --space: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .settingsBody > * {
-    margin-top: 0;
-    margin-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .settingsBody > * + * {
-    margin-top: var(--space);
+  margin-top: var(--space);
 }

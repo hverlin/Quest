@@ -8,6 +8,7 @@ import { ExternalLink } from "../../components/external-link";
 import { Card, H2, Tooltip } from "@blueprintjs/core";
 import logo from "./logo.png";
 import ReactMarkdown from "react-markdown";
+import log from "electron-log";
 
 function driveItemRender(
   { name, webViewLink, iconLink, modifiedTime },
@@ -51,9 +52,7 @@ function DriveResultItem({ item }) {
       {!error && (
         <>
           <H2 className={!data ? SKELETON : ""}>{item.name}</H2>
-          <p className={!data ? SKELETON : ""}>
-            {data && <ReactMarkdown source={data} />}
-          </p>
+          <p className={!data ? SKELETON : ""}>{data && <ReactMarkdown source={data} />}</p>
         </>
       )}
       {error && <Card>Preview cannot be loaded.</Card>}
@@ -82,12 +81,11 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
         const response = await window.gapi.client.drive.files.list({
           q: `name contains '${searchData.input}'`,
           pageSize: 5,
-          fields:
-            "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
+          fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
         });
         setData(response);
       } catch (e) {
-        console.error(e);
+        log.error(e);
         if (e?.status === 401) {
           configuration.nested.accessToken.set(null);
           await loadGoogleDriveClient(configuration, setIsSignedIn, {
@@ -105,8 +103,8 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
   if (isSignedIn === false) {
     return (
       <div>
-        Not authenticated. Go to the <Link to="/settings">settings</Link> to
-        setup the Google Drive module.
+        Not authenticated. Go to the <Link to="/settings">settings</Link> to setup the Google Drive
+        module.
       </div>
     );
   }

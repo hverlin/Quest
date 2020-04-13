@@ -29,11 +29,7 @@ export default function JiraSettings({ configurationState }) {
             onChange={(e) => localState.nested.url.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup
-          label="Username"
-          labelFor="jira-username"
-          labelInfo="(required)"
-        >
+        <FormGroup label="Username" labelFor="jira-username" labelInfo="(required)">
           <InputGroup
             id="jira-username"
             placeholder="username"
@@ -41,11 +37,7 @@ export default function JiraSettings({ configurationState }) {
             onChange={(e) => localState.nested.username.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup
-          label="Password"
-          labelFor="jira-password"
-          labelInfo="(required)"
-        >
+        <FormGroup label="Password" labelFor="jira-password" labelInfo="(required)">
           <InputGroup
             id="jira-password"
             placeholder="password"

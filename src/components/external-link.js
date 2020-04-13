@@ -6,12 +6,12 @@ export function ExternalLink({ href, children, ...props }) {
       {...props}
       href={href}
       target="_blank"
+      rel="noreferrer noopener"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
         window.open(href);
       }}
-      rel="nofollow noopener"
     >
       {children}
     </a>

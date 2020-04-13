@@ -1,12 +1,11 @@
-import React from "react";
 import { parse } from "url";
 import { remote } from "electron";
 import qs from "qs";
+import log from "electron-log";
 
 const GOOGLE_AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-const discoveryDriveV3RestUrl =
-  "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
+const discoveryDriveV3RestUrl = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
 
 // https://developers.google.com/identity/protocols/oauth2/native-app#request-parameter-redirect_uri
 function getRedirectUri(clientId) {
@@ -54,9 +53,8 @@ function signInWithPopup(clientId) {
       handleNavigation(url);
     });
 
-    authWindow.webContents.on(
-      "did-get-redirect-request",
-      (event, oldUrl, newUrl) => handleNavigation(newUrl)
+    authWindow.webContents.on("did-get-redirect-request", (event, oldUrl, newUrl) =>
+      handleNavigation(newUrl)
     );
 
     authWindow.loadURL(authUrl);
@@ -77,7 +75,7 @@ async function refreshAccessToken(clientId, refreshToken) {
 
     return await response.json();
   } catch (e) {
-    console.error(e);
+    log.error(e);
   }
 }
 
@@ -96,7 +94,7 @@ async function fetchAccessTokens(clientId, code) {
 
     return await response.json();
   } catch (e) {
-    console.error(e);
+    log.error(e);
   }
 }
 
@@ -113,10 +111,7 @@ function insertGoogleDriveApiClientScript() {
 
   const script = document.createElement("script");
   script.setAttribute("src", "https://apis.google.com/js/api.js");
-  script.setAttribute(
-    "onreadystatechange",
-    "if (this.readyState === 'complete') this.onload()"
-  );
+  script.setAttribute("onreadystatechange", "if (this.readyState === 'complete') this.onload()");
   script.setAttribute("id", scriptId);
   document.body.appendChild(script);
 }
@@ -148,7 +143,7 @@ export async function revokeRefreshToken({ refreshToken }) {
       body: qs.stringify({ token: refreshToken }),
     });
   } catch (e) {
-    console.error(e);
+    log.error(e);
   }
 }
 
@@ -170,12 +165,7 @@ export async function loadGoogleDriveClient(
   await ensureGoogleClientLoaded();
 
   window.gapi.load("client:auth2", async function initClient() {
-    const {
-      clientId,
-      apiKey,
-      refreshToken,
-      accessToken,
-    } = await configurationState.get();
+    const { clientId, apiKey, refreshToken, accessToken } = await configurationState.get();
 
     if (!clientId || !apiKey) {
       return onSignedIn(false);
@@ -206,7 +196,7 @@ export async function loadGoogleDriveClient(
 
       onSignedIn(true);
     } catch (e) {
-      console.error(e);
+      log.error(e);
       onSignedIn(false);
     }
   });

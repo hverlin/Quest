@@ -3,19 +3,13 @@ import schema from "../configuration-schema";
 import { Logger } from "@hookstate/logger";
 import _ from "lodash";
 import { createStateLink } from "@hookstate/core";
-import {
-  getCredential,
-  saveCredential,
-  deleteCredential,
-} from "./credential-service";
+import { getCredential, saveCredential, deleteCredential } from "./credential-service";
+import log from "electron-log";
 
 function getHiddenKeys(schema, keyPrefix = null) {
   if (schema.properties) {
     return Object.keys(schema.properties).flatMap((key) =>
-      getHiddenKeys(
-        schema.properties[key],
-        keyPrefix ? `${keyPrefix}.${key}` : key
-      )
+      getHiddenKeys(schema.properties[key], keyPrefix ? `${keyPrefix}.${key}` : key)
     );
   }
 
@@ -46,7 +40,7 @@ async function saveCredentials(state) {
           await deleteCredential(value);
         }
       } catch (e) {
-        console.error(key, value, e);
+        log.error(key, value, e);
       }
     })
   );

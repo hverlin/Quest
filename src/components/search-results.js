@@ -68,29 +68,20 @@ export function SearchResults({
             minimal
             onClick={() => {
               setDrawerSize(
-                drawerSize === Drawer.SIZE_LARGE
-                  ? Drawer.SIZE_STANDARD
-                  : Drawer.SIZE_LARGE
+                drawerSize === Drawer.SIZE_LARGE ? Drawer.SIZE_STANDARD : Drawer.SIZE_LARGE
               );
             }}
           >
             Expand
           </Button>
-          {selectedItem &&
-            (itemDetailRenderer ? itemDetailRenderer : itemRenderer)(
-              selectedItem
-            )}
+          {selectedItem && (itemDetailRenderer ? itemDetailRenderer : itemRenderer)(selectedItem)}
         </div>
       </Drawer>
       <div className={styles.results}>
         <div style={{ display: "flex" }}>
-          {logo && (
-            <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} />
-          )}
+          {logo && <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} />}
           <H5 style={{ flexGrow: "1", marginBottom: 0 }}>{name}</H5>
-          {!error && total > 0 && (
-            <p style={{ marginBottom: 0 }}>{total} results</p>
-          )}
+          {!error && total > 0 && <p style={{ marginBottom: 0 }}>{total} results</p>}
         </div>
         {error ? (
           <Card>Error when loading results</Card>

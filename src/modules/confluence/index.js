@@ -25,10 +25,7 @@ function parseConfluenceMessage(message) {
 function ConfluenceDetail({ item, username, password }) {
   const link = `${_.get(item, "content._links.self")}?expand=body.view`;
 
-  const { data, error } = useSWR(
-    link,
-    confluenceFetcher({ username, password })
-  );
+  const { data, error } = useSWR(link, confluenceFetcher({ username, password }));
 
   if (error) {
     return <p>Failed to load document: {link}</p>;
@@ -44,10 +41,7 @@ function ConfluenceDetail({ item, username, password }) {
   );
 }
 
-export default function ConfluenceSearchResults({
-  searchData = {},
-  configuration,
-}) {
+export default function ConfluenceSearchResults({ searchData = {}, configuration }) {
   const { username, password, url } = configuration.get();
 
   const { data, error } = useSWR(
@@ -61,11 +55,7 @@ export default function ConfluenceSearchResults({
   return (
     <SearchResults
       logo={logo}
-      error={
-        !url
-          ? "Confluence module is not configured correctly. URL is missing."
-          : error
-      }
+      error={!url ? "Confluence module is not configured correctly. URL is missing." : error}
       configuration={configuration}
       total={data?.totalSize}
       items={data?.results}
@@ -85,9 +75,7 @@ export default function ConfluenceSearchResults({
               __html: domPurify.sanitize(parseConfluenceMessage(excerpt)),
             }}
           />
-          <p className={isLoading ? SKELETON : ""}>
-            Updated {friendlyLastModified}
-          </p>
+          <p className={isLoading ? SKELETON : ""}>Updated {friendlyLastModified}</p>
         </>
       )}
     />

@@ -42,17 +42,13 @@ const paperFetcher = (token) => async (url, searchData) => {
 };
 
 function PaperResultItem({
-  item: {
-    metadata: { metadata: { id, name, server_modified } = {} } = {},
-  } = {},
+  item: { metadata: { metadata: { id, name, server_modified } = {} } = {} } = {},
   isLoading = false,
 }) {
   return (
     <>
       <p className={isLoading ? SKELETON : ""}>
-        <ExternalLink href={`https://paper.dropbox.com/${id}`}>
-          {name}
-        </ExternalLink>
+        <ExternalLink href={`https://paper.dropbox.com/${id}`}>{name}</ExternalLink>
       </p>
       <p className={isLoading ? SKELETON : ""}>
         Last updated <Time time={server_modified} />
@@ -70,11 +66,7 @@ function PaperDocDetail({ item, token }) {
     return <p>Failed to load document: {id}</p>;
   }
 
-  return (
-    <div className={!data ? SKELETON : ""}>
-      {data && <ReactMarkdown source={data} />}
-    </div>
-  );
+  return <div className={!data ? SKELETON : ""}>{data && <ReactMarkdown source={data} />}</div>;
 }
 
 PaperResultItem.propTypes = {
@@ -95,9 +87,7 @@ export default function PaperSearchResults({ searchData = {}, configuration }) {
       error={error}
       configuration={configuration}
       items={data?.matches}
-      itemDetailRenderer={(item) => (
-        <PaperDocDetail item={item} token={token} />
-      )}
+      itemDetailRenderer={(item) => <PaperDocDetail item={item} token={token} />}
       itemRenderer={(item, { isLoading } = {}) => (
         <PaperResultItem item={item} isLoading={isLoading} />
       )}

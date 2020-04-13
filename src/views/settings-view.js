@@ -6,8 +6,7 @@ import styles from "./settings-view.module.css";
 import { useStateLink } from "@hookstate/core";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
-const getModuleView = (id) =>
-  React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
+const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
 function SettingCard({ moduleState }) {
   const moduleConfiguration = useStateLink(moduleState);
@@ -24,18 +23,14 @@ function SettingCard({ moduleState }) {
           <Switch
             label="Enabled"
             onChange={() =>
-              moduleConfiguration.nested.enabled.set(
-                !moduleConfiguration.nested.enabled.get()
-              )
+              moduleConfiguration.nested.enabled.set(!moduleConfiguration.nested.enabled.get())
             }
             checked={enabled}
             alignIndicator="right"
           />
         </div>
       </div>
-      <Suspense
-        fallback={<div className={SKELETON} style={{ height: "200px" }} />}
-      >
+      <Suspense fallback={<div className={SKELETON} style={{ height: "200px" }} />}>
         {enabled && <ModuleView configurationState={moduleConfiguration} />}
       </Suspense>
     </Card>
@@ -54,9 +49,7 @@ export function SettingsView({ store }) {
           <span style={{ marginLeft: "2px" }}>Back</span>
         </Link>
         <H1>Settings</H1>
-        <p>
-          Credentials and keys are securely stored in the system's keychain.
-        </p>
+        <p>{"Credentials and keys are securely stored in the system's keychain."}</p>
       </div>
       <div className={styles.settingsBody}>
         {Object.entries(modules.nested).map(([moduleId, moduleState]) => (

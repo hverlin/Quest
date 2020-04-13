@@ -1,14 +1,14 @@
 .searchForm {
-    -webkit-app-region: drag;
-    padding: 25px 1rem 1rem;
-    background-color: #e1e8ed;
+  -webkit-app-region: drag;
+  padding: 25px 1rem 1rem;
+  background-color: #e1e8ed;
 }
 
 .searchForm :global(.bp3-input-group) {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 
 .searchForm .settings {
-    display: block;
-    margin: auto auto auto 15px;
+  display: block;
+  margin: auto auto auto 15px;
 }
