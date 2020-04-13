@@ -19,11 +19,11 @@ const jiraFetcher = ({ username, password }) => async (url) => {
   return res.json();
 };
 
-function JiraResultItem({ issue, isLoading, url }) {
+function JiraResultItem({ item = {}, isLoading, url }) {
   const {
     key,
     fields: { issuetype, summary, assignee, status, reporter, created, updated } = {},
-  } = issue;
+  } = item;
 
   return (
     <>
