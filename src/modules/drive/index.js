@@ -2,35 +2,34 @@ import React from "react";
 import { loadGoogleDriveClient } from "./auth";
 import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
-import { SearchResults } from "../../components/search-results";
+import { PaginatedSearchResults } from "../../components/search-results";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import { Card, H2, Tooltip } from "@blueprintjs/core";
 import logo from "./logo.png";
 import ReactMarkdown from "react-markdown";
 import log from "electron-log";
+import useSWR from "swr";
 
-function driveItemRender(
-  { name, webViewLink, iconLink, modifiedTime },
-  { isLoading = false } = {}
-) {
+function DriveItemRender({ item }) {
+  const { name, webViewLink, iconLink, modifiedTime } = item;
   return (
     <>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         <Tooltip content={name}>
           <img src={iconLink} alt="file icon" />
         </Tooltip>
         {"  "}
         <ExternalLink href={webViewLink}>{name}</ExternalLink>
       </p>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         Last updated <Time time={modifiedTime} />
       </p>
     </>
   );
 }
 
-function DriveResultItem({ item }) {
+function DriveDetailComponent({ item }) {
   const [data, setData] = React.useState();
   const [error, setError] = React.useState();
 
@@ -60,10 +59,65 @@ function DriveResultItem({ item }) {
   );
 }
 
+function listFiles({ isSignedIn, searchData, configuration, pageToken }) {
+  return new Promise((resolve, reject) => {
+    if (!isSignedIn) {
+      return;
+    }
+    window.gapi.client.drive.files
+      .list({
+        q: `name contains '${searchData.input}'`,
+        pageSize: 5,
+        fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
+        pageToken,
+      })
+      .then(resolve)
+      .catch((e) => {
+        log.error(e);
+        if (e?.status !== 401) {
+          reject(e);
+        }
+
+        configuration.nested.accessToken.set(null);
+        loadGoogleDriveClient(
+          configuration,
+          () =>
+            listFiles({ isSignedIn: true, searchData, configuration }).then(resolve).catch(reject),
+          { logInIfUnauthorized: false }
+        );
+      });
+  });
+}
+
+const googleDriveFetcher = (configuration) => async (searchData, isSignedIn, cursor) => {
+  return listFiles({ isSignedIn, searchData, configuration, pageToken: cursor });
+};
+
+function getGoogleDrivePage(searchData, isSignedIn, configuration) {
+  return (wrapper) => ({ offset: cursor = null, withSWR }) => {
+    const { data, error } = withSWR(
+      useSWR([searchData, isSignedIn, cursor], googleDriveFetcher(configuration))
+    );
+
+    if (error) {
+      return wrapper({ error, item: null });
+    }
+
+    if (!data?.result?.files) {
+      return wrapper({ item: null });
+    }
+
+    return data?.result?.files.map((item) =>
+      wrapper({
+        component: <DriveItemRender item={item} />,
+        item,
+      })
+    );
+  };
+}
+
 export default function DriveSearchResults({ searchData = {}, configuration }) {
   const [isSignedIn, setIsSignedIn] = React.useState(null);
-  const [error, setError] = React.useState(null);
-  const [data, setData] = React.useState(null);
 
   React.useEffect(() => {
     loadGoogleDriveClient(configuration, setIsSignedIn, {
@@ -71,52 +125,25 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
     });
   }, [isSignedIn]);
 
-  React.useEffect(() => {
-    async function listFiles() {
-      if (!isSignedIn) {
-        return;
-      }
-
-      try {
-        const response = await window.gapi.client.drive.files.list({
-          q: `name contains '${searchData.input}'`,
-          pageSize: 5,
-          fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
-        });
-        setData(response);
-      } catch (e) {
-        log.error(e);
-        if (e?.status === 401) {
-          configuration.nested.accessToken.set(null);
-          await loadGoogleDriveClient(configuration, setIsSignedIn, {
-            logInIfUnauthorized: false,
-          });
-          return listFiles();
-        }
-        setError(e);
-      }
-    }
-
-    listFiles();
-  }, [searchData, isSignedIn]);
-
-  if (isSignedIn === false) {
-    return (
-      <div>
-        Not authenticated. Go to the <Link to="/settings">settings</Link> to setup the Google Drive
-        module.
-      </div>
-    );
-  }
-
   return (
-    <SearchResults
+    <PaginatedSearchResults
+      searchData={searchData}
       logo={logo}
-      itemDetailRenderer={(item) => <DriveResultItem item={item} />}
-      error={error}
+      itemDetailRenderer={(item) => <DriveDetailComponent item={item} />}
+      error={
+        isSignedIn === false ? (
+          <div>
+            Not authenticated. Go to the <Link to="/settings">settings</Link> to setup the Google
+            Drive module.
+          </div>
+        ) : null
+      }
       configuration={configuration}
-      items={data?.result?.files}
-      itemRenderer={driveItemRender}
+      pageFunc={getGoogleDrivePage(searchData, isSignedIn, configuration)}
+      computeNextOffset={({ data }) =>
+        data?.result?.nextPageToken ? data.result.nextPageToken : null
+      }
+      deps={[isSignedIn]}
     />
   );
 }

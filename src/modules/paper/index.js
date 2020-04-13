@@ -50,14 +50,13 @@ const paperFetcher = (token) => async (url, searchData, cursor = null) => {
 
 function PaperResultItem({
   item: { metadata: { metadata: { id, name, server_modified } = {} } = {} } = {},
-  isLoading = false,
 }) {
   return (
     <>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         <ExternalLink href={`https://paper.dropbox.com/${id}`}>{name}</ExternalLink>
       </p>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         Last updated <Time time={server_modified} />
       </p>
     </>
