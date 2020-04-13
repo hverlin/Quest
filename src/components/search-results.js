@@ -57,6 +57,7 @@ export function PaginatedSearchResults({
   error,
   pageFunc,
   computeNextOffset,
+  deps = [],
 }) {
   const { name } = configuration.get();
   const [selectedItem, setSelectedItem] = React.useState(null);
@@ -75,11 +76,21 @@ export function PaginatedSearchResults({
           onClick={item ? () => setSelectedItem(item) : undefined}
           className={styles.resultItem}
         >
-          {item ? component : <p className={SKELETON}>Loading...</p>}
+          {component ? (
+            component
+          ) : (
+            <div>
+              <p className={SKELETON}>Loading...</p>
+              <p className={SKELETON} style={{ height: "3rem" }}>
+                Loading...
+              </p>
+            </div>
+          )}
         </Card>
       );
     }),
-    computeNextOffset
+    computeNextOffset,
+    deps
   );
 
   const total = _.get(pageSWRs, [0, "data", "total"], null);

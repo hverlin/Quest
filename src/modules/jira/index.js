@@ -2,7 +2,6 @@ import useSWR from "swr";
 import React from "react";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
-import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.svg";
 import { Tooltip } from "@blueprintjs/core";
@@ -21,7 +20,7 @@ const jiraFetcher = ({ username, password }) => async (url) => {
   return res.json();
 };
 
-function JiraResultItem({ item = {}, isLoading, url }) {
+function JiraResultItem({ item = {}, url }) {
   const {
     key,
     fields: { issuetype, summary, assignee, status, reporter, created, updated } = {},
@@ -29,7 +28,7 @@ function JiraResultItem({ item = {}, isLoading, url }) {
 
   return (
     <>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         <Tooltip content={issuetype?.name}>
           <img src={issuetype?.iconUrl} alt={issuetype?.name} style={{ verticalAlign: "middle" }} />
         </Tooltip>
@@ -39,7 +38,7 @@ function JiraResultItem({ item = {}, isLoading, url }) {
         </ExternalLink>{" "}
         - {summary}
       </p>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         Created: <Time time={created} /> | Updated: <Time time={updated} /> |{" "}
         {assignee?.displayName} | {status?.name} | reported by {reporter?.displayName}
       </p>

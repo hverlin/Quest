@@ -2,13 +2,14 @@ import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
-import { SearchResults } from "../../components/search-results";
-import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import domPurify from "dompurify";
 import { Card } from "@blueprintjs/core";
 import logo from "./logo.svg";
 import EmojiJS from "emoji-js";
+
+const pageSize = 5;
 
 const emojiConverter = new EmojiJS();
 const rx_colons = new RegExp(":([a-zA-Z0-9-_+]+):", "g");
@@ -56,12 +57,12 @@ async function getEmojis(token) {
 const getUsersMemo = _.memoize(getUsers);
 const getEmojisMemo = _.memoize(getEmojis);
 
-function SlackMessage({ message = {}, users, emojis, isLoading = false, showChannel = false }) {
+function SlackMessage({ message = {}, users, emojis, showChannel = false }) {
   const timestamp = message?.ts?.split(".")[0];
 
   return (
     <>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         <b>{_.get(users, [message.user, "real_name"], message.username)}</b>:{" "}
         <span
           style={{ whiteSpace: "pre-wrap" }}
@@ -73,7 +74,7 @@ function SlackMessage({ message = {}, users, emojis, isLoading = false, showChan
         />
       </p>
       {showChannel && (
-        <p className={isLoading ? SKELETON : ""}>
+        <p>
           in{" "}
           <ExternalLink href={`slack://channel?id=${message?.channel?.id}&team=${message.team}`}>
             {_.get(users, [message?.channel?.name, "real_name"], message?.channel?.name)}
@@ -109,14 +110,38 @@ function SlackDetail({ item, users, emojis }) {
   );
 }
 
+function getSlackPage(token, searchData, users, emojis) {
+  return (wrapper) => ({ offset = 1, withSWR }) => {
+    const { data, error } = withSWR(
+      useSWR(
+        `https://slack.com/api/search.messages?query=${
+          searchData.input
+        }&token=${token}&count=${pageSize}&page=${offset || 1}`
+      )
+    );
+
+    if (error) {
+      return wrapper({ error, item: null });
+    }
+
+    if (!data?.messages?.matches) {
+      return wrapper({ item: null });
+    }
+
+    return data?.messages?.matches.map((message) =>
+      wrapper({
+        component: <SlackMessage message={message} users={users} emojis={emojis} showChannel />,
+        item: message,
+      })
+    );
+  };
+}
+
 export default function SlackSearchResults({ searchData = {}, configuration }) {
   const { token } = configuration.get();
+
   const [users, setUsers] = React.useState([]);
   const [emojis, setEmojis] = React.useState([]);
-
-  const { data, error } = useSWR(
-    `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}&count=5`
-  );
 
   React.useEffect(() => {
     getUsersMemo(token).then((u) => setUsers(u.members));
@@ -126,24 +151,22 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
   const usersById = _.keyBy(users, "id");
 
   return (
-    <SearchResults
+    <PaginatedSearchResults
+      searchData={searchData}
       logo={logo}
-      error={error || (data && !data.ok)}
       configuration={configuration}
-      total={data?.messages?.total}
-      items={data?.messages?.matches}
+      computeNextOffset={({ data }) => {
+        if (!data?.messages) {
+          return null;
+        }
+        const { page, pages } = data.messages.paging;
+        return pages > page ? page + 1 : null;
+      }}
       itemDetailRenderer={(item) => (
         <SlackDetail token={token} item={item} users={usersById} emojis={emojis} />
       )}
-      itemRenderer={(item, { isLoading } = {}) => (
-        <SlackMessage
-          message={item}
-          users={usersById}
-          emojis={emojis}
-          isLoading={isLoading}
-          showChannel
-        />
-      )}
+      pageFunc={getSlackPage(token, searchData, usersById, emojis)}
+      deps={[usersById, emojis]}
     />
   );
 }

@@ -43,11 +43,11 @@ function ConfluenceDetail({ item, username, password }) {
   );
 }
 
-function ConfluenceItem({ item = {}, isLoading, url }) {
+function ConfluenceItem({ item = {}, url }) {
   const { content = {}, excerpt, friendlyLastModified, url: itemUrl } = item;
   return (
     <>
-      <p className={isLoading ? SKELETON : ""}>
+      <p>
         <ExternalLink href={url + itemUrl}>{content.title}</ExternalLink>
       </p>
       <p
@@ -55,7 +55,7 @@ function ConfluenceItem({ item = {}, isLoading, url }) {
           __html: domPurify.sanitize(parseConfluenceMessage(excerpt)),
         }}
       />
-      <p className={isLoading ? SKELETON : ""}>Updated {friendlyLastModified}</p>
+      <p>Updated {friendlyLastModified}</p>
     </>
   );
 }
