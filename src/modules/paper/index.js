@@ -15,7 +15,10 @@ const paperDetailFetcher = (token) => async (id) => {
     credentials: "omit",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Dropbox-API-Arg": `{"doc_id": "${id}", "export_format": "markdown"}`,
+      "Dropbox-API-Arg": JSON.stringify({
+        doc_id: id,
+        export_format: "markdown",
+      }),
     },
   });
 
@@ -35,6 +38,7 @@ const paperFetcher = (token) => async (url, searchData) => {
     body: JSON.stringify({
       query: searchData?.input,
       include_highlights: false,
+      options: { max_results: 5 },
     }),
   });
 

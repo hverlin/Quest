@@ -49,7 +49,7 @@ export default function JiraSearchResults({ searchData = {}, configuration }) {
   const { username, password, url } = configuration.get();
 
   const { data, error } = useSWR(
-    () => (url ? `${url}/rest/api/2/search?jql=text+~+"${searchData.input}"` : null),
+    () => (url ? `${url}/rest/api/2/search?jql=text+~+"${searchData.input}"&maxResults=5` : null),
     jiraFetcher({ username, password })
   );
 

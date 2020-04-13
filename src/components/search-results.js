@@ -7,16 +7,23 @@ function generateFakeItems() {
   return [1, 2, 3, 4, 5].map((id) => ({ id }));
 }
 
+const numberFormatter = new Intl.NumberFormat();
+
 function renderItems(itemRenderer, items, onItemClick) {
   if (items && _.size(items) <= 0) {
-    return <Card>No results</Card>;
+    return (
+      <div className={styles.resultList}>
+        <Card className={styles.resultItem}>No results</Card>
+      </div>
+    );
   }
 
   return (
-    <>
+    <div className={styles.resultList}>
       {items
-        ? _.take(items, 5).map((item) => (
+        ? items.map((item) => (
             <Card
+              className={styles.resultItem}
               interactive
               key={item.id ?? item.key ?? JSON.stringify(item)}
               onClick={(e) => {
@@ -33,7 +40,7 @@ function renderItems(itemRenderer, items, onItemClick) {
         : generateFakeItems().map((item) => (
             <Card key={item.id}>{itemRenderer(item, { isLoading: true })}</Card>
           ))}
-    </>
+    </div>
   );
 }
 
@@ -80,8 +87,12 @@ export function SearchResults({
       <div className={styles.results}>
         <div style={{ display: "flex" }}>
           {logo && <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} />}
-          <H5 style={{ flexGrow: "1", marginBottom: 0 }}>{name}</H5>
-          {!error && total > 0 && <p style={{ marginBottom: 0 }}>{total} results</p>}
+          <H5 style={{ marginBottom: 0 }}>{name}</H5>
+          {!error && total > 0 && (
+            <p style={{ marginBottom: 0, marginLeft: 5 }}>
+              ({numberFormatter.format(total)} {total === 1 ? "result" : "results"})
+            </p>
+          )}
         </div>
         {error ? (
           <Card>Error when loading results</Card>

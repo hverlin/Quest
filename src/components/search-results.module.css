@@ -28,3 +28,14 @@
 .drawerContainer img {
   width: 100%;
 }
+
+.resultList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 1rem;
+  grid-auto-flow: row dense;
+}
+
+.resultItem {
+  height: fit-content;
+}

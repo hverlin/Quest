@@ -115,7 +115,7 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
   const [emojis, setEmojis] = React.useState([]);
 
   const { data, error } = useSWR(
-    `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}`
+    `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}&count=5`
   );
 
   React.useEffect(() => {

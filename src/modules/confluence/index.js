@@ -47,7 +47,7 @@ export default function ConfluenceSearchResults({ searchData = {}, configuration
   const { data, error } = useSWR(
     () =>
       url
-        ? `${url}/rest/api/search?cql=(siteSearch ~ "${searchData.input}" and space = "ENG" and type = "page")`
+        ? `${url}/rest/api/search?cql=(siteSearch ~ "${searchData.input}" and space = "ENG" and type = "page")&limit=5`
         : null,
     confluenceFetcher({ username, password })
   );
