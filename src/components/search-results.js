@@ -1,13 +1,15 @@
 import _ from "lodash";
 import React from "react";
-import { Button, Callout, Card, Drawer, H5 } from "@blueprintjs/core";
+import { Button, Callout, Card, H5 } from "@blueprintjs/core";
 import styles from "./search-results.module.css";
 import { useSWRPages } from "swr";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { useStateLink } from "@hookstate/core";
 
 const numberFormatter = new Intl.NumberFormat();
 
 export function PaginatedSearchResults({
+  searchViewState,
   searchData,
   logo,
   itemDetailRenderer,
@@ -17,21 +19,30 @@ export function PaginatedSearchResults({
   computeNextOffset,
   deps = [],
 }) {
+  const state = useStateLink(searchViewState);
   const { name } = configuration.get();
-  const [selectedItem, setSelectedItem] = React.useState(null);
-  const [drawerSize, setDrawerSize] = React.useState(Drawer.SIZE_STANDARD);
 
   const { pages, pageSWRs, isLoadingMore, isReachingEnd, isEmpty, loadMore } = useSWRPages(
     `${name}-${searchData.input}`,
-    pageFunc(({ component, item, error }) => {
+    pageFunc(({ component, item, error, key }) => {
       if (error) {
         return <Callout intent="danger">An error occurred while the loading results</Callout>;
       }
 
       return (
         <Card
+          key={key}
           interactive={!!item}
-          onClick={item ? () => setSelectedItem(item) : undefined}
+          onClick={
+            item
+              ? () => {
+                  // Ugly workaround: We cannot pass a reference to a view with hookState so
+                  // pass it though the global window object instead :/
+                  window.detailView = itemDetailRenderer;
+                  state.nested.selectedItem.set(item);
+                }
+              : undefined
+          }
           className={styles.resultItem}
         >
           {component ? (
@@ -51,40 +62,11 @@ export function PaginatedSearchResults({
     deps
   );
 
+  // TODO: support a total component
   const total = _.get(pageSWRs, [0, "data", "total"], null);
-
-  function getDrawer() {
-    return (
-      <Drawer
-        size={drawerSize}
-        isOpen={!!selectedItem}
-        onClose={() => {
-          setSelectedItem(null);
-          setDrawerSize(Drawer.SIZE_STANDARD);
-        }}
-        style={{ transition: "all 0.3s ease-out" }}
-      >
-        <div className={styles.drawerContainer}>
-          <Button
-            icon="expand-all"
-            minimal
-            onClick={() => {
-              setDrawerSize(
-                drawerSize === Drawer.SIZE_LARGE ? Drawer.SIZE_STANDARD : Drawer.SIZE_LARGE
-              );
-            }}
-          >
-            Expand
-          </Button>
-          {selectedItem && itemDetailRenderer(selectedItem)}
-        </div>
-      </Drawer>
-    );
-  }
 
   return (
     <div className={styles.results}>
-      {getDrawer()}
       <div style={{ display: "flex" }}>
         {logo && (
           <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} alt={`${name} logo`} />
@@ -96,13 +78,19 @@ export function PaginatedSearchResults({
           </p>
         )}
       </div>
-      {!isEmpty && !error && <div className={styles.resultList}>{pages}</div>}
-      {isEmpty && !error && <Card className={styles.resultItem}>No results.</Card>}
-      {error && (
-        <Callout intent="danger" className={styles.resultItem}>
-          {error}
-        </Callout>
-      )}
+
+      <div className={styles.resultList}>
+        {error ? (
+          <Callout intent="danger" className={styles.resultItem}>
+            {error}
+          </Callout>
+        ) : isEmpty ? (
+          <Card className={styles.resultItem}>No results.</Card>
+        ) : (
+          pages
+        )}
+      </div>
+
       {isReachingEnd || isLoadingMore || error ? null : (
         <div>
           <Button minimal intent="primary" rightIcon="arrow-right" onClick={loadMore}>

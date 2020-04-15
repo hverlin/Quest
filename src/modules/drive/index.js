@@ -109,6 +109,7 @@ function getGoogleDrivePage(searchData, isSignedIn, configuration) {
 
     return data?.result?.files.map((item) =>
       wrapper({
+        key: item.id,
         component: <DriveItemRender item={item} />,
         item,
       })
@@ -116,7 +117,7 @@ function getGoogleDrivePage(searchData, isSignedIn, configuration) {
   };
 }
 
-export default function DriveSearchResults({ searchData = {}, configuration }) {
+export default function DriveSearchResults({ searchData = {}, configuration, searchViewState }) {
   const [isSignedIn, setIsSignedIn] = React.useState(null);
 
   React.useEffect(() => {
@@ -127,6 +128,7 @@ export default function DriveSearchResults({ searchData = {}, configuration }) {
 
   return (
     <PaginatedSearchResults
+      searchViewState={searchViewState}
       searchData={searchData}
       logo={logo}
       itemDetailRenderer={(item) => <DriveDetailComponent item={item} />}

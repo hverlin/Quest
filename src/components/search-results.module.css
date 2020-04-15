@@ -1,8 +1,9 @@
 .results {
   --space: 0.8rem;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   justify-content: flex-start;
+  padding-bottom: 2rem;
 }
 
 .results > * {
@@ -18,15 +19,6 @@
   padding: 10px;
   overflow: hidden;
   word-break: break-word;
-}
-
-.drawerContainer {
-  padding: 10px;
-  overflow: auto;
-}
-
-.drawerContainer img {
-  width: 100%;
 }
 
 .resultList {

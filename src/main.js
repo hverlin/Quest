@@ -21,7 +21,8 @@ const createWindow = () => {
     width: isDev ? 1300 : 800,
     height: 900,
     // only support frameless in prod as it breaks when devtools are open
-    titleBarStyle: isDev ? undefined : "hidden",
+    // TODO: fix frameless mode
+    // titleBarStyle: isDev ? undefined : "hidden",
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,

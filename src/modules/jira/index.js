@@ -70,6 +70,7 @@ function getJiraPage(url, searchData, username, password) {
 
     return data?.issues.map((issue) =>
       wrapper({
+        key: issue.key,
         component: <JiraResultItem key={issue.key} url={url} item={issue} />,
         item: issue,
       })
@@ -77,11 +78,12 @@ function getJiraPage(url, searchData, username, password) {
   };
 }
 
-export default function JiraSearchResults({ searchData = {}, configuration }) {
+export default function JiraSearchResults({ searchData = {}, configuration, searchViewState }) {
   const { username, password, url } = configuration.get();
 
   return (
     <PaginatedSearchResults
+      searchViewState={searchViewState}
       searchData={searchData}
       logo={logo}
       error={!url ? "JIRA module is not configured correctly. URL is missing." : null}

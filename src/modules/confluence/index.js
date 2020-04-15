@@ -1,11 +1,11 @@
 import useSWR from "swr";
 import React from "react";
 import { PaginatedSearchResults } from "../../components/search-results";
-import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import _ from "lodash";
 import domPurify from "dompurify";
 import logo from "./logo.svg";
+import { Spinner } from "@blueprintjs/core";
 
 const pageSize = 5;
 
@@ -33,14 +33,11 @@ function ConfluenceDetail({ item, username, password }) {
     return <p>Failed to load document: {link}</p>;
   }
 
-  return (
-    <div
-      className={!data ? SKELETON : ""}
-      dangerouslySetInnerHTML={{
-        __html: domPurify.sanitize(data?.body.view.value),
-      }}
-    />
-  );
+  if (!data) {
+    return <Spinner />;
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: domPurify.sanitize(data?.body.view.value) }} />;
 }
 
 function ConfluenceItem({ item = {}, url }) {
@@ -82,20 +79,26 @@ function getConfluencePage(url, searchData, username, password) {
       return wrapper({ item: null });
     }
 
-    return data?.results.map((issue) =>
+    return data?.results.map((result) =>
       wrapper({
-        component: <ConfluenceItem key={issue.key} url={url} item={issue} />,
-        item: issue,
+        key: result.content.id,
+        component: <ConfluenceItem url={url} item={result} />,
+        item: result,
       })
     );
   };
 }
 
-export default function ConfluenceSearchResults({ searchData = {}, configuration }) {
+export default function ConfluenceSearchResults({
+  searchData = {},
+  configuration,
+  searchViewState,
+}) {
   const { username, password, url } = configuration.get();
 
   return (
     <PaginatedSearchResults
+      searchViewState={searchViewState}
       searchData={searchData}
       logo={logo}
       error={!url ? "Confluence module is not configured correctly. URL is missing." : null}

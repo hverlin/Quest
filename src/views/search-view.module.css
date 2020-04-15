@@ -1,6 +1,20 @@
 .searchResults {
-  padding: 2rem;
+  padding: 1rem;
   display: grid;
   grid-gap: 1rem;
   grid-auto-flow: row dense;
+  overflow-y: auto;
+  height: calc(100vh - 81px);
+  flex-grow: 1;
+}
+
+.searchResultsSidebar {
+  padding: 20px;
+  height: calc(100vh - 81px);
+  overflow: auto;
+  word-break: break-word;
+}
+
+.searchResultsSidebar img {
+  max-width: 100%;
 }

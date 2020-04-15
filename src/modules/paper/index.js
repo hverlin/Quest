@@ -3,10 +3,10 @@ import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
-import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { ExternalLink } from "../../components/external-link";
 import ReactMarkdown from "react-markdown";
 import logo from "./logo.svg";
+import { Spinner } from "@blueprintjs/core";
 
 const paperDetailFetcher = (token) => async (id) => {
   const res = await fetch("https://api.dropboxapi.com/2/paper/docs/download", {
@@ -72,7 +72,15 @@ function PaperDocDetail({ item, token }) {
     return <p>Failed to load document: {id}</p>;
   }
 
-  return <div className={!data ? SKELETON : ""}>{data && <ReactMarkdown source={data} />}</div>;
+  if (!data) {
+    return <Spinner />;
+  }
+
+  return (
+    <div>
+      <ReactMarkdown source={data} />
+    </div>
+  );
 }
 
 function getPaperPage(token, searchData) {
@@ -91,6 +99,7 @@ function getPaperPage(token, searchData) {
 
     return data?.matches.map((item) =>
       wrapper({
+        key: item.metadata.metadata.id,
         component: <PaperResultItem item={item} />,
         item,
       })
@@ -98,11 +107,12 @@ function getPaperPage(token, searchData) {
   };
 }
 
-export default function PaperSearchResults({ searchData = {}, configuration }) {
+export default function PaperSearchResults({ searchData = {}, configuration, searchViewState }) {
   const { token } = configuration.get();
 
   return (
     <PaginatedSearchResults
+      searchViewState={searchViewState}
       searchData={searchData}
       logo={logo}
       configuration={configuration}

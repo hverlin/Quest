@@ -130,6 +130,7 @@ function getSlackPage(token, searchData, users, emojis) {
 
     return data?.messages?.matches.map((message) =>
       wrapper({
+        key: message.ts,
         component: <SlackMessage message={message} users={users} emojis={emojis} showChannel />,
         item: message,
       })
@@ -137,7 +138,7 @@ function getSlackPage(token, searchData, users, emojis) {
   };
 }
 
-export default function SlackSearchResults({ searchData = {}, configuration }) {
+export default function SlackSearchResults({ searchData = {}, configuration, searchViewState }) {
   const { token } = configuration.get();
 
   const [users, setUsers] = React.useState([]);
@@ -152,6 +153,7 @@ export default function SlackSearchResults({ searchData = {}, configuration }) {
 
   return (
     <PaginatedSearchResults
+      searchViewState={searchViewState}
       searchData={searchData}
       logo={logo}
       configuration={configuration}

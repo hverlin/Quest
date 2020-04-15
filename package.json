@@ -1,6 +1,6 @@
 {
-  "name": "my-search",
-  "productName": "my-search",
+  "name": "quest",
+  "productName": "Quest",
   "private": true,
   "version": "0.0.1",
   "description": "Meta search client",

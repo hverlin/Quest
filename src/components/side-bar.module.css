@@ -1,0 +1,48 @@
+.Container {
+    display: flex;
+    align-items: stretch;
+    border-left: #b3b3b3 1px solid;
+}
+
+.ContainerHorizontal {
+    composes: Container;
+    flex-flow: row nowrap;
+}
+
+.ResizeContent {
+    flex-grow: 1;
+    align-self: stretch;
+    display: flex;
+}
+
+.ResizeContentHorizontal {
+    flex-flow: row;
+}
+
+.ResizeBarHorizontal {
+    cursor: ew-resize;
+    width: 20px;
+    margin-left: -10px;
+    margin-right: -10px;
+    background: transparent;
+    display: flex;
+    z-index: 10;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.ResizeHandleHorizontal {
+    cursor: ew-resize;
+    width: 6px;
+    height: 50px;
+    background: #b3b3b3;
+    text-align: center;
+    z-index: 10;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+}
+
+

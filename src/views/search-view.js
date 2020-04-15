@@ -1,37 +1,54 @@
 import React, { Suspense } from "react";
 
-import { Card, NonIdealState } from "@blueprintjs/core";
+import _ from "lodash";
+import { NonIdealState } from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 import { useStateLink } from "@hookstate/core";
 
 import styles from "./search-view.module.css";
 import { SearchForm } from "../components/search-bar";
-import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import ResizePanel from "../components/side-bar";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
-function EmptyState(props) {
+function EmptyState({ enabledModules = [] }) {
   return (
     <div style={{ marginTop: "3rem" }}>
       <NonIdealState
         icon="search"
         title="Search anything"
         description={
-          props.enabledModules.length === 0
-            ? "No search modules are configured."
+          enabledModules.length === 0
+            ? "No search modules configured."
             : 'Try searching something. e.g. "analytics"'
         }
-        action={
-          props.enabledModules.length === 0 ? <Link to="/settings">Settings</Link> : undefined
-        }
+        action={enabledModules.length === 0 ? <Link to="/settings">Settings</Link> : undefined}
       />
     </div>
+  );
+}
+
+function Sidebar({ searchViewState }) {
+  const state = useStateLink(searchViewState);
+  const { selectedItem } = state.get();
+
+  if (!selectedItem) {
+    return null;
+  }
+
+  return (
+    <ResizePanel>
+      <div className={styles.searchResultsSidebar}>
+        {(window.detailView || _.noop)(state.get().selectedItem)}
+      </div>
+    </ResizePanel>
   );
 }
 
 export function SearchView({ store }) {
   const configuration = useStateLink(store);
   const [searchData, setSearchData] = React.useState({ input: "" });
+  const searchViewState = useStateLink({ selectedItem: null, renderer: null });
 
   const enabledModules = Object.entries(configuration.nested.modules.nested).filter(([, module]) =>
     module.nested.enabled.get()
@@ -39,17 +56,29 @@ export function SearchView({ store }) {
 
   return (
     <>
-      <SearchForm onSubmit={(input) => setSearchData({ input })} />
+      <SearchForm
+        onSubmit={(input) => {
+          setSearchData({ input });
+          searchViewState.nested.selectedItem.set(null);
+        }}
+      />
       {searchData.input ? (
-        <div className={styles.searchResults}>
-          {enabledModules.map(([id, moduleState]) => {
-            const ResultComponent = getModuleView(id);
-            return (
-              <Suspense key={id} fallback={<Card className={SKELETON} />}>
-                <ResultComponent searchData={searchData} configuration={moduleState} />
-              </Suspense>
-            );
-          })}
+        <div style={{ display: "flex" }}>
+          <div className={styles.searchResults}>
+            {enabledModules.map(([id, moduleState]) => {
+              const ResultComponent = getModuleView(id);
+              return (
+                <Suspense key={id} fallback={<span />}>
+                  <ResultComponent
+                    searchData={searchData}
+                    configuration={moduleState}
+                    searchViewState={searchViewState}
+                  />
+                </Suspense>
+              );
+            })}
+          </div>
+          <Sidebar searchViewState={searchViewState} />
         </div>
       ) : (
         <EmptyState enabledModules={enabledModules} />
