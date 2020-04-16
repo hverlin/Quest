@@ -1,24 +1,126 @@
+import _ from "lodash";
 import useSWR from "swr";
 import React from "react";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.svg";
-import { Tooltip } from "@blueprintjs/core";
+import { Card, H3, H4, Spinner, Tooltip } from "@blueprintjs/core";
+import styles from "./jira.module.css";
+import domPurify from "dompurify";
+
+const appSession = require("electron").remote.session;
 
 const pageSize = 5;
+
+domPurify.addHook("afterSanitizeAttributes", (node) => {
+  if ("target" in node) {
+    node.setAttribute("target", "_blank");
+  }
+});
+
+const jiraAuth = ({ username, password }) => async (url) => {
+  const res = await fetch(`${url}/rest/auth/1/session`, {
+    credentials: "omit",
+    method: "post",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  return res.json();
+};
 
 const jiraFetcher = ({ username, password }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
     headers: {
       Authorization: `Basic ${btoa(`${username}:${password}`)}`,
-      Accept: "application/json",
+      Content: "application/json",
+      Origin: url,
     },
   });
 
   return res.json();
 };
+
+function IssueType(props) {
+  const { iconUrl, name } = props.issuetype;
+  return (
+    <Tooltip openOnTargetFocus={false} content={name}>
+      <img src={iconUrl} alt={name} style={{ verticalAlign: "middle" }} />
+    </Tooltip>
+  );
+}
+
+function JiraDetail({ item, username, password, url }) {
+  const { data: { session } = {} } = useSWR(url, jiraAuth({ username, password }));
+
+  const { data, error } = useSWR(
+    `${item.self}?expand=names,renderedFields`,
+    jiraFetcher({ username, password })
+  );
+
+  if (error) {
+    return <p>Failed to load document: {item.key}</p>;
+  }
+
+  if (!data || !session) {
+    return <Spinner />;
+  }
+
+  if (session) {
+    appSession.defaultSession.cookies.set({ url, ...session });
+  }
+
+  const {
+    key,
+    fields: { issuetype, summary, assignee, status, reporter, created, updated } = {},
+  } = item;
+
+  const { description, comment } = data.renderedFields;
+
+  return (
+    <div>
+      <div>
+        <H3>
+          <ExternalLink target="_blank" href={`${url}/browse/${key}`}>
+            {key}
+          </ExternalLink>{" "}
+          - {summary}
+        </H3>
+      </div>
+      <p>
+        <IssueType issuetype={issuetype} /> {issuetype?.name} | {status?.name} | Created:{" "}
+        <Time time={created} /> | Updated: <Time time={updated} /> | Assigned to{" "}
+        {assignee?.displayName} | reported by {reporter?.displayName}
+      </p>
+      {description && (
+        <div>
+          <hr />
+          <H4>Description</H4>
+          <div dangerouslySetInnerHTML={{ __html: domPurify.sanitize(description) }} />
+        </div>
+      )}
+      {!_.isEmpty(comment.comments) && (
+        <>
+          <hr />
+          <div className={styles.comments}>
+            <H4>Comments</H4>
+            {comment.comments.map((comment) => (
+              <Card key={comment.id}>
+                <b>{comment.author.displayName}</b> - {comment.updated}
+                <div
+                  style={{ marginTop: 3 }}
+                  dangerouslySetInnerHTML={{ __html: domPurify.sanitize(comment.body) }}
+                />
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function JiraResultItem({ item = {}, url }) {
   const {
@@ -29,9 +131,7 @@ function JiraResultItem({ item = {}, url }) {
   return (
     <>
       <p>
-        <Tooltip content={issuetype?.name}>
-          <img src={issuetype?.iconUrl} alt={issuetype?.name} style={{ verticalAlign: "middle" }} />
-        </Tooltip>
+        <IssueType issuetype={issuetype} />
         {"  "}
         <ExternalLink target="_blank" href={url + "/browse/" + key}>
           {key}
@@ -39,8 +139,8 @@ function JiraResultItem({ item = {}, url }) {
         - {summary}
       </p>
       <p>
-        Created: <Time time={created} /> | Updated: <Time time={updated} /> |{" "}
-        {assignee?.displayName} | {status?.name} | reported by {reporter?.displayName}
+        {status?.name} | Created: <Time time={created} /> | Updated: <Time time={updated} /> |{" "}
+        {assignee?.displayName} | reported by {reporter?.displayName}
       </p>
     </>
   );
@@ -91,7 +191,9 @@ export default function JiraSearchResults({ searchData = {}, configuration, sear
       computeNextOffset={({ data }) =>
         data && data.total > data.startAt + data.issues.length ? data.startAt + pageSize : null
       }
-      itemDetailRenderer={(item) => <JiraResultItem url={url} item={item} />}
+      itemDetailRenderer={(item) => (
+        <JiraDetail password={password} username={username} item={item} url={url} />
+      )}
       pageFunc={getJiraPage(url, searchData, username, password)}
     />
   );

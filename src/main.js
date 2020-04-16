@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, shell } = require("electron");
+const { app, session, BrowserWindow, globalShortcut, shell } = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -16,6 +16,15 @@ function centerAndFocus(window) {
 let mainWindow;
 const createWindow = () => {
   const isDev = process.env.NODE_ENV !== "production";
+
+  // override user agent to by-pass some CSRF checks
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    { urls: ["*://*/*"] },
+    (details, callback) => {
+      details.requestHeaders["User-Agent"] = "Quest";
+      callback({ requestHeaders: details.requestHeaders });
+    }
+  );
 
   mainWindow = new BrowserWindow({
     width: isDev ? 1300 : 800,

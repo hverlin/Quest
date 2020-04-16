@@ -1,0 +1,20 @@
+.comments {
+    margin: auto;
+    --space: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.comments > * {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.comments > * + * {
+    margin-top: var(--space);
+}
+
+.comments :global(.bp3-card) {
+    padding: 10px;
+}
