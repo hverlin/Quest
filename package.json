@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
+    "make": "rm -rf .webpack && electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
@@ -57,6 +57,7 @@
     "@types/gapi": "0.0.39",
     "@types/react": "^16.9.27",
     "@types/react-dom": "^16.9.5",
+    "cheerio": "^1.0.0-rc.3",
     "dompurify": "^2.0.8",
     "electron-log": "^4.1.1",
     "electron-squirrel-startup": "^1.0.0",
@@ -69,6 +70,7 @@
     "qs": "^6.9.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-draggable": "^4.3.1",
     "react-markdown": "^4.3.1",
     "react-router-dom": "^5.1.2",
     "swr": "^0.1.18"

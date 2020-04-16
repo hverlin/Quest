@@ -4,21 +4,15 @@ import React from "react";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
-import domPurify from "dompurify";
 import { Card } from "@blueprintjs/core";
 import logo from "./logo.svg";
 import EmojiJS from "emoji-js";
+import SafeHtmlElement from "../../components/safe-html-element";
 
 const pageSize = 5;
 
 const emojiConverter = new EmojiJS();
 const rx_colons = new RegExp(":([a-zA-Z0-9-_+]+):", "g");
-
-domPurify.addHook("afterSanitizeAttributes", (node) => {
-  if ("target" in node) {
-    node.setAttribute("target", "_blank");
-  }
-});
 
 function slackMessageParser(message, usersById, emojis) {
   if (!message?.text) {
@@ -64,13 +58,10 @@ function SlackMessage({ message = {}, users, emojis, showChannel = false }) {
     <>
       <p>
         <b>{_.get(users, [message.user, "real_name"], message.username)}</b>:{" "}
-        <span
+        <SafeHtmlElement
           style={{ whiteSpace: "pre-wrap" }}
-          dangerouslySetInnerHTML={{
-            __html: domPurify.sanitize(slackMessageParser(message, users, emojis), {
-              ALLOW_UNKNOWN_PROTOCOLS: true,
-            }),
-          }}
+          tag="span"
+          html={slackMessageParser(message, users, emojis)}
         />
       </p>
       {showChannel && (

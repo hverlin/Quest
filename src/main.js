@@ -18,13 +18,15 @@ const createWindow = () => {
   const isDev = process.env.NODE_ENV !== "production";
 
   // override user agent to by-pass some CSRF checks
-  session.defaultSession.webRequest.onBeforeSendHeaders(
-    { urls: ["*://*/*"] },
-    (details, callback) => {
-      details.requestHeaders["User-Agent"] = "Quest";
-      callback({ requestHeaders: details.requestHeaders });
-    }
-  );
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders["User-Agent"] = "Quest";
+    callback({ requestHeaders: details.requestHeaders });
+  });
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    details.responseHeaders["Quest-Cookie"] = details.responseHeaders["Set-Cookie"];
+    callback(details);
+  });
 
   mainWindow = new BrowserWindow({
     width: isDev ? 1300 : 800,

@@ -7,45 +7,14 @@ import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.svg";
 import { Card, H3, H4, Spinner, Tooltip } from "@blueprintjs/core";
 import styles from "./jira.module.css";
-import domPurify from "dompurify";
 import log from "electron-log";
+import SafeHtmlElement from "../../components/safe-html-element";
 
 const appSession = require("electron").remote.session;
 
 const pageSize = 5;
 
-domPurify.addHook("afterSanitizeAttributes", (node) => {
-  if ("target" in node) {
-    node.setAttribute("target", "_blank");
-  }
-});
-
-const jiraAuth = ({ username, password }) => async (url) => {
-  const cookies = await appSession.defaultSession.cookies.get({ url, name: "JSESSIONID" });
-  if (!_.isEmpty(cookies)) {
-    return true;
-  }
-
-  const res = await fetch(`${url}/rest/auth/1/session`, {
-    credentials: "omit",
-    method: "post",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-
-  const { session } = await res.json();
-
-  await appSession.defaultSession.cookies.set({
-    url,
-    name: session.name,
-    httpOnly: true,
-    value: session.value,
-  });
-
-  return true;
-};
-
-const jiraFetcher = ({ username, password }) => async (url) => {
+const jiraFetcher = ({ username, password, baseUrl }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
     headers: {
@@ -54,6 +23,16 @@ const jiraFetcher = ({ username, password }) => async (url) => {
       Origin: url,
     },
   });
+
+  if (res.headers.has("quest-cookie")) {
+    const [name, value] = res.headers.get("quest-cookie").split(";")[0].split("=");
+    await appSession.defaultSession.cookies.set({
+      url: baseUrl,
+      name,
+      httpOnly: true,
+      value,
+    });
+  }
 
   return res.json();
 };
@@ -68,22 +47,17 @@ function IssueType(props) {
 }
 
 function JiraDetail({ item, username, password, url }) {
-  const { data: hasSession, error: sessionError } = useSWR(
-    [url, item.id],
-    jiraAuth({ username, password })
-  );
-
   const { data, error } = useSWR(
     `${item.self}?expand=names,renderedFields`,
-    jiraFetcher({ username, password })
+    jiraFetcher({ username, password, baseUrl: url })
   );
 
-  if (error || sessionError) {
-    log.error(error, sessionError);
+  if (error) {
+    log.error(error);
     return <p>Failed to load document: {item.key}</p>;
   }
 
-  if (!data || !hasSession) {
+  if (!data) {
     return <Spinner />;
   }
 
@@ -113,7 +87,7 @@ function JiraDetail({ item, username, password, url }) {
         <div>
           <hr />
           <H4>Description</H4>
-          <div dangerouslySetInnerHTML={{ __html: domPurify.sanitize(description) }} />
+          <SafeHtmlElement html={description} />
         </div>
       )}
       {!_.isEmpty(comment.comments) && (
@@ -124,10 +98,7 @@ function JiraDetail({ item, username, password, url }) {
             {comment.comments.map((comment) => (
               <Card key={comment.id}>
                 <b>{comment.author.displayName}</b> - {comment.updated}
-                <div
-                  style={{ marginTop: 3 }}
-                  dangerouslySetInnerHTML={{ __html: domPurify.sanitize(comment.body) }}
-                />
+                <SafeHtmlElement style={{ marginTop: 3 }} html={comment.body} />
               </Card>
             ))}
           </div>
@@ -171,7 +142,7 @@ function getJiraPage(url, searchData, username, password) {
                 offset || 0
               }&maxResults=${pageSize}`
             : null,
-        jiraFetcher({ username, password })
+        jiraFetcher({ username, password, baseUrl: url })
       )
     );
 

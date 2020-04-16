@@ -3,13 +3,32 @@ import React from "react";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import _ from "lodash";
-import domPurify from "dompurify";
 import logo from "./logo.svg";
 import { Spinner } from "@blueprintjs/core";
+import SafeHtmlElement from "../../components/safe-html-element";
+import cheerio from "cheerio";
+
+const appSession = require("electron").remote.session;
 
 const pageSize = 5;
 
-const confluenceFetcher = ({ username, password }) => async (url) => {
+function replaceRelativeUrls(html, baseUrl) {
+  function convert(el, attribute) {
+    if (!el.attribs[attribute]) {
+      return;
+    }
+    el.attribs[attribute] = baseUrl + el.attribs[attribute];
+  }
+
+  const $ = cheerio.load(html);
+
+  $("img, script").each((index, el) => convert(el, "src"));
+  $("a, link").each((index, el) => convert(el, "href"));
+
+  return $.html();
+}
+
+const confluenceFetcher = ({ username, password, baseUrl }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
     headers: {
@@ -17,17 +36,27 @@ const confluenceFetcher = ({ username, password }) => async (url) => {
       Accept: "application/json",
     },
   });
+
+  if (res.headers.has("quest-cookie")) {
+    const [name, value] = res.headers.get("quest-cookie").split(";")[0].split("=");
+    await appSession.defaultSession.cookies.set({
+      url: baseUrl,
+      name,
+      httpOnly: true,
+      value,
+    });
+  }
   return res.json();
 };
 
-function parseConfluenceMessage(message) {
+function parseConfluenceDocument(message) {
   return message && message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
 }
 
-function ConfluenceDetail({ item, username, password }) {
+function ConfluenceDetail({ item, username, password, url }) {
   const link = `${_.get(item, "content._links.self")}?expand=body.view`;
 
-  const { data, error } = useSWR(link, confluenceFetcher({ username, password }));
+  const { data, error } = useSWR(link, confluenceFetcher({ username, password, baseUrl: url }));
 
   if (error) {
     return <p>Failed to load document: {link}</p>;
@@ -37,7 +66,7 @@ function ConfluenceDetail({ item, username, password }) {
     return <Spinner />;
   }
 
-  return <div dangerouslySetInnerHTML={{ __html: domPurify.sanitize(data?.body.view.value) }} />;
+  return <SafeHtmlElement html={replaceRelativeUrls(data?.body.view.value, url)} />;
 }
 
 function ConfluenceItem({ item = {}, url }) {
@@ -47,11 +76,7 @@ function ConfluenceItem({ item = {}, url }) {
       <p>
         <ExternalLink href={url + itemUrl}>{content.title}</ExternalLink>
       </p>
-      <p
-        dangerouslySetInnerHTML={{
-          __html: domPurify.sanitize(parseConfluenceMessage(excerpt)),
-        }}
-      />
+      <SafeHtmlElement tag="p" html={parseConfluenceDocument(excerpt)} />
       <p>Updated {friendlyLastModified}</p>
     </>
   );
@@ -67,7 +92,7 @@ function getConfluencePage(url, searchData, username, password) {
                 searchData.input
               }" and space = "ENG" and type = "page")&start=${offset || 0}&limit=${pageSize}`
             : null,
-        confluenceFetcher({ username, password })
+        confluenceFetcher({ username, password, baseUrl: url })
       )
     );
 
@@ -104,7 +129,7 @@ export default function ConfluenceSearchResults({
       error={!url ? "Confluence module is not configured correctly. URL is missing." : null}
       configuration={configuration}
       itemDetailRenderer={(item) => (
-        <ConfluenceDetail item={item} username={username} password={password} />
+        <ConfluenceDetail item={item} username={username} password={password} url={url} />
       )}
       computeNextOffset={({ data }) =>
         data && data.totalSize > data.start + data.size ? data.start + pageSize : null
