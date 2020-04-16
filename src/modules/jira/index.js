@@ -8,6 +8,7 @@ import logo from "./logo.svg";
 import { Card, H3, H4, Spinner, Tooltip } from "@blueprintjs/core";
 import styles from "./jira.module.css";
 import domPurify from "dompurify";
+import log from "electron-log";
 
 const appSession = require("electron").remote.session;
 
@@ -20,6 +21,11 @@ domPurify.addHook("afterSanitizeAttributes", (node) => {
 });
 
 const jiraAuth = ({ username, password }) => async (url) => {
+  const cookies = await appSession.defaultSession.cookies.get({ url, name: "JSESSIONID" });
+  if (!_.isEmpty(cookies)) {
+    return true;
+  }
+
   const res = await fetch(`${url}/rest/auth/1/session`, {
     credentials: "omit",
     method: "post",
@@ -27,7 +33,16 @@ const jiraAuth = ({ username, password }) => async (url) => {
     body: JSON.stringify({ username, password }),
   });
 
-  return res.json();
+  const { session } = await res.json();
+
+  await appSession.defaultSession.cookies.set({
+    url,
+    name: session.name,
+    httpOnly: true,
+    value: session.value,
+  });
+
+  return true;
 };
 
 const jiraFetcher = ({ username, password }) => async (url) => {
@@ -53,23 +68,23 @@ function IssueType(props) {
 }
 
 function JiraDetail({ item, username, password, url }) {
-  const { data: { session } = {} } = useSWR(url, jiraAuth({ username, password }));
+  const { data: hasSession, error: sessionError } = useSWR(
+    [url, item.id],
+    jiraAuth({ username, password })
+  );
 
   const { data, error } = useSWR(
     `${item.self}?expand=names,renderedFields`,
     jiraFetcher({ username, password })
   );
 
-  if (error) {
+  if (error || sessionError) {
+    log.error(error, sessionError);
     return <p>Failed to load document: {item.key}</p>;
   }
 
-  if (!data || !session) {
+  if (!data || !hasSession) {
     return <Spinner />;
-  }
-
-  if (session) {
-    appSession.defaultSession.cookies.set({ url, ...session });
   }
 
   const {
