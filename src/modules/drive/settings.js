@@ -24,7 +24,7 @@ export function DriveOauthButton({ configurationState }) {
           Sign Out
         </Button>
       ) : (
-        <Button onClick={() => loadGoogleDriveClient(configurationState, setIsSignedIn)}>
+        <Button onClick={() => loadGoogleDriveClient(configurationState).then(setIsSignedIn)}>
           Authorize
         </Button>
       )}
@@ -57,7 +57,7 @@ export default function DriveSettings({ configurationState }) {
             onChange={(e) => localState.nested.clientId.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup label="API Key" labelFor="google-drive-api-key" labelInfo="(required)">
+        <FormGroup label="API Key" labelFor="google-drive-api-key">
           <InputGroup
             id="google-drive-api-key"
             placeholder="API key"

@@ -111,22 +111,23 @@ function insertGoogleDriveApiClientScript() {
 
   const script = document.createElement("script");
   script.setAttribute("src", "https://apis.google.com/js/api.js");
-  script.setAttribute("onreadystatechange", "if (this.readyState === 'complete') this.onload()");
+  script.setAttribute(
+    "onreadystatechange",
+    "if (this.readyState === 'complete') { console.log('gapi ready'); this.onload() }"
+  );
+  script.setAttribute("onload", "this.onload=function(){};console.log('gapi loaded');");
   script.setAttribute("id", scriptId);
   document.body.appendChild(script);
 }
 
 function waitForGoogleClient() {
   return new Promise((resolve) => {
-    function checkGoogleClient() {
+    (function checkGoogleClient() {
       if (window.gapi) {
         return resolve();
       }
-    }
-
-    checkGoogleClient();
-
-    setTimeout(checkGoogleClient, 1000);
+      setTimeout(checkGoogleClient, 30);
+    })();
   });
 }
 
@@ -152,52 +153,59 @@ export function hasCorrectTokens(configuration) {
   return !!(clientId && apiKey && refreshToken);
 }
 
+function loadGoogleClient() {
+  if (!window._gClient) {
+    window._gClient = new Promise((resolve) => window.gapi.load("client:auth2", resolve));
+  }
+  return window._gClient;
+}
+
 async function ensureGoogleClientLoaded() {
   insertGoogleDriveApiClientScript();
   await waitForGoogleClient();
+  await loadGoogleClient();
 }
 
 export async function loadGoogleDriveClient(
   configurationState,
-  onSignedIn,
   { logInIfUnauthorized = true } = {}
 ) {
   await ensureGoogleClientLoaded();
 
-  window.gapi.load("client:auth2", async function initClient() {
-    const { clientId, apiKey, refreshToken, accessToken } = await configurationState.get();
+  const { clientId, apiKey, refreshToken, accessToken } = await configurationState.get();
 
-    if (!clientId || !apiKey) {
-      return onSignedIn(false);
-    }
+  if (!clientId) {
+    return false;
+  }
 
-    if (!refreshToken && !logInIfUnauthorized) {
-      return onSignedIn(false);
-    }
+  if (!refreshToken && !logInIfUnauthorized) {
+    return false;
+  }
 
-    try {
-      if (!accessToken) {
-        const token = refreshToken
-          ? await refreshAccessToken(clientId, refreshToken)
-          : await googleSignIn(clientId);
+  try {
+    if (!accessToken) {
+      const token = refreshToken
+        ? await refreshAccessToken(clientId, refreshToken)
+        : await googleSignIn(clientId);
 
-        if (!refreshToken) {
-          configurationState.nested.refreshToken.set(token.refresh_token);
-        }
-
-        configurationState.nested.accessToken.set(token.access_token);
+      if (!refreshToken) {
+        configurationState.nested.refreshToken.set(token.refresh_token);
       }
 
-      const { accessToken: token } = configurationState.get();
-
-      window.gapi.client.setApiKey(apiKey);
-      window.gapi.client.setToken({ access_token: token });
-      await window.gapi.client.load(discoveryDriveV3RestUrl);
-
-      onSignedIn(true);
-    } catch (e) {
-      log.error(e);
-      onSignedIn(false);
+      configurationState.nested.accessToken.set(token.access_token);
     }
-  });
+
+    const { accessToken: token } = configurationState.get();
+
+    if (apiKey) {
+      window.gapi.client.setApiKey(apiKey);
+    }
+    window.gapi.client.setToken({ access_token: token });
+    await window.gapi.client.load(discoveryDriveV3RestUrl);
+
+    return true;
+  } catch (e) {
+    log.error(e);
+    return false;
+  }
 }

@@ -34,7 +34,7 @@ async function saveCredentials(state) {
     hiddenKeys.map(async ({ key, value }) => {
       try {
         const credential = _.get(state, key);
-        if (credential != null) {
+        if (credential) {
           await saveCredential(value, credential);
         } else {
           await deleteCredential(value);

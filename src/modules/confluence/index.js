@@ -4,7 +4,7 @@ import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import _ from "lodash";
 import logo from "./logo.svg";
-import { Spinner } from "@blueprintjs/core";
+import { H2, Spinner } from "@blueprintjs/core";
 import SafeHtmlElement from "../../components/safe-html-element";
 import cheerio from "cheerio";
 
@@ -12,18 +12,25 @@ const appSession = require("electron").remote.session;
 
 const pageSize = 5;
 
-function replaceRelativeUrls(html, baseUrl) {
+function cleanConfluenceHtml(html, baseUrl) {
   function convert(el, attribute) {
-    if (!el.attribs[attribute]) {
-      return;
+    if (el.attribs[attribute]) {
+      el.attribs[attribute] = baseUrl + el.attribs[attribute];
     }
-    el.attribs[attribute] = baseUrl + el.attribs[attribute];
   }
 
   const $ = cheerio.load(html);
 
+  // confluence links are relative, so add the base url
   $("img, script").each((index, el) => convert(el, "src"));
   $("a, link").each((index, el) => convert(el, "href"));
+
+  // remove the width for tables as they are often too narrow
+  $("table").each((index, el) => {
+    if (el.attribs["style"]) {
+      el.attribs["style"] = "";
+    }
+  });
 
   return $.html();
 }
@@ -66,7 +73,12 @@ function ConfluenceDetail({ item, username, password, url }) {
     return <Spinner />;
   }
 
-  return <SafeHtmlElement html={replaceRelativeUrls(data?.body.view.value, url)} />;
+  return (
+    <div>
+      <H2>{item.content.title}</H2>
+      <SafeHtmlElement html={cleanConfluenceHtml(data?.body.view.value, url)} />
+    </div>
+  );
 }
 
 function ConfluenceItem({ item = {}, url }) {
