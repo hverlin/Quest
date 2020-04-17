@@ -33,6 +33,29 @@ import ReactDOM from "react-dom";
 import React from "react";
 import App from "./app";
 import { initializeStore } from "./services/storage-service";
+import { FocusStyleManager } from "@blueprintjs/core";
+import spatialNavigation from "spatial-navigation-js";
+
+function setupGlobalKeyboardNavigation() {
+  FocusStyleManager.onlyShowFocusOnTabs();
+  spatialNavigation.init();
+
+  spatialNavigation.add({
+    selector: ".focusable, .focusableInput input",
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target.classList.contains("focusable") || e.target.tagName === "INPUT") {
+      return;
+    }
+
+    if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      e.target?.closest(".focusable")?.focus();
+    }
+  });
+}
+
+setupGlobalKeyboardNavigation();
 
 (async () => {
   const store = await initializeStore({

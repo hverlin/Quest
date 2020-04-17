@@ -5,6 +5,7 @@ import styles from "./search-results.module.css";
 import { useSWRPages } from "swr";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { useStateLink } from "@hookstate/core";
+import FocusableCard from "./card";
 
 const numberFormatter = new Intl.NumberFormat();
 
@@ -30,7 +31,7 @@ export function PaginatedSearchResults({
       }
 
       return (
-        <Card
+        <FocusableCard
           key={key}
           interactive={!!item}
           onClick={
@@ -55,7 +56,7 @@ export function PaginatedSearchResults({
               </p>
             </div>
           )}
-        </Card>
+        </FocusableCard>
       );
     }),
     computeNextOffset,

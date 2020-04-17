@@ -6,6 +6,20 @@ import { Redirect } from "react-router-dom";
 export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
   const [redirect, setRedirect] = React.useState(false);
+  const inputRef = React.useRef();
+
+  function focusInput(event) {
+    if (event.key === "/" && event.target.tagName !== "INPUT") {
+      event.stopPropagation();
+      event.preventDefault();
+      inputRef?.current?.focus();
+    }
+  }
+
+  React.useEffect(() => {
+    window.addEventListener("keydown", focusInput);
+    return () => window.removeEventListener("mouseup", focusInput);
+  });
 
   if (redirect) {
     return <Redirect to="/settings" />;
@@ -26,6 +40,8 @@ export function SearchForm({ onSubmit }) {
     <div className={styles.searchForm}>
       <form onSubmit={_onSubmit} style={{ display: "flex" }}>
         <InputGroup
+          inputRef={inputRef}
+          className="focusableInput"
           autoFocus
           large
           placeholder="Search something..."

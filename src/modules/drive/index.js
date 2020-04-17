@@ -15,7 +15,7 @@ function DriveItemRender({ item }) {
   return (
     <>
       <p>
-        <Tooltip content={name}>
+        <Tooltip content={name} openOnTargetFocus={false}>
           <img src={iconLink} alt="file icon" />
         </Tooltip>
         {"  "}

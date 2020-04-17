@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 
 import _ from "lodash";
-import { NonIdealState } from "@blueprintjs/core";
+import { Button, NonIdealState } from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 import { useStateLink } from "@hookstate/core";
 
@@ -31,6 +31,13 @@ function EmptyState({ enabledModules = [] }) {
 function Sidebar({ searchViewState }) {
   const state = useStateLink(searchViewState);
   const { selectedItem } = state.get();
+  const contentRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (selectedItem) {
+      contentRef.current.focus();
+    }
+  }, [selectedItem]);
 
   if (!selectedItem) {
     return null;
@@ -38,9 +45,19 @@ function Sidebar({ searchViewState }) {
 
   return (
     <ResizePanel>
-      <div className={styles.searchResultsSidebar}>
-        {(window.detailView || _.noop)(state.get().selectedItem)}
-      </div>
+      <>
+        <Button
+          onClick={() => {
+            state.nested.selectedItem.set(null);
+          }}
+          outlined
+          icon="cross"
+          style={{ position: "fixed", right: 10, marginTop: 4 }}
+        />
+        <div className={styles.searchResultsSidebar} ref={contentRef} tabIndex={-1}>
+          {(window.detailView || _.noop)(state.get().selectedItem)}
+        </div>
+      </>
     </ResizePanel>
   );
 }

@@ -6,7 +6,7 @@
   "description": "Meta search client",
   "main": ".webpack/main",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "rm -rf .webpack && electron-forge start",
     "package": "electron-forge package",
     "make": "rm -rf .webpack && electron-forge make",
     "publish": "electron-forge publish",
@@ -73,6 +73,7 @@
     "react-draggable": "^4.3.1",
     "react-markdown": "^4.3.1",
     "react-router-dom": "^5.1.2",
+    "spatial-navigation-js": "^1.0.0",
     "swr": "^0.1.18"
   }
 }
