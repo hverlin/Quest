@@ -2,6 +2,7 @@
     display: flex;
     align-items: stretch;
     border-left: #b3b3b3 1px solid;
+    background-color: var(--background-3);
 }
 
 .ContainerHorizontal {

@@ -1,12 +1,19 @@
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: auto;
+:root {
+  --background: #f5f8fa;
+  --background-2: #e1e8ed;
+  --background-3: #fff;
+  --text-primary: #1a202c;
 }
 
-table,
-th,
-td {
-  border: 1px solid gray;
+.bp3-dark {
+  --background: #293742;
+  --background-2: #394b59;
+  --background-3: #30404d;
+  --text-primary: #f5f8fa;
+}
+
+body {
+  background-color: var(--background);
 }
 
 pre {
@@ -26,8 +33,15 @@ pre {
   overflow-x: auto;
   padding: 1.25em 1.5em;
   white-space: pre;
-  word-wrap: normal;
-  margin: 0 0 1em;
+  margin: 0.5em 0;
+  word-wrap: break-word;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(16,22,26,.4);
+}
+
+.bp3-dark pre {
+  background: rgba(16,22,26,.3);
+  color: var(--text-primary);
 }
 
 /*** Table styles ***/
@@ -39,8 +53,6 @@ table {
 }
 
 table caption {
-  color: #000;
-  font: italic 85%/1 arial, sans-serif;
   padding: 1em 0;
   text-align: center;
 }
@@ -48,11 +60,11 @@ table caption {
 table td,
 table th {
   border-left: 1px solid #cbcbcb;
-  border-width: 0 0 0 1px;
   font-size: inherit;
   margin: 0;
   overflow: visible;
   padding: 0.5em 1em;
+  word-break: normal;
 }
 
 table thead {
@@ -61,6 +73,11 @@ table thead {
   text-align: center;
   vertical-align: middle;
   word-break: normal;
+}
+
+.bp3-dark table thead {
+  background-color: #394b59;
+  color: var(--text-primary);
 }
 
 table td {
@@ -85,4 +102,14 @@ span[data-markjs] {
   rgba(255, 250, 150, 0.6) 100%,
   rgba(255, 250, 150, 0.25)
   );
+}
+
+.bp3-dark span[data-markjs] {
+  color: unset;
+  text-shadow: var(--text-primary);
+  background: linear-gradient(-100deg,
+  rgba(214, 230, 238, 0.08),
+  rgba(214, 230, 238, 0.17) 100%,
+  rgba(214, 230, 238, 0.17)
+  )
 }

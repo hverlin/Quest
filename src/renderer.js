@@ -1,29 +1,8 @@
 /**
- * This file will automatically be loaded by webpack and run in the "renderer" context.
- * To learn more about the differences between the "main" and the "renderer" context in
- * Electron, visit:
+ * This file is automatically be loaded by webpack and run in the "renderer" context.
+ * see https://electronjs.org/docs/tutorial/application-architecture#main-and-renderer-processes
  *
- * https://electronjs.org/docs/tutorial/application-architecture#main-and-renderer-processes
- *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.js` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
+ * Node.js integration is enabled (https://electronjs.org/docs/tutorial/security)
  */
 
 import "@blueprintjs/core/lib/css/blueprint.css";
@@ -35,6 +14,12 @@ import App from "./app";
 import { initializeStore } from "./services/storage-service";
 import { FocusStyleManager } from "@blueprintjs/core";
 import spatialNavigation from "spatial-navigation-js";
+
+import { remote } from "electron";
+
+if (remote.nativeTheme.shouldUseDarkColors) {
+  document.body.classList.add("bp3-dark");
+}
 
 function setupGlobalKeyboardNavigation() {
   FocusStyleManager.onlyShowFocusOnTabs();

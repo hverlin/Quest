@@ -1,17 +1,25 @@
 <!DOCTYPE html>
-<html style="background-color: white;">
+<html>
   <head>
     <meta charset="UTF-8" />
     <title>Quest</title>
     <style>
-      #loading {
+      body {
+        margin: auto;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      #loading-intro {
         display: block;
         margin: 200px auto auto;
-        font: 1em "Roboto", sans-serif;
         width: 100px;
         height: 100px;
+        text-transform: none;
+        letter-spacing: 0;
+        box-sizing: inherit;
       }
-      #loader {
+
+      #intro-loader {
         margin-bottom: 20px;
         display: block;
         width: 50px;
@@ -30,9 +38,8 @@
   </head>
   <body>
     <div id="app" style="overflow: hidden">
-      <div id="loading">
-        <div id="loader"></div>
-        Loading...
+      <div id="loading-intro">
+        <div id="intro-loader"></div>
       </div>
     </div>
   </body>

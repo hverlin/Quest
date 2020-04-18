@@ -1,7 +1,7 @@
 .settingsHeader {
   -webkit-app-region: drag;
   padding: 1rem 2rem;
-  background-color: #e1e8ed;
+  background-color: var(--background-2);
 }
 
 .settingsBody {

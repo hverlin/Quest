@@ -1,7 +1,7 @@
 .searchForm {
   -webkit-app-region: drag;
   padding: 25px 1rem 1rem;
-  background-color: #e1e8ed;
+  background-color: var(--background-2);
 }
 
 .searchForm :global(.bp3-input-group) {

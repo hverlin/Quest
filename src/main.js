@@ -1,4 +1,4 @@
-const { app, session, BrowserWindow, globalShortcut, shell } = require("electron");
+const { app, session, BrowserWindow, globalShortcut, shell, nativeTheme } = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -38,6 +38,7 @@ const createWindow = () => {
       webSecurity: false,
       nodeIntegration: true,
     },
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#293742" : "",
   });
 
   // eslint-disable-next-line no-undef
