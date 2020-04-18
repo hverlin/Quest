@@ -93,11 +93,11 @@ function getPaperPage(token, searchData) {
       return wrapper({ error, item: null });
     }
 
-    if (!data) {
+    if (!data?.matches) {
       return wrapper({ item: null });
     }
 
-    return data?.matches.map((item) =>
+    return data.matches.map((item) =>
       wrapper({
         key: item.metadata.metadata.id,
         component: <PaperResultItem item={item} />,

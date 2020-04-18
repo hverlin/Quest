@@ -95,7 +95,7 @@ function JiraDetail({ item, username, password, url }) {
           <hr />
           <div className={styles.comments}>
             <H4>Comments</H4>
-            {comment.comments.map((comment) => (
+            {comment.comments?.map((comment) => (
               <Card key={comment.id}>
                 <b>{comment.author.displayName}</b> - {comment.updated}
                 <SafeHtmlElement style={{ marginTop: 3 }} html={comment.body} />
@@ -175,7 +175,7 @@ export default function JiraSearchResults({ searchData = {}, configuration, sear
       error={!url ? "JIRA module is not configured correctly. URL is missing." : null}
       configuration={configuration}
       computeNextOffset={({ data }) =>
-        data && data.total > data.startAt + data.issues.length ? data.startAt + pageSize : null
+        data && data.total > data.startAt + data?.issues.length ? data.startAt + pageSize : null
       }
       itemDetailRenderer={(item) => (
         <JiraDetail password={password} username={username} item={item} url={url} />

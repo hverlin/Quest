@@ -19,23 +19,38 @@ function slackMessageParser(message, usersById, emojis) {
     return "";
   }
 
-  const urlRegex = /<http(.*?)>/gm;
-  const userRegex = /<@([A-Z0-9]+)>/gm;
-
-  let a = message.text
+  const renderedMessage = message.text
+    .replace(/```([\s\S]*?)```/g, `<pre style="white-space: pre-wrap; padding: 5px">$1</pre>`)
+    .replace(
+      /`([\s\S]*?)`/g,
+      `<pre style="white-space: pre-wrap; display: inline; padding: 2px">$1</pre>`
+    )
     .replace(rx_colons, (match, p1) => {
       if (!emojis[p1]) {
         return match;
       }
       return `<img src="${emojis[p1]}" style="width:1rem;height:1rem;" alt="emoji"/>`;
     })
-    .replace(urlRegex, `<a href="http$1">http$1</a>`)
-    .replace(userRegex, (match, p1) => {
+    .replace(/<http([^|]*?)\|?([^|]*?)>/gm, (match, p1, p2) => {
+      return p1 ? `<a href="http${p1}">${p2}</a>` : `<a href="http${p2}">http${p2}</a>`;
+    })
+    .replace(/<@([A-Z0-9]+)>/gm, (match, p1) => {
       const linkToUser = `slack://user?id=${p1}&team=${message.team}`;
       return `<a href="${linkToUser}" >@${_.get(usersById, [p1, "real_name"], p1)}</a>`;
-    });
+    })
+    .replace(/<#([A-Z\d]+)\|(.*?)>/g, `<a href="slack://channel?team=${message.team}&id=$1">$2</a>`)
+    .replace(/<!here>/g, `<em>@here</em>`)
+    .replace(/<!channel>/g, `<em>@channel</em>`)
+    .replace(/<!everyone>/g, `<em>@everyone</em>`)
+    .replace(/\*(.*?)\*/g, `<b>$1</b>`)
+    .replace(/_(\s*?)_/g, `<em>$1</em>`)
+    .replace(/~(\s*?)~/g, `<span style="text-decoration: line-through;">@everyone</span>`)
+    .replace(
+      /^>(.*?)$/gm,
+      `<blockquote style="margin: 0; border-left: 4px solid #b3b3b3; padding-left: 4px; display: inline-block">$1</blockquote>`
+    );
 
-  return emojiConverter.replace_colons(a);
+  return emojiConverter.replace_colons(renderedMessage);
 }
 
 async function getUsers(token) {
@@ -56,7 +71,7 @@ function SlackMessage({ message = {}, users, emojis, showChannel = false }) {
 
   return (
     <>
-      <p>
+      <p style={{ maxHeight: 300, overflowY: "auto" }}>
         <b>{_.get(users, [message.user, "real_name"], message.username)}</b>:{" "}
         <SafeHtmlElement
           style={{ whiteSpace: "pre-wrap" }}

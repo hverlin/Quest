@@ -47,10 +47,9 @@ function Sidebar({ searchViewState }) {
     <ResizePanel>
       <>
         <Button
-          onClick={() => {
-            state.nested.selectedItem.set(null);
-          }}
-          outlined
+          title="Close"
+          minimal
+          onClick={() => state.nested.selectedItem.set(null)}
           icon="cross"
           style={{ position: "fixed", right: 10, marginTop: 4 }}
         />
