@@ -22,7 +22,7 @@ function DriveItemRender({ item }) {
         <ExternalLink href={webViewLink}>{name}</ExternalLink>
       </p>
       <p>
-        Last updated <Time time={modifiedTime} />
+        Last updated <Time iso={modifiedTime} />
       </p>
     </>
   );

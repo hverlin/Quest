@@ -57,7 +57,7 @@ function PaperResultItem({
         <ExternalLink href={`https://paper.dropbox.com/${id}`}>{name}</ExternalLink>
       </p>
       <p>
-        Last updated <Time time={server_modified} />
+        Last updated <Time iso={server_modified} />
       </p>
     </>
   );

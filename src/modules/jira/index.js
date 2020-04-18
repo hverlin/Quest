@@ -80,7 +80,7 @@ function JiraDetail({ item, username, password, url }) {
       </div>
       <p>
         <IssueType issuetype={issuetype} /> {issuetype?.name} | {status?.name} | Created:{" "}
-        <Time time={created} /> | Updated: <Time time={updated} /> | Assigned to{" "}
+        <Time iso={created} /> | Updated: <Time iso={updated} /> | Assigned to{" "}
         {assignee?.displayName} | reported by {reporter?.displayName}
       </p>
       {description && (
@@ -125,7 +125,7 @@ function JiraResultItem({ item = {}, url }) {
         - {summary}
       </p>
       <p>
-        {status?.name} | Created: <Time time={created} /> | Updated: <Time time={updated} /> |{" "}
+        {status?.name} | Created: <Time iso={created} /> | Updated: <Time iso={updated} /> |{" "}
         {assignee?.displayName} | reported by {reporter?.displayName}
       </p>
     </>

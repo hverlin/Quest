@@ -2,11 +2,11 @@ import { DateTime } from "luxon";
 import React from "react";
 import { Tooltip } from "@blueprintjs/core";
 
-export function Time({ time }) {
-  const date = DateTime.fromISO(time);
+export function Time({ iso, seconds }) {
+  const date = iso ? DateTime.fromISO(iso) : DateTime.fromSeconds(+seconds);
   return (
     <Tooltip openOnTargetFocus={false} content={date.toLocaleString(DateTime.DATETIME_FULL)}>
-      <time dateTime={time}>{date.toLocaleString()}</time>
+      <time dateTime={iso}>{date.toLocaleString()}</time>
     </Tooltip>
   );
 }

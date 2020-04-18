@@ -160,6 +160,34 @@
               "isPassword": true
             }
           }
+        },
+        "phab-revision": {
+          "type": "object",
+          "required": ["enabled", "id", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "default": "phab-revision"
+            },
+            "name": {
+              "type": "string",
+              "default": "Phabricator"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "url": {
+              "type": "string",
+              "default": ""
+            },
+            "token": {
+              "type": "string",
+              "default": "phabricator-token",
+              "isPassword": true
+            }
+          }
         }
       }
     }

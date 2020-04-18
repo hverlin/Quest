@@ -33,9 +33,9 @@ export function PaginatedSearchResults({
       return (
         <FocusableCard
           key={key}
-          interactive={!!item}
+          interactive={!!item && itemDetailRenderer}
           onClick={
-            item
+            item && itemDetailRenderer
               ? () => {
                   // Ugly workaround: We cannot pass a reference to a view with hookState so
                   // pass it though the global window object instead :/
