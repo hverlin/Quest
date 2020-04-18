@@ -144,8 +144,9 @@ function getSlackPage(token, searchData, users, emojis) {
   };
 }
 
-export default function SlackSearchResults({ searchData = {}, configuration, searchViewState }) {
+export default function SlackSearchResults({ configuration, searchViewState }) {
   const { token } = configuration.get();
+  const searchData = searchViewState.get();
 
   const [users, setUsers] = React.useState([]);
   const [emojis, setEmojis] = React.useState([]);
@@ -160,7 +161,6 @@ export default function SlackSearchResults({ searchData = {}, configuration, sea
   return (
     <PaginatedSearchResults
       searchViewState={searchViewState}
-      searchData={searchData}
       logo={logo}
       configuration={configuration}
       computeNextOffset={({ data }) => {

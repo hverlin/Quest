@@ -66,6 +66,7 @@
     "keytar": "^5.4.0",
     "lodash": "^4.17.15",
     "luxon": "^1.23.0",
+    "mark.js": "^8.11.1",
     "prop-types": "latest",
     "qs": "^6.9.3",
     "react": "^16.13.1",

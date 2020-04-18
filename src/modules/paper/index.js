@@ -107,13 +107,13 @@ function getPaperPage(token, searchData) {
   };
 }
 
-export default function PaperSearchResults({ searchData = {}, configuration, searchViewState }) {
+export default function PaperSearchResults({ configuration, searchViewState }) {
   const { token } = configuration.get();
+  const searchData = searchViewState.get();
 
   return (
     <PaginatedSearchResults
       searchViewState={searchViewState}
-      searchData={searchData}
       logo={logo}
       configuration={configuration}
       itemDetailRenderer={(item) => <PaperDocDetail item={item} token={token} />}

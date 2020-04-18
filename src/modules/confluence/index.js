@@ -126,17 +126,13 @@ function getConfluencePage(url, searchData, username, password) {
   };
 }
 
-export default function ConfluenceSearchResults({
-  searchData = {},
-  configuration,
-  searchViewState,
-}) {
+export default function ConfluenceSearchResults({ configuration, searchViewState }) {
+  const searchData = searchViewState.get();
   const { username, password, url } = configuration.get();
 
   return (
     <PaginatedSearchResults
       searchViewState={searchViewState}
-      searchData={searchData}
       logo={logo}
       error={!url ? "Confluence module is not configured correctly. URL is missing." : null}
       configuration={configuration}

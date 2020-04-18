@@ -8,6 +8,7 @@ import { useStateLink } from "@hookstate/core";
 import styles from "./search-view.module.css";
 import { SearchForm } from "../components/search-bar";
 import ResizePanel from "../components/side-bar";
+import Highlighter from "../components/highlighter";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
@@ -54,7 +55,9 @@ function Sidebar({ searchViewState }) {
           style={{ position: "fixed", right: 10, marginTop: 4 }}
         />
         <div className={styles.searchResultsSidebar} ref={contentRef} tabIndex={-1}>
-          {(window.detailView || _.noop)(state.get().selectedItem)}
+          <Highlighter text={state.nested.input.get()}>
+            {(window.detailView || _.noop)(state.get().selectedItem)}
+          </Highlighter>
         </div>
       </>
     </ResizePanel>
@@ -63,8 +66,7 @@ function Sidebar({ searchViewState }) {
 
 export function SearchView({ store }) {
   const configuration = useStateLink(store);
-  const [searchData, setSearchData] = React.useState({ input: "" });
-  const searchViewState = useStateLink({ selectedItem: null, renderer: null });
+  const searchViewState = useStateLink({ input: "", selectedItem: null, renderer: null });
 
   const enabledModules = Object.entries(configuration.nested.modules.nested).filter(([, module]) =>
     module.nested.enabled.get()
@@ -74,22 +76,18 @@ export function SearchView({ store }) {
     <>
       <SearchForm
         onSubmit={(input) => {
-          setSearchData({ input });
+          searchViewState.nested.input.set(input);
           searchViewState.nested.selectedItem.set(null);
         }}
       />
-      {searchData.input ? (
+      {searchViewState.nested.input.get() ? (
         <div style={{ display: "flex" }}>
           <div className={styles.searchResults}>
             {enabledModules.map(([id, moduleState]) => {
               const ResultComponent = getModuleView(id);
               return (
                 <Suspense key={id} fallback={<span />}>
-                  <ResultComponent
-                    searchData={searchData}
-                    configuration={moduleState}
-                    searchViewState={searchViewState}
-                  />
+                  <ResultComponent configuration={moduleState} searchViewState={searchViewState} />
                 </Suspense>
               );
             })}

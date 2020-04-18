@@ -6,12 +6,12 @@ import { useSWRPages } from "swr";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { useStateLink } from "@hookstate/core";
 import FocusableCard from "./card";
+import Highlighter from "./highlighter";
 
 const numberFormatter = new Intl.NumberFormat();
 
 export function PaginatedSearchResults({
   searchViewState,
-  searchData,
   logo,
   itemDetailRenderer,
   configuration,
@@ -24,7 +24,7 @@ export function PaginatedSearchResults({
   const { name } = configuration.get();
 
   const { pages, pageSWRs, isLoadingMore, isReachingEnd, isEmpty, loadMore } = useSWRPages(
-    `${name}-${searchData.input}`,
+    `${name}-${state.nested.input.get()}`,
     pageFunc(({ component, item, error, key }) => {
       if (error) {
         return <Callout intent="danger">An error occurred while the loading results</Callout>;
@@ -47,7 +47,7 @@ export function PaginatedSearchResults({
           className={styles.resultItem}
         >
           {component ? (
-            component
+            <Highlighter text={state.nested.input.get()}>{component}</Highlighter>
           ) : (
             <div>
               <p className={SKELETON}>Loading...</p>

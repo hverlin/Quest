@@ -117,13 +117,13 @@ function getGoogleDrivePage(searchData, isSignedIn, configuration, setIsSignedIn
   };
 }
 
-export default function DriveSearchResults({ searchData = {}, configuration, searchViewState }) {
+export default function DriveSearchResults({ configuration, searchViewState }) {
+  const searchData = searchViewState.get();
   const [isSignedIn, setIsSignedIn] = React.useState(null);
 
   return (
     <PaginatedSearchResults
       searchViewState={searchViewState}
-      searchData={searchData}
       logo={logo}
       itemDetailRenderer={(item) => <DriveDetailComponent item={item} />}
       error={

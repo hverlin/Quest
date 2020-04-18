@@ -30,7 +30,7 @@ pre {
   margin: 0 0 1em;
 }
 
-
+/*** Table styles ***/
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -73,4 +73,16 @@ table td {
 
 table tbody > tr:last-child > td {
   border-bottom-width: 0;
+}
+
+/*** highlighting ***/
+span[data-markjs] {
+  color: unset;
+  border-radius: 1em 0 1em 0;
+  text-shadow: 1px 1px 1px #fff;
+  background: linear-gradient(-100deg,
+  rgba(255, 250, 150, 0.15),
+  rgba(255, 250, 150, 0.6) 100%,
+  rgba(255, 250, 150, 0.25)
+  );
 }

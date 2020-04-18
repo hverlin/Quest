@@ -164,13 +164,13 @@ function getJiraPage(url, searchData, username, password) {
   };
 }
 
-export default function JiraSearchResults({ searchData = {}, configuration, searchViewState }) {
+export default function JiraSearchResults({ configuration, searchViewState }) {
+  const searchData = searchViewState.get();
   const { username, password, url } = configuration.get();
 
   return (
     <PaginatedSearchResults
       searchViewState={searchViewState}
-      searchData={searchData}
       logo={logo}
       error={!url ? "JIRA module is not configured correctly. URL is missing." : null}
       configuration={configuration}
