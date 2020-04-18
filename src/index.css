@@ -58,8 +58,9 @@ table th {
 table thead {
   background-color: #e1e8ed;
   color: #000;
-  text-align: left;
-  vertical-align: bottom;
+  text-align: center;
+  vertical-align: middle;
+  word-break: normal;
 }
 
 table td {

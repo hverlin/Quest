@@ -78,7 +78,7 @@ function PaperDocDetail({ item, token }) {
 
   return (
     <div>
-      <ReactMarkdown source={data} />
+      <ReactMarkdown escapeHtml={false} source={data} />
     </div>
   );
 }
