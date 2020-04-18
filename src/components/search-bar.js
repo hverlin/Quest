@@ -19,7 +19,7 @@ export function SearchForm({ onSubmit }) {
   React.useEffect(() => {
     window.addEventListener("keydown", focusInput);
     return () => window.removeEventListener("mouseup", focusInput);
-  });
+  }, []);
 
   if (redirect) {
     return <Redirect to="/settings" />;
@@ -31,8 +31,8 @@ export function SearchForm({ onSubmit }) {
   }
 
   const searchButton = (
-    <Tooltip content="Hit Enter to search">
-      <Button icon="key-enter" minimal onClick={_onSubmit} />
+    <Tooltip content="Hit Enter to search" openOnTargetFocus={false}>
+      <Button icon="key-enter" minimal onClick={_onSubmit} tabIndex={-1} />
     </Tooltip>
   );
 
@@ -41,7 +41,6 @@ export function SearchForm({ onSubmit }) {
       <form onSubmit={_onSubmit} style={{ display: "flex" }}>
         <InputGroup
           inputRef={inputRef}
-          className="focusableInput"
           autoFocus
           large
           placeholder="Search something..."

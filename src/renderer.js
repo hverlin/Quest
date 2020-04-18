@@ -40,13 +40,11 @@ function setupGlobalKeyboardNavigation() {
   FocusStyleManager.onlyShowFocusOnTabs();
   spatialNavigation.init();
 
-  spatialNavigation.add({
-    selector: ".focusable, .focusableInput input",
-  });
+  spatialNavigation.add({ selector: ".focusable" });
 
   window.addEventListener("keydown", (e) => {
-    if (e.target.classList.contains("focusable") || e.target.tagName === "INPUT") {
-      return;
+    if (e.target.classList.contains("focusable")) {
+      return true;
     }
 
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {

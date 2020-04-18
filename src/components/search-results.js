@@ -94,7 +94,13 @@ export function PaginatedSearchResults({
 
       {isReachingEnd || isLoadingMore || error ? null : (
         <div>
-          <Button minimal intent="primary" rightIcon="arrow-right" onClick={loadMore}>
+          <Button
+            className="focusable"
+            minimal
+            intent="primary"
+            rightIcon="arrow-right"
+            onClick={loadMore}
+          >
             Load More
           </Button>
         </div>
