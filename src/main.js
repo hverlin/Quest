@@ -35,7 +35,7 @@ const createWindow = async () => {
     readCredentials: false,
   });
 
-  const theme = store.access().nested.appearance.nested.theme.get();
+  const theme = store.access().nested?.appearance?.nested.theme.get();
 
   mainWindow = new BrowserWindow({
     width: isDev ? 1300 : 800,

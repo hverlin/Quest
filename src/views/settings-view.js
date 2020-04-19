@@ -1,11 +1,23 @@
 import React, { Suspense } from "react";
 import { Link } from "react-router-dom";
-import { Card, Elevation, FormGroup, H1, H5, HTMLSelect, Icon, Switch } from "@blueprintjs/core";
+import {
+  Button,
+  Card,
+  Elevation,
+  FormGroup,
+  H1,
+  H4,
+  H5,
+  HTMLSelect,
+  Icon,
+  Switch,
+} from "@blueprintjs/core";
 import styles from "./settings-view.module.css";
 
 import { useStateLink } from "@hookstate/core";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { remote } from "electron";
+import { openStoreInEditor } from "../services/storage-service";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
@@ -43,7 +55,6 @@ function UIPreferences({ store }) {
 
   return (
     <Card elevation={Elevation.TWO}>
-      <H5>Appearance</H5>
       <FormGroup label="Theme" labelFor="slack-token">
         <HTMLSelect
           value={configuration.nested.theme.get()}
@@ -80,10 +91,19 @@ export function SettingsView({ store }) {
         <p>{"Credentials and keys are securely stored in the system's keychain."}</p>
       </div>
       <div className={styles.settingsBody}>
+        <H4>Appearance</H4>
         <UIPreferences store={configuration.nested.appearance} />
+        <H4>Modules</H4>
         {Object.entries(modules.nested).map(([moduleId, moduleState]) => (
           <SettingCard key={moduleId} moduleState={moduleState} />
         ))}
+        {process.env.NODE_ENV !== "production" && (
+          <div>
+            <Button icon="document-open" minimal onClick={openStoreInEditor}>
+              Open settings in editor
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

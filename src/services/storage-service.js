@@ -67,8 +67,9 @@ function Persistence(localStore) {
   });
 }
 
+let localStore;
 export async function initializeStore({ isProduction = false, readCredentials = true } = {}) {
-  const localStore = new Store({ schema: schema.properties });
+  localStore = new Store({ schema: schema.properties });
   const data = await localStore.store;
   if (_.isEmpty(data)) {
     // ensure that configuration is initialized on disk.
@@ -88,4 +89,8 @@ export async function initializeStore({ isProduction = false, readCredentials = 
 
   const stateLink = createStateLink(data).with(Persistence(localStore));
   return isProduction ? stateLink : stateLink.with(Logger);
+}
+
+export function openStoreInEditor() {
+  localStore.openInEditor();
 }
