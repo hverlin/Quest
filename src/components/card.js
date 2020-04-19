@@ -2,16 +2,11 @@ import React from "react";
 import { Card } from "@blueprintjs/core";
 import _ from "lodash";
 import spatialNavigation from "spatial-navigation-js";
-import Mark from "mark.js";
 
 function FocusableCard({ className = "", ...props }) {
   const elRef = React.useRef();
   React.useEffect(() => {
     spatialNavigation.makeFocusable();
-    const instance = new Mark(elRef.current);
-    instance.mark("test", {
-      element: "span",
-    });
   });
 
   return (
