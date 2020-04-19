@@ -1,10 +1,10 @@
 import React from "react";
-import { loadGoogleDriveClient } from "./auth";
+import { hasCorrectTokens, loadGoogleDriveClient } from "./auth";
 import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
-import { Card, H2, Spinner, Tooltip } from "@blueprintjs/core";
+import { Card, Classes, H2, Spinner, Tooltip } from "@blueprintjs/core";
 import logo from "./logo.png";
 import ReactMarkdown from "react-markdown";
 import log from "electron-log";
@@ -56,16 +56,15 @@ function DriveDetailComponent({ item }) {
       ) : (
         <>
           <H2>{item.name}</H2>
-          <p>{data && <ReactMarkdown source={data} />}</p>
+          <p className={Classes.RUNNING_TEXT}>{data && <ReactMarkdown source={data} />}</p>
         </>
       )}
     </div>
   );
 }
 
-async function listFiles({ searchData, configuration, pageToken, setIsSignedIn }) {
+async function listFiles({ searchData, configuration, pageToken }) {
   const isAuthorized = await loadGoogleDriveClient(configuration, { logInIfUnauthorized: false });
-  setIsSignedIn(isAuthorized);
   if (!isAuthorized) {
     return;
   }
@@ -89,14 +88,14 @@ async function listFiles({ searchData, configuration, pageToken, setIsSignedIn }
   }
 }
 
-const googleDriveFetcher = (configuration, setIsSignedIn) => async (searchData, cursor) => {
-  return listFiles({ searchData, configuration, pageToken: cursor, setIsSignedIn });
+const googleDriveFetcher = (configuration) => async (searchData, cursor) => {
+  return listFiles({ searchData, configuration, pageToken: cursor });
 };
 
-function getGoogleDrivePage(searchData, isSignedIn, configuration, setIsSignedIn) {
+function getGoogleDrivePage(searchData, configuration) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
     const { data, error } = withSWR(
-      useSWR([searchData, cursor], googleDriveFetcher(configuration, setIsSignedIn))
+      useSWR([searchData, cursor], googleDriveFetcher(configuration))
     );
 
     if (error) {
@@ -119,7 +118,6 @@ function getGoogleDrivePage(searchData, isSignedIn, configuration, setIsSignedIn
 
 export default function DriveSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
-  const [isSignedIn, setIsSignedIn] = React.useState(null);
 
   return (
     <PaginatedSearchResults
@@ -127,7 +125,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
       logo={logo}
       itemDetailRenderer={(item) => <DriveDetailComponent item={item} />}
       error={
-        isSignedIn === false ? (
+        hasCorrectTokens(configuration.get()) === false ? (
           <div>
             Not authenticated. Go to the <Link to="/settings">settings</Link> to setup the Google
             Drive module.
@@ -135,11 +133,10 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
         ) : null
       }
       configuration={configuration}
-      pageFunc={getGoogleDrivePage(searchData, isSignedIn, configuration, setIsSignedIn)}
+      pageFunc={getGoogleDrivePage(searchData, configuration)}
       computeNextOffset={({ data }) =>
         data?.result?.nextPageToken ? data.result.nextPageToken : null
       }
-      deps={[isSignedIn]}
     />
   );
 }

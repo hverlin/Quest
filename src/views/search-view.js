@@ -10,6 +10,7 @@ import ResizePanel from "../components/side-bar";
 import Highlighter from "../components/highlighter";
 import { SettingsBar } from "../components/settings-bar";
 import ButtonLink from "../components/button-link";
+import ErrorBoundary from "../components/error-boundary";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
@@ -91,7 +92,12 @@ export function SearchView({ store }) {
               const ResultComponent = getModuleView(id);
               return (
                 <Suspense key={id} fallback={<span />}>
-                  <ResultComponent configuration={moduleState} searchViewState={searchViewState} />
+                  <ErrorBoundary>
+                    <ResultComponent
+                      configuration={moduleState}
+                      searchViewState={searchViewState}
+                    />
+                  </ErrorBoundary>
                 </Suspense>
               );
             })}

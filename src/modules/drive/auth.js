@@ -149,8 +149,8 @@ export async function revokeRefreshToken({ refreshToken }) {
 }
 
 export function hasCorrectTokens(configuration) {
-  const { clientId, apiKey, refreshToken } = configuration;
-  return !!(clientId && apiKey && refreshToken);
+  const { clientId, refreshToken } = configuration;
+  return !!(clientId && refreshToken);
 }
 
 function loadGoogleClient() {

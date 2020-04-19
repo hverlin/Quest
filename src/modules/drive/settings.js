@@ -6,15 +6,18 @@ import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 
-export function DriveOauthButton({ configurationState }) {
+export function DriveOauthButton({ disabled, configurationState }) {
   const configuration = configurationState.get();
   const [isSignedIn, setIsSignedIn] = React.useState(hasCorrectTokens(configuration));
+
+  React.useEffect(() => {
+    setIsSignedIn(hasCorrectTokens(configuration));
+  });
 
   async function handleSignoutClick() {
     await revokeRefreshToken(configuration);
     configurationState.nested.refreshToken.set(null);
     configurationState.nested.accessToken.set(null);
-    setIsSignedIn(false);
   }
 
   return (
@@ -24,7 +27,7 @@ export function DriveOauthButton({ configurationState }) {
           Sign Out
         </Button>
       ) : (
-        <Button onClick={() => loadGoogleDriveClient(configurationState).then(setIsSignedIn)}>
+        <Button disabled={disabled} onClick={() => loadGoogleDriveClient(configurationState)}>
           Authorize
         </Button>
       )}
@@ -67,7 +70,7 @@ export default function DriveSettings({ configurationState }) {
           />
         </FormGroup>
         <FormGroup>
-          <DriveOauthButton configurationState={configurationState} />
+          <DriveOauthButton disabled={!_.isEmpty(apiKey)} configurationState={configurationState} />
         </FormGroup>
         <Button onClick={save} icon="floppy-disk">
           Save

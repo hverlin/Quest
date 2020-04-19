@@ -29,7 +29,7 @@ pre {
   box-sizing: inherit;
   -webkit-font-smoothing: auto;
   font-family: monospace;
-  background-color: #f5f5f5;
+  background-color: rgb(251, 251, 251);
   color: #4a4a4a;
   font-size: 0.875em;
   overflow-x: auto;
@@ -123,4 +123,8 @@ span[data-markjs] {
 .bp3-running-text h4 {
   margin-top: 15px;
   margin-bottom: 10px;
+}
+
+.bp3-running-text pre {
+ background-color: rgb(251, 251, 251);
 }

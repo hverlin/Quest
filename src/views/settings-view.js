@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import { Link } from "react-router-dom";
 import {
   Button,
   Card,
@@ -18,6 +17,7 @@ import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { remote } from "electron";
 import { openStoreInEditor } from "../services/storage-service";
 import ButtonLink from "../components/button-link";
+import ErrorBoundary from "../components/error-boundary";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
@@ -98,7 +98,9 @@ export function SettingsView({ store }) {
         <UIPreferences store={configuration.nested.appearance} />
         <H4>Modules</H4>
         {Object.entries(modules.nested).map(([moduleId, moduleState]) => (
-          <SettingCard key={moduleId} moduleState={moduleState} />
+          <ErrorBoundary key={moduleId}>
+            <SettingCard moduleState={moduleState} />
+          </ErrorBoundary>
         ))}
         {process.env.NODE_ENV !== "production" && (
           <div>

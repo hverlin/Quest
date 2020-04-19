@@ -6,7 +6,7 @@ import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import ReactMarkdown from "react-markdown";
 import logo from "./logo.svg";
-import { Spinner } from "@blueprintjs/core";
+import { Classes, Spinner } from "@blueprintjs/core";
 
 const paperDetailFetcher = (token) => async (id) => {
   const res = await fetch("https://api.dropboxapi.com/2/paper/docs/download", {
@@ -77,7 +77,7 @@ function PaperDocDetail({ item, token }) {
   }
 
   return (
-    <div>
+    <div className={Classes.RUNNING_TEXT}>
       <ReactMarkdown escapeHtml={false} source={data} />
     </div>
   );

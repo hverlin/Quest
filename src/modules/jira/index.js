@@ -5,10 +5,11 @@ import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.svg";
-import { Card, H3, H4, Spinner, Tooltip } from "@blueprintjs/core";
+import { Card, Classes, H3, H4, Spinner, Tooltip } from "@blueprintjs/core";
 import styles from "./jira.module.css";
 import log from "electron-log";
 import SafeHtmlElement from "../../components/safe-html-element";
+import qs from "qs";
 
 const appSession = require("electron").remote.session;
 
@@ -84,7 +85,7 @@ function JiraDetail({ item, username, password, url }) {
         {assignee?.displayName} | reported by {reporter?.displayName}
       </p>
       {description && (
-        <div>
+        <div className={Classes.RUNNING_TEXT}>
           <hr />
           <H4>Description</H4>
           <SafeHtmlElement html={description} />
@@ -96,7 +97,7 @@ function JiraDetail({ item, username, password, url }) {
           <div className={styles.comments}>
             <H4>Comments</H4>
             {comment.comments?.map((comment) => (
-              <Card key={comment.id}>
+              <Card key={comment.id} className={Classes.RUNNING_TEXT}>
                 <b>{comment.author.displayName}</b> - {comment.updated}
                 <SafeHtmlElement style={{ marginTop: 3 }} html={comment.body} />
               </Card>
@@ -134,14 +135,15 @@ function JiraResultItem({ item = {}, url }) {
 
 function getJiraPage(url, searchData, username, password) {
   return (wrapper) => ({ offset = 0, withSWR }) => {
+    const searchParams = qs.stringify({
+      startedAt: offset || 0,
+      maxResults: pageSize,
+    });
+
     const { data, error } = withSWR(
       useSWR(
         () =>
-          url
-            ? `${url}/rest/api/2/search?jql=text+~+"${searchData.input}"&startAt=${
-                offset || 0
-              }&maxResults=${pageSize}`
-            : null,
+          url ? `${url}/rest/api/2/search?${searchParams}&jql=text+~+"${searchData.input}"` : null,
         jiraFetcher({ username, password, baseUrl: url })
       )
     );
@@ -175,7 +177,7 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
       error={!url ? "JIRA module is not configured correctly. URL is missing." : null}
       configuration={configuration}
       computeNextOffset={({ data }) =>
-        data && data.total > data.startAt + data?.issues.length ? data.startAt + pageSize : null
+        data?.total > data?.startAt + data?.issues?.length ? data.startAt + pageSize : null
       }
       itemDetailRenderer={(item) => (
         <JiraDetail password={password} username={username} item={item} url={url} />
