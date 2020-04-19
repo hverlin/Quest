@@ -1,10 +1,11 @@
 import React, { Suspense } from "react";
 import { Link } from "react-router-dom";
-import { Card, Elevation, H1, H5, Icon, Switch } from "@blueprintjs/core";
+import { Card, Elevation, FormGroup, H1, H5, HTMLSelect, Icon, Switch } from "@blueprintjs/core";
 import styles from "./settings-view.module.css";
 
 import { useStateLink } from "@hookstate/core";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import { remote } from "electron";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
@@ -37,6 +38,33 @@ function SettingCard({ moduleState }) {
   );
 }
 
+function UIPreferences({ store }) {
+  const configuration = useStateLink(store);
+
+  return (
+    <Card elevation={Elevation.TWO}>
+      <H5>Appearance</H5>
+      <FormGroup label="Theme" labelFor="slack-token">
+        <HTMLSelect
+          value={configuration.nested.theme.get()}
+          options={["system", "light", "dark"]}
+          onChange={(e) => {
+            configuration.nested.theme.set(e.target.value);
+            if (
+              remote.nativeTheme.shouldUseDarkColors &&
+              configuration.nested.theme.get() !== "light"
+            ) {
+              document.body.classList.add("bp3-dark");
+            } else {
+              document.body.classList.remove("bp3-dark");
+            }
+          }}
+        />
+      </FormGroup>
+    </Card>
+  );
+}
+
 export function SettingsView({ store }) {
   const configuration = useStateLink(store);
   const modules = configuration.nested.modules;
@@ -52,6 +80,7 @@ export function SettingsView({ store }) {
         <p>{"Credentials and keys are securely stored in the system's keychain."}</p>
       </div>
       <div className={styles.settingsBody}>
+        <UIPreferences store={configuration.nested.appearance} />
         {Object.entries(modules.nested).map(([moduleId, moduleState]) => (
           <SettingCard key={moduleId} moduleState={moduleState} />
         ))}

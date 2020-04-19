@@ -67,23 +67,24 @@ function Persistence(localStore) {
   });
 }
 
-export async function initializeStore({ isProduction = false } = {}) {
+export async function initializeStore({ isProduction = false, readCredentials = true } = {}) {
   const localStore = new Store({ schema: schema.properties });
   const data = await localStore.store;
   if (_.isEmpty(data)) {
     // ensure that configuration is initialized on disk.
     // TODO: Find a better way to do this.
-    location.reload();
+    location?.reload();
   }
 
-  const credentials = await Promise.all(
-    hiddenKeys.map(async ({ key, value }) => ({
-      credential: await getCredential(value),
-      key,
-    }))
-  );
-
-  credentials.forEach(({ credential, key }) => _.set(data, key, credential));
+  if (readCredentials) {
+    const credentials = await Promise.all(
+      hiddenKeys.map(async ({ key, value }) => ({
+        credential: await getCredential(value),
+        key,
+      }))
+    );
+    credentials.forEach(({ credential, key }) => _.set(data, key, credential));
+  }
 
   const stateLink = createStateLink(data).with(Persistence(localStore));
   return isProduction ? stateLink : stateLink.with(Logger);

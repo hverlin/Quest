@@ -1,8 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
-  "required": ["modules"],
+  "required": ["appearance","modules"],
   "properties": {
+    "appearance": {
+      "type": "object",
+      "required": ["theme"],
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "type": "string",
+          "default": "system",
+          "enum": ["system", "dark", "light"]
+        }
+      }
+    },
     "modules": {
       "type": "object",
       "required": ["confluence", "drive", "jira", "paper", "slack"],

@@ -14,10 +14,12 @@ import App from "./app";
 import { initializeStore } from "./services/storage-service";
 import { FocusStyleManager } from "@blueprintjs/core";
 import spatialNavigation from "spatial-navigation-js";
-
+import qs from "qs";
 import { remote } from "electron";
 
-if (remote.nativeTheme.shouldUseDarkColors) {
+const initial = qs.parse(location.search.substring(1));
+
+if (remote.nativeTheme.shouldUseDarkColors && initial.theme !== "light") {
   document.body.classList.add("bp3-dark");
 }
 

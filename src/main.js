@@ -1,3 +1,5 @@
+import { initializeStore } from "./services/storage-service";
+
 const { app, session, BrowserWindow, globalShortcut, shell, nativeTheme } = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -14,7 +16,7 @@ function centerAndFocus(window) {
 }
 
 let mainWindow;
-const createWindow = () => {
+const createWindow = async () => {
   const isDev = process.env.NODE_ENV !== "production";
 
   // override user agent to by-pass some CSRF checks
@@ -28,6 +30,13 @@ const createWindow = () => {
     callback(details);
   });
 
+  const store = await initializeStore({
+    isProduction: process.env.NODE_ENV === "production",
+    readCredentials: false,
+  });
+
+  const theme = store.access().nested.appearance.nested.theme.get();
+
   mainWindow = new BrowserWindow({
     width: isDev ? 1300 : 800,
     height: 900,
@@ -38,11 +47,11 @@ const createWindow = () => {
       webSecurity: false,
       nodeIntegration: true,
     },
-    backgroundColor: nativeTheme.shouldUseDarkColors ? "#293742" : "",
+    backgroundColor: nativeTheme.shouldUseDarkColors && theme !== "light" ? "#293742" : "",
   });
 
   // eslint-disable-next-line no-undef
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  mainWindow.loadURL(`${MAIN_WINDOW_WEBPACK_ENTRY}?theme=${theme}`);
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
