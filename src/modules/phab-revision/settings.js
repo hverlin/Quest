@@ -3,6 +3,7 @@ import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
+import PasswordInput from "../../components/password-input";
 
 export default function PhabricatorSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
@@ -28,7 +29,7 @@ export default function PhabricatorSettings({ configurationState }) {
           />
         </FormGroup>
         <FormGroup label="API Token" labelFor="phabricator-token" labelInfo="(required)">
-          <InputGroup
+          <PasswordInput
             id="phabricator-password"
             placeholder="API Token"
             type="password"

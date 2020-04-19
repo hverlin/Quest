@@ -1,8 +1,9 @@
 import React from "react";
-import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
+import { Button, FormGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
+import PasswordInput from "../../components/password-input";
 
 export default function PaperSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
@@ -20,7 +21,7 @@ export default function PaperSettings({ configurationState }) {
     <>
       <form onSubmit={save}>
         <FormGroup label="API Token" labelFor="dropbox-paper-token" labelInfo="(required)">
-          <InputGroup
+          <PasswordInput
             id="dropbox-paper-token"
             placeholder="API token"
             type="password"

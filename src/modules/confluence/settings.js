@@ -3,6 +3,7 @@ import React from "react";
 import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
+import PasswordInput from "../../components/password-input";
 
 export default function ConfluenceSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
@@ -38,10 +39,9 @@ export default function ConfluenceSettings({ configurationState }) {
           />
         </FormGroup>
         <FormGroup label="Password" labelFor="confluence-password" labelInfo="(required)">
-          <InputGroup
+          <PasswordInput
             id="confluence-password"
             placeholder="password"
-            type="password"
             value={password || ""}
             onChange={(e) => localState.nested.password.set(e.target.value)}
           />

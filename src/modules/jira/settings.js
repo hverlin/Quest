@@ -3,6 +3,7 @@ import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
+import PasswordInput from "../../components/password-input";
 
 export default function JiraSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
@@ -38,10 +39,9 @@ export default function JiraSettings({ configurationState }) {
           />
         </FormGroup>
         <FormGroup label="Password" labelFor="jira-password" labelInfo="(required)">
-          <InputGroup
+          <PasswordInput
             id="jira-password"
             placeholder="password"
-            type="password"
             value={password || ""}
             onChange={(e) => localState.nested.password.set(e.target.value)}
           />
