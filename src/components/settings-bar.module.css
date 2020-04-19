@@ -1,0 +1,7 @@
+.settingsBar {
+  width: 100%;
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  background-color: var(--background-2);
+}

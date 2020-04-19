@@ -9,6 +9,7 @@ import styles from "./search-view.module.css";
 import { SearchForm } from "../components/search-bar";
 import ResizePanel from "../components/side-bar";
 import Highlighter from "../components/highlighter";
+import { SettingsBar } from "../components/settings-bar";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
@@ -97,6 +98,7 @@ export function SearchView({ store }) {
       ) : (
         <EmptyState enabledModules={enabledModules} />
       )}
+      <SettingsBar>Settings</SettingsBar>
     </>
   );
 }

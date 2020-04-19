@@ -27,7 +27,7 @@ export function PaginatedSearchResults({
     `${name}-${state.nested.input.get()}`,
     pageFunc(({ component, item, error, key }) => {
       if (error) {
-        return <Callout intent="danger">An error occurred while the loading results</Callout>;
+        return <Callout intent="danger">An error occurred while loading the results</Callout>;
       }
 
       return (

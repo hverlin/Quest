@@ -46,6 +46,17 @@ pre {
   color: var(--text-primary);
 }
 
+code {
+  font-family: monospace;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 0 0 1px rgba(16,22,26,.2);
+  box-shadow: inset 0 0 0 1px rgba(16,22,26,.2);
+  background: hsla(0,0%,100%,.7);
+  padding: 2px 5px;
+  color: #5c7080;
+  font-size: smaller;
+}
+
 /*** Table styles ***/
 table {
   border-collapse: collapse;

@@ -16,7 +16,11 @@ function FocusableCard({ className = "", ...props }) {
         interactive
         tabIndex={0}
         onKeyDown={(event) => {
-          if (_.isFunction(props.onClick) && event.key === "Enter") {
+          if (
+            _.isFunction(props.onClick) &&
+            event.key === "Enter" &&
+            event.target.tagName !== "A"
+          ) {
             event.preventDefault();
             event.stopPropagation();
             event.nativeEvent.stopImmediatePropagation();

@@ -1,11 +1,9 @@
 import React from "react";
 import { Button, InputGroup, Tooltip } from "@blueprintjs/core";
 import styles from "./search-bar.module.css";
-import { Redirect } from "react-router-dom";
 
 export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
-  const [redirect, setRedirect] = React.useState(false);
   const inputRef = React.useRef();
 
   function focusInput(event) {
@@ -21,17 +19,21 @@ export function SearchForm({ onSubmit }) {
     return () => window.removeEventListener("mouseup", focusInput);
   }, []);
 
-  if (redirect) {
-    return <Redirect to="/settings" />;
-  }
-
   function _onSubmit(e) {
     e.preventDefault();
     onSubmit(input);
   }
 
   const searchButton = (
-    <Tooltip content="Hit Enter to search" openOnTargetFocus={false}>
+    <Tooltip
+      content={
+        <span>
+          Press <code>Enter</code> to search.
+          <br /> Use <code>/</code> to focus the search bar
+        </span>
+      }
+      openOnTargetFocus={false}
+    >
       <Button icon="key-enter" minimal onClick={_onSubmit} tabIndex={-1} />
     </Tooltip>
   );
@@ -49,9 +51,6 @@ export function SearchForm({ onSubmit }) {
           type="text"
           rightElement={searchButton}
         />
-        <Tooltip content="Settings" className={styles.settings}>
-          <Button onClick={() => setRedirect(true)} minimal icon="settings" />
-        </Tooltip>
       </form>
     </div>
   );

@@ -1,6 +1,6 @@
 .searchForm {
   -webkit-app-region: drag;
-  padding: 25px 1rem 1rem;
+  padding: 1rem 1rem;
   background-color: var(--background-2);
 }
 
@@ -8,7 +8,7 @@
   flex-grow: 1;
 }
 
-.searchForm .settings {
+.searchForm .settingsButton {
   display: block;
-  margin: auto auto auto 15px;
+  margin: auto 15px auto auto;
 }
