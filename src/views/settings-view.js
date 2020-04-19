@@ -77,7 +77,14 @@ function UIPreferences({ store }) {
           id="highlight"
           label="Highlight keywords in search results"
           checked={highlightResults.get()}
-          onChange={() => highlightResults.set(!highlightResults.get())}
+          onChange={() => {
+            highlightResults.set(!highlightResults.get());
+            if (highlightResults.get()) {
+              document.body.classList.remove("no-highlight");
+            } else {
+              document.body.classList.add("no-highlight");
+            }
+          }}
         />
       </FormGroup>
     </Card>
