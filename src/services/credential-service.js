@@ -1,5 +1,5 @@
 import keytar from "keytar";
-const SERVICE_NAME = "my-search";
+const SERVICE_NAME = "quest-app";
 
 export async function saveCredential(credentialName, value) {
   return keytar.setPassword(SERVICE_NAME, credentialName, value);

@@ -2,7 +2,6 @@ import React, { Suspense } from "react";
 
 import _ from "lodash";
 import { Button, NonIdealState } from "@blueprintjs/core";
-import { Link } from "react-router-dom";
 import { useStateLink } from "@hookstate/core";
 
 import styles from "./search-view.module.css";
@@ -10,21 +9,23 @@ import { SearchForm } from "../components/search-bar";
 import ResizePanel from "../components/side-bar";
 import Highlighter from "../components/highlighter";
 import { SettingsBar } from "../components/settings-bar";
+import ButtonLink from "../components/button-link";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
-function EmptyState({ enabledModules = [] }) {
+function EmptyState({ hasModules = true }) {
   return (
-    <div style={{ marginTop: "3rem" }}>
+    <div style={{ marginTop: "3rem", marginBottom: "1rem" }}>
       <NonIdealState
         icon="search"
-        title="Search anything"
-        description={
-          enabledModules.length === 0
-            ? "No search modules configured."
-            : 'Try searching something. e.g. "analytics"'
+        title={!hasModules ? "No search modules configured" : "Search anything"}
+        action={
+          !hasModules ? (
+            <ButtonLink minimal intent="primary" icon="settings" to="/settings">
+              Settings
+            </ButtonLink>
+          ) : undefined
         }
-        action={enabledModules.length === 0 ? <Link to="/settings">Settings</Link> : undefined}
       />
     </div>
   );
@@ -73,6 +74,8 @@ export function SearchView({ store }) {
     module.nested.enabled.get()
   );
 
+  const hasModules = enabledModules.length > 0;
+
   return (
     <>
       <SearchForm
@@ -81,7 +84,7 @@ export function SearchView({ store }) {
           searchViewState.nested.selectedItem.set(null);
         }}
       />
-      {searchViewState.nested.input.get() ? (
+      {searchViewState.nested.input.get() && hasModules ? (
         <div style={{ display: "flex" }}>
           <div className={styles.searchResults}>
             {enabledModules.map(([id, moduleState]) => {
@@ -96,7 +99,7 @@ export function SearchView({ store }) {
           <Sidebar searchViewState={searchViewState} />
         </div>
       ) : (
-        <EmptyState enabledModules={enabledModules} />
+        <EmptyState hasModules={hasModules} />
       )}
       <SettingsBar>Settings</SettingsBar>
     </>

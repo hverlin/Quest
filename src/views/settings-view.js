@@ -9,7 +9,6 @@ import {
   H4,
   H5,
   HTMLSelect,
-  Icon,
   Switch,
 } from "@blueprintjs/core";
 import styles from "./settings-view.module.css";
@@ -18,6 +17,7 @@ import { useStateLink } from "@hookstate/core";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { remote } from "electron";
 import { openStoreInEditor } from "../services/storage-service";
+import ButtonLink from "../components/button-link";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
@@ -83,12 +83,15 @@ export function SettingsView({ store }) {
   return (
     <div>
       <div className={styles.settingsHeader}>
-        <Link to="/">
-          <Icon icon="arrow-left" />
-          <span style={{ marginLeft: "2px" }}>Back</span>
-        </Link>
-        <H1>Settings</H1>
-        <p>{"Credentials and keys are securely stored in the system's keychain."}</p>
+        <div style={{ flexGrow: 1 }}>
+          <H1>Settings</H1>
+          <p>{"Credentials and keys are securely stored in the system's keychain."}</p>
+        </div>
+        <div>
+          <ButtonLink minimal rightIcon="cross" to="/">
+            Close
+          </ButtonLink>
+        </div>
       </div>
       <div className={styles.settingsBody}>
         <H4>Appearance</H4>
