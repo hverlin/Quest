@@ -5,13 +5,17 @@
   "properties": {
     "appearance": {
       "type": "object",
-      "required": ["theme"],
+      "required": ["theme", "highlightResults"],
       "additionalProperties": false,
       "properties": {
         "theme": {
           "type": "string",
           "default": "system",
           "enum": ["system", "dark", "light"]
+        },
+        "highlightResults": {
+          "type": "boolean",
+          "default": true
         }
       }
     },

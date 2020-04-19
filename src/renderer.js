@@ -46,5 +46,10 @@ setupGlobalKeyboardNavigation();
   const store = await initializeStore({
     isProduction: process.env.NODE_ENV === "production",
   });
+
+  if (!store.nested.appearance.nested.highlightResults.get()) {
+    document.body.classList.add("no-highlight");
+  }
+
   ReactDOM.render(<App store={store} />, document.getElementById("app"));
 })();

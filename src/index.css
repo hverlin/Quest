@@ -115,6 +115,10 @@ span[data-markjs] {
   background: var(--text-highlight);
 }
 
+.no-highlight span[data-markjs] {
+  background-color: unset !important;
+}
+
 
 /*** RUNNING TEXT OVERRIDES ***/
 .bp3-running-text h1,

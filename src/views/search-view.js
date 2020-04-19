@@ -107,7 +107,7 @@ export function SearchView({ store }) {
       ) : (
         <EmptyState hasModules={hasModules} />
       )}
-      <SettingsBar>Settings</SettingsBar>
+      <SettingsBar configuration={configuration.nested.appearance}>Settings</SettingsBar>
     </>
   );
 }

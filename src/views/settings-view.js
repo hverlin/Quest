@@ -53,23 +53,31 @@ function SettingCard({ moduleState }) {
 function UIPreferences({ store }) {
   const configuration = useStateLink(store);
 
+  const { highlightResults, theme } = configuration.nested;
+
   return (
     <Card elevation={Elevation.TWO}>
-      <FormGroup label="Theme" labelFor="slack-token">
+      <FormGroup label="Theme" labelFor="theme-selector">
         <HTMLSelect
-          value={configuration.nested.theme.get()}
+          id="theme-selector"
+          value={theme.get()}
           options={["system", "light", "dark"]}
           onChange={(e) => {
-            configuration.nested.theme.set(e.target.value);
-            if (
-              remote.nativeTheme.shouldUseDarkColors &&
-              configuration.nested.theme.get() !== "light"
-            ) {
+            theme.set(e.target.value);
+            if (remote.nativeTheme.shouldUseDarkColors && theme.get() !== "light") {
               document.body.classList.add("bp3-dark");
             } else {
               document.body.classList.remove("bp3-dark");
             }
           }}
+        />
+      </FormGroup>
+      <FormGroup label="Search results" labelFor="highlight">
+        <Switch
+          id="highlight"
+          label="Highlight keywords in search results"
+          checked={highlightResults.get()}
+          onChange={() => highlightResults.set(!highlightResults.get())}
         />
       </FormGroup>
     </Card>
