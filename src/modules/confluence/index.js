@@ -4,33 +4,49 @@ import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import _ from "lodash";
 import logo from "./logo.svg";
-import { H2, Spinner } from "@blueprintjs/core";
+import { H2, Spinner, Classes, Tag } from "@blueprintjs/core";
 import SafeHtmlElement from "../../components/safe-html-element";
 import cheerio from "cheerio";
+import qs from "qs";
 
 const appSession = require("electron").remote.session;
 
 const pageSize = 5;
 
 function cleanConfluenceHtml(html, baseUrl) {
-  function convert(el, attribute) {
-    if (el.attribs[attribute]) {
-      el.attribs[attribute] = baseUrl + el.attribs[attribute];
+  function addBaseUrl(el, attribute) {
+    const originalUrl = el.attribs[attribute];
+    if (originalUrl && !originalUrl.startsWith("http")) {
+      el.attribs[attribute] = baseUrl + originalUrl;
     }
   }
 
   const $ = cheerio.load(html);
 
   // confluence links are relative, so add the base url
-  $("img, script").each((index, el) => convert(el, "src"));
-  $("a, link").each((index, el) => convert(el, "href"));
+  $("img, script").each((index, el) => addBaseUrl(el, "src"));
+  $("a, link").each((index, el) => addBaseUrl(el, "href"));
 
-  // remove the width for tables as they are often too narrow
-  $("table").each((index, el) => {
+  // remove any added styles
+  $("*").each((index, el) => {
     if (el.attribs["style"]) {
       el.attribs["style"] = "";
     }
   });
+
+  $("p").each((i, el) => {
+    if (_.isEmpty($(el).text().trim())) {
+      el.attribs["data-marked-for-removal"] = "true";
+    }
+  });
+  $("[data-marked-for-removal='true']").remove();
+
+  $("[data-macro-name='note']").addClass(Classes.CALLOUT);
+  $("[data-macro-name='info']").addClass(Classes.CALLOUT);
+  $("[data-macro-name='tip']").addClass(Classes.CALLOUT).addClass(Classes.INTENT_SUCCESS);
+  $("[data-macro-name='warning']").addClass(Classes.CALLOUT).addClass(Classes.INTENT_WARNING);
+
+  $("[data-macro-name='toc']").remove();
 
   return $.html();
 }
@@ -74,8 +90,18 @@ function ConfluenceDetail({ item, username, password, url }) {
   }
 
   return (
-    <div>
+    <div className={Classes.RUNNING_TEXT}>
       <H2>{item.content.title}</H2>
+      <p>
+        <ExternalLink href={url + item.url}>Edit in Confluence</ExternalLink>
+      </p>
+      <p>
+        {item.content?.metadata?.labels.results.map(({ name, id }) => (
+          <Tag key={id} round minimal style={{ marginRight: 2, marginLeft: 2 }}>
+            {name}
+          </Tag>
+        ))}
+      </p>
       <SafeHtmlElement html={cleanConfluenceHtml(data?.body.view.value, url)} />
     </div>
   );
@@ -96,14 +122,16 @@ function ConfluenceItem({ item = {}, url }) {
 
 function getConfluencePage(url, searchData, username, password) {
   return (wrapper) => ({ offset = 0, withSWR }) => {
+    const searchParams = qs.stringify({
+      cql: `(siteSearch ~ "${searchData.input}" and type = "page")`,
+      expand: "content.metadata.labels",
+      start: offset || 0,
+      limit: pageSize,
+    });
+
     const { data, error } = withSWR(
       useSWR(
-        () =>
-          url
-            ? `${url}/rest/api/search?cql=(siteSearch ~ "${
-                searchData.input
-              }" and space = "ENG" and type = "page")&start=${offset || 0}&limit=${pageSize}`
-            : null,
+        () => (url ? `${url}/rest/api/search?${searchParams}` : null),
         confluenceFetcher({ username, password, baseUrl: url })
       )
     );

@@ -80,8 +80,8 @@ table th {
   word-break: normal;
 }
 
-table thead {
-  background-color: #e1e8ed;
+table th {
+  background-color: var(--background-2);
   color: #000;
   text-align: center;
   vertical-align: middle;
@@ -101,6 +101,10 @@ table td {
   border-bottom: 1px solid #cbcbcb;
 }
 
+table tbody > tr:first-child {
+  border-bottom: 1px solid #cbcbcb;
+}
+
 table tbody > tr:last-child > td {
   border-bottom-width: 0;
 }
@@ -109,4 +113,14 @@ table tbody > tr:last-child > td {
 span[data-markjs] {
   color: unset;
   background: var(--text-highlight);
+}
+
+
+/*** RUNNING TEXT OVERRIDES ***/
+.bp3-running-text h1,
+.bp3-running-text h2,
+.bp3-running-text h3,
+.bp3-running-text h4 {
+  margin-top: 15px;
+  margin-bottom: 10px;
 }
