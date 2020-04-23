@@ -12,14 +12,16 @@ import { SettingsBar } from "../components/settings-bar";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
 
+import icon from "../icon.svg";
+
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
 function EmptyState({ hasModules = true }) {
   return (
     <div style={{ marginTop: "3rem", marginBottom: "1rem" }}>
       <NonIdealState
-        icon="search"
-        title={!hasModules ? "No search modules configured" : "Search anything"}
+        icon={<img style={{ maxWidth: "100%" }} src={icon} />}
+        title={!hasModules ? "No search modules configured" : ""}
         action={
           !hasModules ? (
             <ButtonLink minimal intent="primary" icon="settings" to="/settings">

@@ -11,10 +11,13 @@ QUEST
 ## Preface
 Meta-search client that can connects to various applications and sources. It will submit a search queries to all the configured services and aggregate the results.
 
+You can connect to various applications like JIRA, Confluence, Google Drive, Dropbox paper, Slack...
+and do one query for all the services.
+
 ---
-- It stores settings encrypted locally. The encryption key is stored in your system's keychain.
+- Settings and credentials are stored encrypted locally. The encryption key is stored in your system's keychain.
 - You will need to configure all the modules you want to connect to.
-- The application is built with React and Electron
+- Built with React, Electron and [Blueprint](https://blueprintjs.com).
 
 ## Development
 
@@ -28,3 +31,8 @@ npm start
 ```
 npm run make
 ```
+
+### License 
+Licensed under the MIT license.
+
+Icon made by [Pixel perfect](https://www.flaticon.com/authors/pixel-perfect) from www.flaticon.com
