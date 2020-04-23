@@ -71,7 +71,7 @@ export function SearchView({ store }) {
   const configuration = useStateLink(store);
   const searchViewState = useStateLink({ input: "", selectedItem: null, renderer: null });
 
-  const enabledModules = Object.entries(configuration.nested.modules.nested).filter(([, module]) =>
+  const enabledModules = configuration.nested.modules.nested.filter((module) =>
     module.nested.enabled.get()
   );
 
@@ -88,10 +88,10 @@ export function SearchView({ store }) {
       {searchViewState.nested.input.get() && hasModules ? (
         <div style={{ display: "flex" }}>
           <div className={styles.searchResults}>
-            {enabledModules.map(([id, moduleState]) => {
-              const ResultComponent = getModuleView(id);
+            {enabledModules.map((moduleState) => {
+              const ResultComponent = getModuleView(moduleState.nested.moduleType.get());
               return (
-                <Suspense key={id} fallback={<span />}>
+                <Suspense key={moduleState.nested.id.get()} fallback={<span />}>
                   <ErrorBoundary>
                     <ResultComponent
                       configuration={moduleState}

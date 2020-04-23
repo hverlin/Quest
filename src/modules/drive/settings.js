@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
 import { hasCorrectTokens, loadGoogleDriveClient, revokeRefreshToken } from "./auth";
-import { notify } from "../../services/notification-service";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
@@ -38,26 +37,18 @@ export function DriveOauthButton({ disabled, configurationState }) {
 // noinspection JSUnusedGlobalSymbols
 export default function DriveSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
-  const localState = useStateLink(_.cloneDeep(configuration.get()));
 
-  const { apiKey, clientId } = localState.get();
-
-  async function save(event) {
-    event.preventDefault();
-    configuration.nested.apiKey.set(apiKey);
-    configuration.nested.clientId.set(clientId);
-    notify("Google Drive credentials saved successfully.");
-  }
+  const { apiKey, clientId } = configuration.get();
 
   return (
     <>
-      <form onSubmit={save}>
+      <form>
         <FormGroup label="Client Id" labelFor="google-drive-client-id" labelInfo="(required)">
           <InputGroup
             id="google-drive-client-id"
             placeholder="Client id"
             value={clientId || ""}
-            onChange={(e) => localState.nested.clientId.set(e.target.value)}
+            onChange={(e) => configuration.nested.clientId.set(e.target.value)}
           />
         </FormGroup>
         <FormGroup label="API Key" labelFor="google-drive-api-key">
@@ -66,15 +57,12 @@ export default function DriveSettings({ configurationState }) {
             placeholder="API key"
             type="password"
             value={apiKey || ""}
-            onChange={(e) => localState.nested.apiKey.set(e.target.value)}
+            onChange={(e) => configuration.nested.apiKey.set(e.target.value)}
           />
         </FormGroup>
         <FormGroup>
           <DriveOauthButton disabled={!_.isEmpty(apiKey)} configurationState={configurationState} />
         </FormGroup>
-        <Button onClick={save} icon="floppy-disk">
-          Save
-        </Button>
       </form>
     </>
   );

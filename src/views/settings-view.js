@@ -1,51 +1,98 @@
 import React, { Suspense } from "react";
+import _ from "lodash";
 import {
   Button,
   Card,
+  EditableText,
   Elevation,
   FormGroup,
   H1,
   H4,
   H5,
   HTMLSelect,
+  MenuItem,
   Switch,
 } from "@blueprintjs/core";
 import styles from "./settings-view.module.css";
 
 import { useStateLink } from "@hookstate/core";
-import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { remote } from "electron";
-import { openStoreInEditor } from "../services/storage-service";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
+import { Select } from "@blueprintjs/select";
+import configurationSchema from "../configuration-schema.json";
+import { v4 as uuidv4 } from "uuid";
+
+const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
+  type: item.properties.moduleType.const,
+  name: item.properties.name.default,
+}));
+
+const moduleSchemaByType = _.keyBy(
+  configurationSchema.properties.modules.items.oneOf,
+  "properties.moduleType.const"
+);
+
+function createDefaultValuesForModule(moduleType) {
+  const moduleSchema = moduleSchemaByType[moduleType];
+  return Object.fromEntries(
+    Object.entries(moduleSchema.properties).map(([propertyName, property]) => {
+      const value =
+        property.format === "uuid" ? uuidv4() : property.const ? property.const : property.default;
+      return [propertyName, value];
+    })
+  );
+}
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
-function SettingCard({ moduleState }) {
+function SettingCardHeader({ configurationState }) {
+  const moduleConfiguration = useStateLink(configurationState);
+  const { name, enabled } = moduleConfiguration.get();
+
+  return (
+    <div style={{ display: "flex " }}>
+      <div style={{ flexGrow: 1 }}>
+        <H5>
+          <EditableText
+            maxLength={35}
+            value={name}
+            placeholder="Module name"
+            onChange={(val) => moduleConfiguration.nested.name.set(val)}
+          />
+        </H5>
+      </div>
+
+      <div>
+        <Switch
+          label={enabled ? "Enabled" : "Disabled"}
+          onChange={() =>
+            moduleConfiguration.nested.enabled.set(!moduleConfiguration.nested.enabled.get())
+          }
+          checked={enabled}
+          alignIndicator="right"
+        />
+      </div>
+    </div>
+  );
+}
+
+function SettingCard({ moduleState, onDelete }) {
   const moduleConfiguration = useStateLink(moduleState);
-  const { name, enabled, id } = moduleConfiguration.get();
-  const ModuleView = getModuleView(id);
+  const { moduleType, id } = moduleConfiguration.get();
+  const ModuleView = getModuleView(moduleType);
 
   return (
     <Card elevation={Elevation.TWO}>
-      <div style={{ display: "flex " }}>
-        <div style={{ flexGrow: 1 }}>
-          <H5>{name}</H5>
-        </div>
-        <div>
-          <Switch
-            label="Enabled"
-            onChange={() =>
-              moduleConfiguration.nested.enabled.set(!moduleConfiguration.nested.enabled.get())
-            }
-            checked={enabled}
-            alignIndicator="right"
-          />
-        </div>
-      </div>
-      <Suspense fallback={<div className={SKELETON} style={{ height: "200px" }} />}>
-        {enabled && <ModuleView configurationState={moduleConfiguration} />}
+      <SettingCardHeader configurationState={moduleConfiguration} />
+      <Suspense fallback={<div />}>
+        <ModuleView configurationState={moduleConfiguration} />
       </Suspense>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button icon="trash" minimal intent="danger" onClick={() => onDelete(id)}>
+          Remove
+        </Button>
+      </div>
     </Card>
   );
 }
@@ -93,14 +140,13 @@ function UIPreferences({ store }) {
 
 export function SettingsView({ store }) {
   const configuration = useStateLink(store);
-  const modules = configuration.nested.modules;
 
   return (
     <div>
       <div className={styles.settingsHeader}>
         <div style={{ flexGrow: 1 }}>
           <H1>Settings</H1>
-          <p>{"Credentials and keys are securely stored in the system's keychain."}</p>
+          <p>{"Credentials and keys are stored encrypted."}</p>
         </div>
         <div>
           <ButtonLink minimal rightIcon="cross" to="/">
@@ -112,18 +158,46 @@ export function SettingsView({ store }) {
         <H4>Appearance</H4>
         <UIPreferences store={configuration.nested.appearance} />
         <H4>Modules</H4>
-        {Object.entries(modules.nested).map(([moduleId, moduleState]) => (
-          <ErrorBoundary key={moduleId}>
-            <SettingCard moduleState={moduleState} />
+        <div>
+          <Select
+            itemPredicate={(query, module) =>
+              module.name.toLowerCase().indexOf(query.toLowerCase()) >= 0
+            }
+            items={availableModules}
+            itemRenderer={(module, { handleClick, modifiers }) => {
+              if (!modifiers.matchesPredicate) {
+                return null;
+              }
+              return (
+                <MenuItem
+                  key={module.type}
+                  active={modifiers.active}
+                  onClick={handleClick}
+                  text={module.name}
+                />
+              );
+            }}
+            onItemSelect={(module) => {
+              configuration.nested.modules.set((modules) =>
+                modules.concat(createDefaultValuesForModule(module.type))
+              );
+            }}
+          >
+            <Button icon="plus">Add search module</Button>
+          </Select>
+        </div>
+        {configuration.nested.modules.nested.map((moduleState) => (
+          <ErrorBoundary key={moduleState.nested.id.get()}>
+            <SettingCard
+              moduleState={moduleState}
+              onDelete={(id) =>
+                configuration.nested.modules.set((modules) =>
+                  modules.filter((module) => module.id !== id)
+                )
+              }
+            />
           </ErrorBoundary>
         ))}
-        {process.env.NODE_ENV !== "production" && (
-          <div>
-            <Button icon="document-open" minimal onClick={openStoreInEditor}>
-              Open settings in editor
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

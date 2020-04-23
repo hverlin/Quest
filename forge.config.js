@@ -1,5 +1,7 @@
 module.exports = {
-  packagerConfig: {},
+  packagerConfig: {
+    appBundleId: "org.quest.app",
+  },
   makers: [
     {
       name: "@electron-forge/maker-squirrel",

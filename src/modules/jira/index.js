@@ -136,7 +136,7 @@ function JiraResultItem({ item = {}, url }) {
 function getJiraPage(url, searchData, username, password) {
   return (wrapper) => ({ offset = 0, withSWR }) => {
     const searchParams = qs.stringify({
-      startedAt: offset || 0,
+      startAt: offset || 0,
       maxResults: pageSize,
     });
 
@@ -177,7 +177,7 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
       error={!url ? "JIRA module is not configured correctly. URL is missing." : null}
       configuration={configuration}
       computeNextOffset={({ data }) =>
-        data?.total > data?.startAt + data?.issues?.length ? data.startAt + pageSize : null
+        data?.total > data?.startAt + pageSize ? data.startAt + pageSize : null
       }
       itemDetailRenderer={(item) => (
         <JiraDetail password={password} username={username} item={item} url={url} />

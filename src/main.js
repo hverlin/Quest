@@ -1,12 +1,26 @@
 import { initializeStore } from "./services/storage-service";
+import { getCredential, saveCredential } from "./services/credential-service";
+const crypto = require("crypto");
+const { promisify } = require("util");
+const log = require("electron-log");
 
-const { app, session, BrowserWindow, globalShortcut, shell, nativeTheme } = require("electron");
+const {
+  app,
+  session,
+  BrowserWindow,
+  globalShortcut,
+  shell,
+  nativeTheme,
+  systemPreferences,
+} = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   // eslint-disable-line global-require
   app.quit();
 }
+
+let isAuthenticated = false;
 
 function centerAndFocus(window) {
   window.show();
@@ -18,6 +32,18 @@ function centerAndFocus(window) {
 let mainWindow;
 const createWindow = async () => {
   const isDev = process.env.NODE_ENV !== "production";
+
+  let encryptionKey = await getCredential("encryptionKey");
+  if (!encryptionKey) {
+    encryptionKey = (await promisify(crypto.randomBytes)(256)).toString("hex");
+    await saveCredential("encryptionKey", encryptionKey);
+  }
+
+  if (!isDev && !isAuthenticated && encryptionKey && systemPreferences.canPromptTouchID()) {
+    await systemPreferences.promptTouchID("access your keychain");
+  }
+
+  isAuthenticated = true;
 
   // override user agent to by-pass some CSRF checks
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -32,10 +58,10 @@ const createWindow = async () => {
 
   const store = await initializeStore({
     isProduction: process.env.NODE_ENV === "production",
-    readCredentials: false,
+    encryptionKey,
   });
 
-  const theme = store.access().nested?.appearance?.nested.theme.get();
+  const theme = store.access()?.nested?.appearance?.nested?.theme?.get();
 
   mainWindow = new BrowserWindow({
     width: isDev ? 1300 : 800,
@@ -46,12 +72,13 @@ const createWindow = async () => {
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
+      additionalArguments: [`--encryptionKey=${encryptionKey}`, `--theme=${theme}`],
     },
     backgroundColor: nativeTheme.shouldUseDarkColors && theme !== "light" ? "#293742" : "",
   });
 
   // eslint-disable-next-line no-undef
-  mainWindow.loadURL(`${MAIN_WINDOW_WEBPACK_ENTRY}?theme=${theme}`);
+  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -79,7 +106,14 @@ const createWindow = async () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", async () => {
+  try {
+    await createWindow();
+  } catch (e) {
+    log.error("error, quiting", e);
+    app.quit();
+  }
+});
 
 // Quit when all windows are closed.
 app.on("window-all-closed", (e) => {

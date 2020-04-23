@@ -12,9 +12,9 @@ QUEST
 Meta-search client that can connects to various applications and sources. It will submit a search queries to all the configured services and aggregate the results.
 
 ---
-- The application is built with React and Electron
-- It stores settings locally. Credentials are stored securely in your system's keychain.
+- It stores settings encrypted locally. The encryption key is stored in your system's keychain.
 - You will need to configure all the modules you want to connect to.
+- The application is built with React and Electron
 
 ## Development
 

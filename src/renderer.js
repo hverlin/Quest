@@ -14,12 +14,13 @@ import App from "./app";
 import { initializeStore } from "./services/storage-service";
 import { FocusStyleManager } from "@blueprintjs/core";
 import spatialNavigation from "spatial-navigation-js";
-import qs from "qs";
 import { remote } from "electron";
 
-const initial = qs.parse(location.search.substring(1));
+const args = window.process.argv;
 
-if (remote.nativeTheme.shouldUseDarkColors && initial.theme !== "light") {
+const theme = args.find((a) => a.startsWith("--theme")).split("=")[1];
+
+if (remote.nativeTheme.shouldUseDarkColors && theme !== "light") {
   document.body.classList.add("bp3-dark");
 }
 
@@ -43,8 +44,10 @@ function setupGlobalKeyboardNavigation() {
 setupGlobalKeyboardNavigation();
 
 (async () => {
+  const encryptionKey = args.find((a) => a.startsWith("--encryptionKey")).split("=")[1];
   const store = await initializeStore({
     isProduction: process.env.NODE_ENV === "production",
+    encryptionKey,
   });
 
   if (!store.nested.appearance.nested.highlightResults.get()) {
