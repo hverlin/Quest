@@ -10,6 +10,7 @@ import {
   H4,
   H5,
   HTMLSelect,
+  HTMLTable,
   MenuItem,
   Switch,
 } from "@blueprintjs/core";
@@ -22,6 +23,8 @@ import ErrorBoundary from "../components/error-boundary";
 import { Select } from "@blueprintjs/select";
 import configurationSchema from "../configuration-schema.json";
 import { v4 as uuidv4 } from "uuid";
+import configSchema from "../configuration-schema.json";
+import { Shortcut } from "shortcuts";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -198,6 +201,26 @@ export function SettingsView({ store }) {
             />
           </ErrorBoundary>
         ))}
+        <H4>Shortcuts</H4>
+        <p>
+          Use <kbd>Tab</kbd> and the arrow keys to navigate between the search results.
+        </p>
+        <Card>
+          <HTMLTable style={{ border: "none", width: "100%" }}>
+            <tbody>
+              {Object.entries(configSchema.properties.shortcuts.properties).map(([id, action]) => (
+                <tr key={id}>
+                  <td style={{ borderLeft: "none", boxShadow: "none" }}>{action.description}</td>
+                  <td style={{ borderLeft: "none", boxShadow: "none", textAlign: "right" }}>
+                    <kbd className={styles.shortcut}>
+                      {Shortcut.shortcut2symbols(action.default)}
+                    </kbd>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </HTMLTable>
+        </Card>
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ import { initializeStore } from "./services/storage-service";
 import { FocusStyleManager } from "@blueprintjs/core";
 import spatialNavigation from "spatial-navigation-js";
 import { remote } from "electron";
+import { ShortcutPlugin } from "./services/shortcut-manager";
 
 const args = window.process.argv;
 
@@ -43,16 +44,14 @@ function setupGlobalKeyboardNavigation() {
 
 setupGlobalKeyboardNavigation();
 
-(async () => {
-  const encryptionKey = args.find((a) => a.startsWith("--encryptionKey")).split("=")[1];
-  const store = await initializeStore({
-    isProduction: process.env.NODE_ENV === "production",
-    encryptionKey,
-  });
+const encryptionKey = args.find((a) => a.startsWith("--encryptionKey")).split("=")[1];
+const store = initializeStore({
+  isProduction: process.env.NODE_ENV === "production",
+  encryptionKey,
+}).with(ShortcutPlugin);
 
-  if (!store.nested.appearance.nested.highlightResults.get()) {
-    document.body.classList.add("no-highlight");
-  }
+if (!store.nested.appearance.nested.highlightResults.get()) {
+  document.body.classList.add("no-highlight");
+}
 
-  ReactDOM.render(<App store={store} />, document.getElementById("app"));
-})();
+ReactDOM.render(<App store={store} />, document.getElementById("app"));

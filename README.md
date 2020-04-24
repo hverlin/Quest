@@ -9,10 +9,9 @@ QUEST
 ---
 
 ## Preface
-Meta-search client that can connects to various applications and sources. It will submit a search queries to all the configured services and aggregate the results.
+*Quest* is meta-search client that can connects to various applications and sources. It will submit a search query to all the configured services and aggregate the results.
 
-You can connect to various applications like JIRA, Confluence, Google Drive, Dropbox paper, Slack...
-and do one query for all the services.
+You can connect it to various services like JIRA, Confluence, Google Drive, Dropbox paper, Slack... 
 
 ---
 - Settings and credentials are stored encrypted locally. The encryption key is stored in your system's keychain.

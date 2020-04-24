@@ -20,6 +20,38 @@
       },
       "default": {}
     },
+    "shortcuts": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {},
+      "properties": {
+        "focusApp": {
+          "description": "Open and focus the application",
+          "type": "string",
+          "default": "CommandOrControl+Shift+Space"
+        },
+        "focusSearchBar": {
+          "description": "Focus the search bar",
+          "type": "string",
+          "default": "/"
+        },
+        "toggleHighlighting": {
+          "description": "Toggle search term highlighting",
+          "type": "string",
+          "default": "CommandOrControl+i"
+        },
+        "openSettings": {
+          "description": "Open the settings",
+          "type": "string",
+          "default": "CommandOrControl+,"
+        },
+        "closeSidebar": {
+          "description": "Close the sidebar",
+          "type": "string",
+          "default": "Escape"
+        }
+      }
+    },
     "modules": {
       "type": "array",
       "items": {

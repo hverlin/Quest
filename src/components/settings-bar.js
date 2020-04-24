@@ -4,12 +4,26 @@ import styles from "./settings-bar.module.css";
 import ButtonLink from "./button-link";
 import { useStateLink } from "@hookstate/core";
 import { remote } from "electron";
+import { useShortcut } from "../services/shortcut-manager";
+import { withRouter } from "react-router-dom";
 
-export function SettingsBar({ configuration }) {
+function SettingsBar({ configuration, history }) {
   const state = useStateLink(configuration);
 
   const { highlightResults, theme } = state.nested;
   const hasDarkTheme = remote.nativeTheme.shouldUseDarkColors && theme.get() !== "light";
+
+  function toggleHighlighting() {
+    highlightResults.set(!highlightResults.get());
+    if (highlightResults.get()) {
+      document.body.classList.remove("no-highlight");
+    } else {
+      document.body.classList.add("no-highlight");
+    }
+  }
+
+  useShortcut("toggleHighlighting", toggleHighlighting);
+  useShortcut("openSettings", () => history.push("/settings"));
 
   return (
     <div className={styles.settingsBar}>
@@ -21,14 +35,7 @@ export function SettingsBar({ configuration }) {
             small
             minimal
             style={{ margin: 3, opacity: highlightResults.get() ? 1 : 0.4 }}
-            onClick={() => {
-              highlightResults.set(!highlightResults.get());
-              if (highlightResults.get()) {
-                document.body.classList.remove("no-highlight");
-              } else {
-                document.body.classList.add("no-highlight");
-              }
-            }}
+            onClick={toggleHighlighting}
           />
         </Tooltip>
         <Tooltip content={hasDarkTheme ? "Use light theme" : "Use dark theme"}>
@@ -56,3 +63,5 @@ export function SettingsBar({ configuration }) {
     </div>
   );
 }
+
+export default withRouter(SettingsBar);

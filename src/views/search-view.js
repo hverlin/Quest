@@ -8,11 +8,12 @@ import styles from "./search-view.module.css";
 import { SearchForm } from "../components/search-bar";
 import ResizePanel from "../components/side-bar";
 import Highlighter from "../components/highlighter";
-import { SettingsBar } from "../components/settings-bar";
+import SettingsBar from "../components/settings-bar";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
 
 import icon from "../icon.svg";
+import { useShortcut } from "../services/shortcut-manager";
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}`)));
 
@@ -39,6 +40,16 @@ function Sidebar({ searchViewState }) {
   const { selectedItem } = state.get();
   const contentRef = React.useRef(null);
 
+  const closeSidebar = () => {
+    const key = selectedItem?.__focusKey;
+    state.nested.selectedItem.set(null);
+    if (key) {
+      document.querySelector(`[data-focus-key="${key}"]`)?.focus();
+    }
+  };
+
+  useShortcut("closeSidebar", closeSidebar);
+
   React.useEffect(() => {
     if (selectedItem) {
       contentRef.current.focus();
@@ -55,7 +66,7 @@ function Sidebar({ searchViewState }) {
         <Button
           title="Close"
           minimal
-          onClick={() => state.nested.selectedItem.set(null)}
+          onClick={closeSidebar}
           icon="cross"
           style={{ position: "fixed", right: 10, marginTop: 4 }}
         />

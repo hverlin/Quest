@@ -23,10 +23,9 @@ function Persistence(localStore) {
   });
 }
 
-export async function initializeStore({ isProduction = false, encryptionKey } = {}) {
+export function initializeStore({ isProduction = false, encryptionKey } = {}) {
   const localStore = new Store({ schema: schema.properties, encryptionKey });
-  const data = await localStore.store;
 
-  const stateLink = createStateLink(data).with(Persistence(localStore));
+  const stateLink = createStateLink(localStore.store).with(Persistence(localStore));
   return isProduction ? stateLink : stateLink.with(Logger);
 }

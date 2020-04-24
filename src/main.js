@@ -92,17 +92,22 @@ const createWindow = async () => {
     await shell.openExternal(url);
   });
 
-  const shortcut = "CommandOrControl+Shift+Space";
-  if (!globalShortcut.isRegistered(shortcut)) {
-    globalShortcut.register(shortcut, () => {
-      try {
-        centerAndFocus(mainWindow);
-      } catch (e) {
-        createWindow();
-      }
-    });
-  }
+  registerGlobalShortcut(store);
 };
+
+function registerGlobalShortcut(store) {
+  const shortcut = store.access().nested.shortcuts.nested.focusApp.get();
+  if (globalShortcut.isRegistered(shortcut)) {
+    globalShortcut.unregister(shortcut);
+  }
+  globalShortcut.register(shortcut, () => {
+    try {
+      centerAndFocus(mainWindow);
+    } catch (e) {
+      return createWindow();
+    }
+  });
+}
 
 function makeMenu() {
   const isMac = process.platform === "darwin";

@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, InputGroup, Tooltip } from "@blueprintjs/core";
 import styles from "./search-bar.module.css";
+import { useShortcut } from "../services/shortcut-manager";
 
 export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
@@ -14,10 +15,7 @@ export function SearchForm({ onSubmit }) {
     }
   }
 
-  React.useEffect(() => {
-    window.addEventListener("keydown", focusInput);
-    return () => window.removeEventListener("mouseup", focusInput);
-  }, []);
+  useShortcut("focusSearchBar", focusInput);
 
   function _onSubmit(e) {
     e.preventDefault();

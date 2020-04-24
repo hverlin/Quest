@@ -7,6 +7,7 @@ import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { useStateLink } from "@hookstate/core";
 import FocusableCard from "./card";
 import Highlighter from "./highlighter";
+import { v4 as uuidv4 } from "uuid";
 
 const numberFormatter = new Intl.NumberFormat();
 
@@ -30,8 +31,10 @@ export function PaginatedSearchResults({
         return <Callout intent="danger">An error occurred while loading the results</Callout>;
       }
 
+      const focusKey = uuidv4();
       return (
         <FocusableCard
+          data-focus-key={focusKey}
           key={key}
           interactive={!!item && itemDetailRenderer}
           onClick={
@@ -40,6 +43,7 @@ export function PaginatedSearchResults({
                   // Ugly workaround: We cannot pass a reference to a view with hookState so
                   // pass it though the global window object instead :/
                   window.detailView = itemDetailRenderer;
+                  item.__focusKey = focusKey;
                   state.nested.selectedItem.set(item);
                 }
               : undefined
