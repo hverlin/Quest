@@ -16,6 +16,7 @@
 
 body {
   background-color: var(--background);
+  min-width: 350px;
 }
 
 pre {

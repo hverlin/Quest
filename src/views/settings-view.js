@@ -27,6 +27,9 @@ import configSchema from "../configuration-schema.json";
 import { Shortcut } from "shortcuts";
 import { useShortcut } from "../services/shortcut-manager";
 import { Redirect } from "react-router-dom";
+import { DndProvider } from "react-dnd";
+import Backend from "react-dnd-html5-backend";
+import SortableList from "../components/sortable-list/sortable-list";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -143,15 +146,45 @@ function UIPreferences({ store }) {
   );
 }
 
+function reorderModules(configuration, items) {
+  const modules = configuration.nested.modules.get();
+  const modulesById = _.keyBy(modules, "id");
+  configuration.nested.modules.set(_.cloneDeep(items.map(({ itemId }) => modulesById[itemId])));
+}
+
+function moduleItemRenderer(module, { handleClick, modifiers: { matchesPredicate, active } = {} }) {
+  if (!matchesPredicate) {
+    return null;
+  }
+
+  return <MenuItem key={module.type} active={active} onClick={handleClick} text={module.name} />;
+}
+
 export function SettingsView({ store }) {
   const configuration = useStateLink(store);
   const [isClosed, setIsClosed] = React.useState(false);
-  useShortcut("close", () => {
-    setIsClosed(true);
-  });
+  const [isReordering, setIsReordering] = React.useState(false);
+  const [items, setItems] = React.useState([]);
 
+  useShortcut("close", () => setIsClosed(true));
   if (isClosed) {
     return <Redirect to="/" />;
+  }
+
+  function onReorderingClicked() {
+    if (isReordering) {
+      setIsReordering(false);
+      reorderModules(configuration, items);
+    } else {
+      setItems(
+        configuration.nested.modules.nested.map((module, id) => ({
+          id,
+          itemId: module.nested.id.get(),
+          text: module.nested.name.get(),
+        }))
+      );
+      setIsReordering(true);
+    }
   }
 
   return (
@@ -171,46 +204,52 @@ export function SettingsView({ store }) {
         <H4>Appearance</H4>
         <UIPreferences store={configuration.nested.appearance} />
         <H4>Modules</H4>
-        <div>
+        <div style={{ display: "flex" }}>
           <Select
+            disabled={isReordering}
             itemPredicate={(query, module) =>
               module.name.toLowerCase().indexOf(query.toLowerCase()) >= 0
             }
             items={availableModules}
-            itemRenderer={(module, { handleClick, modifiers }) => {
-              if (!modifiers.matchesPredicate) {
-                return null;
-              }
-              return (
-                <MenuItem
-                  key={module.type}
-                  active={modifiers.active}
-                  onClick={handleClick}
-                  text={module.name}
-                />
-              );
-            }}
+            itemRenderer={moduleItemRenderer}
             onItemSelect={(module) => {
               configuration.nested.modules.set((modules) =>
                 modules.concat(createDefaultValuesForModule(module.type))
               );
             }}
           >
-            <Button icon="plus">Add search module</Button>
+            <Button disabled={isReordering} icon="plus">
+              Add search module
+            </Button>
           </Select>
+          <div style={{ flexGrow: "1" }} />
+          <Button
+            minimal={!isReordering}
+            intent={isReordering ? "primary" : "none"}
+            icon={isReordering ? "floppy-disk" : "refresh"}
+            onClick={onReorderingClicked}
+          >
+            {isReordering ? "Save" : "Reorder"}
+          </Button>
         </div>
-        {configuration.nested.modules.nested.map((moduleState) => (
-          <ErrorBoundary key={moduleState.nested.id.get()}>
-            <SettingCard
-              moduleState={moduleState}
-              onDelete={(id) =>
-                configuration.nested.modules.set((modules) =>
-                  modules.filter((module) => module.id !== id)
-                )
-              }
-            />
-          </ErrorBoundary>
-        ))}
+        {isReordering && (
+          <DndProvider backend={Backend}>
+            <SortableList initialItems={items} onChange={setItems} />
+          </DndProvider>
+        )}
+        {!isReordering &&
+          configuration.nested.modules.nested.map((moduleState) => (
+            <ErrorBoundary key={moduleState.nested.id.get()}>
+              <SettingCard
+                moduleState={moduleState}
+                onDelete={(id) =>
+                  configuration.nested.modules.set((modules) =>
+                    modules.filter((module) => module.id !== id)
+                  )
+                }
+              />
+            </ErrorBoundary>
+          ))}
         <H4>Shortcuts</H4>
         <p>
           Use <kbd>Tab</kbd> and the arrow keys to navigate between the search results.
