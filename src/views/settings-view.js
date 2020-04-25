@@ -222,6 +222,7 @@ export function SettingsView({ store }) {
           </Select>
           <div style={{ flexGrow: "1" }} />
           <Button
+            disabled={configuration.nested.modules.get().length < 2}
             minimal={!isReordering}
             intent={isReordering ? "primary" : "none"}
             icon={isReordering ? "small-tick" : "swap-vertical"}
