@@ -48,7 +48,7 @@ function Sidebar({ searchViewState }) {
     }
   };
 
-  useShortcut("closeSidebar", closeSidebar);
+  useShortcut("close", closeSidebar);
 
   React.useEffect(() => {
     if (selectedItem) {
@@ -91,7 +91,7 @@ export function SearchView({ store }) {
   const hasModules = enabledModules.length > 0;
 
   return (
-    <>
+    <div>
       <SearchForm
         onSubmit={(input) => {
           searchViewState.nested.input.set(input);
@@ -121,6 +121,6 @@ export function SearchView({ store }) {
         <EmptyState hasModules={hasModules} />
       )}
       <SettingsBar configuration={configuration.nested.appearance}>Settings</SettingsBar>
-    </>
+    </div>
   );
 }

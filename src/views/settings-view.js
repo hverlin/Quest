@@ -25,6 +25,8 @@ import configurationSchema from "../configuration-schema.json";
 import { v4 as uuidv4 } from "uuid";
 import configSchema from "../configuration-schema.json";
 import { Shortcut } from "shortcuts";
+import { useShortcut } from "../services/shortcut-manager";
+import { Redirect } from "react-router-dom";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -143,6 +145,14 @@ function UIPreferences({ store }) {
 
 export function SettingsView({ store }) {
   const configuration = useStateLink(store);
+  const [isClosed, setIsClosed] = React.useState(false);
+  useShortcut("close", () => {
+    setIsClosed(true);
+  });
+
+  if (isClosed) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <div>

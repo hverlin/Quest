@@ -45,8 +45,8 @@
           "type": "string",
           "default": "CommandOrControl+,"
         },
-        "closeSidebar": {
-          "description": "Close the sidebar",
+        "close": {
+          "description": "Close sidebar, settings, modal, etc.",
           "type": "string",
           "default": "Escape"
         }
