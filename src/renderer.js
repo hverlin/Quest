@@ -5,6 +5,8 @@
  * Node.js integration is enabled (https://electronjs.org/docs/tutorial/security)
  */
 
+import "v8-compile-cache";
+
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "./index.css";
 
@@ -25,6 +27,11 @@ if (remote.nativeTheme.shouldUseDarkColors && theme !== "light") {
   document.body.classList.add("bp3-dark");
 }
 
+function resetFocusManager() {
+  FocusStyleManager.alwaysShowFocus();
+  FocusStyleManager.onlyShowFocusOnTabs();
+}
+
 function setupGlobalKeyboardNavigation() {
   FocusStyleManager.onlyShowFocusOnTabs();
   spatialNavigation.init();
@@ -33,11 +40,13 @@ function setupGlobalKeyboardNavigation() {
 
   window.addEventListener("keydown", (e) => {
     if (e.target.classList.contains("focusable")) {
+      resetFocusManager();
       return true;
     }
 
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
       e.target?.closest(".focusable")?.focus();
+      resetFocusManager();
     }
   });
 }

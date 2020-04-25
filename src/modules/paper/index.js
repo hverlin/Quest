@@ -24,7 +24,7 @@ const paperDetailFetcher = (token) => async (id) => {
   return res.text();
 };
 
-const paperFetcher = (token) => async (url, searchData, cursor = null) => {
+const paperFetcher = (token) => async (url, query, cursor = null) => {
   const res = await fetch(`${url}${cursor ? "/continue" : ""}_v2`, {
     method: "POST",
 
@@ -38,7 +38,7 @@ const paperFetcher = (token) => async (url, searchData, cursor = null) => {
       cursor
         ? { cursor }
         : {
-            query: searchData?.input,
+            query,
             include_highlights: false,
             options: { max_results: 5 },
           }
@@ -86,7 +86,10 @@ function PaperDocDetail({ item, token }) {
 function getPaperPage(token, searchData) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
     const { data, error } = withSWR(
-      useSWR([`https://api.dropboxapi.com/2/files/search`, searchData, cursor], paperFetcher(token))
+      useSWR(
+        [`https://api.dropboxapi.com/2/files/search`, searchData?.input, cursor],
+        paperFetcher(token)
+      )
     );
 
     if (error) {
