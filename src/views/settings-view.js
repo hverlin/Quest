@@ -201,8 +201,6 @@ export function SettingsView({ store }) {
         </div>
       </div>
       <div className={styles.settingsBody}>
-        <H4>Appearance</H4>
-        <UIPreferences store={configuration.nested.appearance} />
         <H4>Modules</H4>
         <div style={{ display: "flex" }}>
           <Select
@@ -226,10 +224,10 @@ export function SettingsView({ store }) {
           <Button
             minimal={!isReordering}
             intent={isReordering ? "primary" : "none"}
-            icon={isReordering ? "floppy-disk" : "refresh"}
+            icon={isReordering ? "small-tick" : "swap-vertical"}
             onClick={onReorderingClicked}
           >
-            {isReordering ? "Save" : "Reorder"}
+            {isReordering ? "Done" : "Reorder"}
           </Button>
         </div>
         {isReordering && (
@@ -250,6 +248,8 @@ export function SettingsView({ store }) {
               />
             </ErrorBoundary>
           ))}
+        <H4>Appearance</H4>
+        <UIPreferences store={configuration.nested.appearance} />
         <H4>Shortcuts</H4>
         <p>
           Use <kbd>Tab</kbd> and the arrow keys to navigate between the search results.
