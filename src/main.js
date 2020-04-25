@@ -15,6 +15,8 @@ const {
   systemPreferences,
 } = require("electron");
 
+const isDev = process.env.NODE_ENV !== "production";
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   // eslint-disable-line global-require
@@ -32,8 +34,6 @@ function centerAndFocus(window) {
 
 let mainWindow;
 const createWindow = async () => {
-  const isDev = process.env.NODE_ENV !== "production";
-
   let encryptionKey = await getCredential("encryptionKey");
   if (!encryptionKey) {
     encryptionKey = (await promisify(crypto.randomBytes)(256)).toString("hex");
@@ -83,6 +83,11 @@ const createWindow = async () => {
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
+  } else {
+    const devToolShortcuts = "CommandOrControl+Option+i";
+    if (!globalShortcut.isRegistered(devToolShortcuts)) {
+      globalShortcut.register(devToolShortcuts, () => mainWindow.webContents.openDevTools());
+    }
   }
   centerAndFocus(mainWindow);
 
@@ -111,6 +116,13 @@ function registerGlobalShortcut(store) {
 
 function makeMenu() {
   const isMac = process.platform === "darwin";
+
+  const devTools = [
+    { role: "reload" },
+    { role: "forcereload" },
+    { role: "toggledevtools" },
+    { type: "separator" },
+  ];
 
   const template = [
     // { role: 'appMenu' }
@@ -165,10 +177,7 @@ function makeMenu() {
     {
       label: "View",
       submenu: [
-        { role: "reload" },
-        { role: "forcereload" },
-        { role: "toggledevtools" },
-        { type: "separator" },
+        ...(isDev ? devTools : []),
         { role: "resetzoom" },
         { role: "zoomin" },
         { role: "zoomout" },
