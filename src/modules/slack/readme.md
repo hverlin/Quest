@@ -4,8 +4,9 @@
 It is done using an API token.
 To get one, you need to create a Slack application.
 
-Then go to oauth and permissions:
-- enable the correct user token scopes: 
+Then go to Oauth and permissions.
+
+- enable the correct *user token scopes*: 
     - channels:history
     - channels:read
     - emoji:read
@@ -14,11 +15,11 @@ Then go to oauth and permissions:
 - click install app
 - copy the OAuth Access Token
 
-Eventually we would need to use oauth directly by starting a local server locally to handle the redirect URL of the Oauth flow.
+Eventually we would support use Oauth directly by starting a local server to handle the redirect URL of the Oauth flow.
 
 # Limitations
 - Message attachments are not yet supported.
-- At the moment, might not work well for workspaces with a lot of channels
+- At the moment, might not work well for workspaces with a lot of channels.
 
 ## Resources
 - https://api.slack.com/methods/reactions.get
