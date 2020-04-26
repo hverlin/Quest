@@ -11,8 +11,6 @@ import qs from "qs";
 
 const appSession = require("electron").remote.session;
 
-const pageSize = 5;
-
 function cleanConfluenceHtml(html, baseUrl) {
   function addBaseUrl(el, attribute) {
     const originalUrl = el.attribs[attribute];
@@ -76,10 +74,13 @@ function parseConfluenceDocument(message) {
   return message && message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
 }
 
-function ConfluenceDetail({ item, username, password, url }) {
+function ConfluenceDetail({ item, username, password, url, pageSize = 5, filter }) {
   const link = `${_.get(item, "content._links.self")}?expand=body.view`;
 
-  const { data, error } = useSWR(link, confluenceFetcher({ username, password, baseUrl: url }));
+  const { data, error } = useSWR(
+    link,
+    confluenceFetcher({ username, password, baseUrl: url, pageSize, filter })
+  );
 
   if (error) {
     return <p>Failed to load document: {link}</p>;
@@ -120,10 +121,12 @@ function ConfluenceItem({ item = {}, url }) {
   );
 }
 
-function getConfluencePage(url, searchData, username, password) {
+function getConfluencePage(url, searchData, username, password, pageSize, filter) {
   return (wrapper) => ({ offset = 0, withSWR }) => {
     const searchParams = qs.stringify({
-      cql: `(siteSearch ~ "${searchData.input}" and type = "page")`,
+      cql: `(siteSearch ~ "${searchData.input}" and type = "page"${
+        filter ? ` and ${filter}` : ""
+      })`,
       expand: "content.metadata.labels",
       start: offset || 0,
       limit: pageSize,
@@ -156,7 +159,7 @@ function getConfluencePage(url, searchData, username, password) {
 
 export default function ConfluenceSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
-  const { username, password, url } = configuration.get();
+  const { username, password, url, pageSize, filter } = configuration.get();
 
   return (
     <PaginatedSearchResults
@@ -170,7 +173,7 @@ export default function ConfluenceSearchResults({ configuration, searchViewState
       computeNextOffset={({ data }) =>
         data && data.totalSize > data.start + data.size ? data.start + pageSize : null
       }
-      pageFunc={getConfluencePage(url, searchData, username, password)}
+      pageFunc={getConfluencePage(url, searchData, username, password, pageSize, filter)}
     />
   );
 }

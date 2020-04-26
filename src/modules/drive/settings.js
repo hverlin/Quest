@@ -38,7 +38,7 @@ export function DriveOauthButton({ disabled, configurationState }) {
 export default function DriveSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
 
-  const { apiKey, clientId } = configuration.get();
+  const { clientId } = configuration.get();
 
   return (
     <>
@@ -51,17 +51,11 @@ export default function DriveSettings({ configurationState }) {
             onChange={(e) => configuration.nested.clientId.set(e.target.value)}
           />
         </FormGroup>
-        <FormGroup label="API Key" labelFor="google-drive-api-key">
-          <InputGroup
-            id="google-drive-api-key"
-            placeholder="API key"
-            type="password"
-            value={apiKey || ""}
-            onChange={(e) => configuration.nested.apiKey.set(e.target.value)}
-          />
-        </FormGroup>
         <FormGroup>
-          <DriveOauthButton disabled={!_.isEmpty(apiKey)} configurationState={configurationState} />
+          <DriveOauthButton
+            disabled={!_.isEmpty(clientId)}
+            configurationState={configurationState}
+          />
         </FormGroup>
       </form>
     </>

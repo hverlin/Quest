@@ -83,13 +83,21 @@
               },
               "username": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               },
               "password": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
+              },
+              "filter": {
+                "type": "string",
+                "default": ""
+              },
+              "pageSize": {
+                "type": "integer",
+                "default": 5,
+                "minimum": 1,
+                "maximum": 50
               }
             }
           },
@@ -116,23 +124,19 @@
               },
               "clientId": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               },
               "apiKey": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               },
               "refreshToken": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               },
               "accessToken": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               }
             }
           },
@@ -159,8 +163,7 @@
               },
               "token": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               }
             }
           },
@@ -191,13 +194,11 @@
               },
               "username": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               },
               "password": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               }
             }
           },
@@ -228,8 +229,7 @@
               },
               "token": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               }
             }
           },
@@ -256,8 +256,7 @@
               },
               "token": {
                 "type": "string",
-                "default": "",
-                "isPassword": true
+                "default": ""
               }
             }
           }
