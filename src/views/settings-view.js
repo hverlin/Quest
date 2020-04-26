@@ -30,6 +30,7 @@ import { Redirect } from "react-router-dom";
 import { DndProvider } from "react-dnd";
 import Backend from "react-dnd-html5-backend";
 import SortableList from "../components/sortable-list/sortable-list";
+import { ExternalLink } from "../components/external-link";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -271,6 +272,7 @@ export function SettingsView({ store }) {
             </tbody>
           </HTMLTable>
         </Card>
+        <ExternalLink href="https://github.com/hverlin/Quest">Learn more about Quest</ExternalLink>
       </div>
     </div>
   );
