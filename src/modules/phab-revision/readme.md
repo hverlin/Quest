@@ -7,5 +7,8 @@ https://www.dropbox.com/developers/apps
 
 Then create an application and generate an API token.
 
+# Limitations
+- Does not yet support a preview mode
+
 ## Resources
 - https://www.dropbox.com/developers/documentation/http/documentation

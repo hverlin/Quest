@@ -16,6 +16,10 @@ Then go to oauth and permissions:
 
 Eventually we would need to use oauth directly by starting a local server locally to handle the redirect URL of the Oauth flow.
 
+# Limitations
+- Message attachments are not yet supported.
+- At the moment, might not work well for workspaces with a lot of channels
+
 ## Resources
 - https://api.slack.com/methods/reactions.get
 - https://api.slack.com/methods/search.messages

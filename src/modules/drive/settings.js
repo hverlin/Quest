@@ -49,7 +49,7 @@ export default function DriveSettings({ configurationState }) {
         />
         <FormGroup>
           <DriveOauthButton
-            disabled={_.isEmpty(configuration.nested.client.get())}
+            disabled={_.isEmpty(configuration.nested.clientId.get())}
             configurationState={configurationState}
           />
         </FormGroup>

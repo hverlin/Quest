@@ -8,12 +8,12 @@ If you don't have a username and password, you can get one usually here https://
 It is possible to change the filter to narrow your search.
 The default CQL query is:
 ```
-siteSearch ~ "input" and type ="page"
+siteSearch ~ "input" and type = "page"
 ```
 
 If you use a filter, it will be converted to:
 ```
-siteSearch ~ "input" and type ="page" and ${filter}
+siteSearch ~ "input" and type = "page" and ${filter}
 ```
 
 ## Resources
