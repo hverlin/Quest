@@ -4,7 +4,7 @@ const rules = require("./webpack.rules");
 
 rules.push(
   {
-    test: /\.(png|svg|jpg|gif)$/,
+    test: /\.(png|svg|jpg|gif|md)$/,
     use: ["file-loader"],
   },
   {

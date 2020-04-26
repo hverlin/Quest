@@ -20,6 +20,7 @@ export function PaginatedSearchResults({
   pageFunc,
   computeNextOffset,
   deps = [],
+  getTotal = _.noop,
 }) {
   const state = useStateLink(searchViewState);
   const { name } = configuration.get();
@@ -67,8 +68,7 @@ export function PaginatedSearchResults({
     deps
   );
 
-  // TODO: support a total component
-  const total = _.get(pageSWRs, [0, "data", "total"], null);
+  const total = getTotal(pageSWRs);
 
   return (
     <div className={styles.results}>

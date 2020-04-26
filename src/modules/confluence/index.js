@@ -174,6 +174,7 @@ export default function ConfluenceSearchResults({ configuration, searchViewState
         data && data.totalSize > data.start + data.size ? data.start + pageSize : null
       }
       pageFunc={getConfluencePage(url, searchData, username, password, pageSize, filter)}
+      getTotal={(pageSWRs) => _.get(pageSWRs, [0, "data", "totalSize"], null)}
     />
   );
 }

@@ -181,6 +181,7 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
         <JiraDetail password={password} username={username} item={item} url={url} />
       )}
       pageFunc={getJiraPage(url, searchData, username, password, pageSize)}
+      getTotal={(pageSWRs) => _.get(pageSWRs, [0, "data", "total"], null)}
     />
   );
 }

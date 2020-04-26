@@ -7,11 +7,11 @@ import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import ConfigurationForm from "../../components/configuration-form";
 
 export function DriveOauthButton({ disabled, configurationState }) {
-  const configuration = configurationState.get();
-  const [isSignedIn, setIsSignedIn] = React.useState(hasCorrectTokens(configuration));
+  const configuration = useStateLink(configurationState);
+  const [isSignedIn, setIsSignedIn] = React.useState(hasCorrectTokens(configuration.get()));
 
   React.useEffect(() => {
-    setIsSignedIn(hasCorrectTokens(configuration));
+    setIsSignedIn(hasCorrectTokens(configuration.get()));
   });
 
   async function handleSignoutClick() {

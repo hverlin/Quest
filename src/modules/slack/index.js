@@ -173,6 +173,7 @@ export default function SlackSearchResults({ configuration, searchViewState }) {
       )}
       pageFunc={getSlackPage(token, pageSize, searchData, usersById, emojis)}
       deps={[usersById, emojis]}
+      getTotal={(pageSWRs) => _.get(pageSWRs, [0, "data", "messages", "total"], null)}
     />
   );
 }
