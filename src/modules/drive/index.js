@@ -72,7 +72,7 @@ async function listFiles({ searchData, configuration, pageToken }) {
   try {
     return await window.gapi.client.drive.files.list({
       q: `name contains '${searchData.input}'`,
-      pageSize: 5,
+      pageSize: configuration.nested.pageSize.get() ?? 5,
       fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
       pageToken,
     });

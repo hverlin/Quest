@@ -6,7 +6,7 @@ import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.svg";
 
-const revisionSearchFetcher = (token) => async (url, searchData, cursor) => {
+const revisionSearchFetcher = (token, pageSize) => async (url, searchData, cursor) => {
   const res = await fetch(`${url}/api/differential.revision.search`, {
     method: "POST",
     headers: {
@@ -17,7 +17,7 @@ const revisionSearchFetcher = (token) => async (url, searchData, cursor) => {
     body: qs.stringify({
       "api.token": token,
       constraints: { query: searchData.input },
-      limit: 5,
+      limit: pageSize,
       after: cursor,
     }),
   });
@@ -42,10 +42,10 @@ function RevisionResultItem({ url, item }) {
   );
 }
 
-function getRevisionPage(url, token, searchData) {
+function getRevisionPage(url, token, pageSize, searchData) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
     const { data, error } = withSWR(
-      useSWR([url, searchData, cursor], revisionSearchFetcher(token))
+      useSWR([url, searchData, cursor], revisionSearchFetcher(token, pageSize))
     );
 
     if (error) {
@@ -67,7 +67,7 @@ function getRevisionPage(url, token, searchData) {
 }
 
 export default function PaperSearchResults({ configuration, searchViewState }) {
-  const { url, token } = configuration.get();
+  const { url, token, pageSize } = configuration.get();
   const searchData = searchViewState.get();
 
   return (
@@ -76,7 +76,7 @@ export default function PaperSearchResults({ configuration, searchViewState }) {
       logo={logo}
       configuration={configuration}
       deps={[token]}
-      pageFunc={getRevisionPage(url, token, searchData)}
+      pageFunc={getRevisionPage(url, token, pageSize, searchData)}
       computeNextOffset={({ data }) =>
         data?.result?.cursor?.after ? data?.result?.cursor?.after : null
       }

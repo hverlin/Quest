@@ -9,8 +9,6 @@ import logo from "./logo.svg";
 import EmojiJS from "emoji-js";
 import SafeHtmlElement from "../../components/safe-html-element";
 
-const pageSize = 5;
-
 const emojiConverter = new EmojiJS();
 const rx_colons = new RegExp(":([a-zA-Z0-9-_+]+):", "g");
 
@@ -116,13 +114,13 @@ function SlackDetail({ item, users, emojis }) {
   );
 }
 
-function getSlackPage(token, searchData, users, emojis) {
+function getSlackPage(token, pageSize, searchData, users, emojis) {
   return (wrapper) => ({ offset = 1, withSWR }) => {
     const { data, error } = withSWR(
       useSWR(
-        `https://slack.com/api/search.messages?query=${
-          searchData.input
-        }&token=${token}&count=${pageSize}&page=${offset || 1}`
+        `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}&count=${
+          pageSize || 5
+        }&page=${offset || 1}`
       )
     );
 
@@ -145,7 +143,7 @@ function getSlackPage(token, searchData, users, emojis) {
 }
 
 export default function SlackSearchResults({ configuration, searchViewState }) {
-  const { token } = configuration.get();
+  const { token, pageSize } = configuration.get();
   const searchData = searchViewState.get();
 
   const [users, setUsers] = React.useState([]);
@@ -173,7 +171,7 @@ export default function SlackSearchResults({ configuration, searchViewState }) {
       itemDetailRenderer={(item) => (
         <SlackDetail token={token} item={item} users={usersById} emojis={emojis} />
       )}
-      pageFunc={getSlackPage(token, searchData, usersById, emojis)}
+      pageFunc={getSlackPage(token, pageSize, searchData, usersById, emojis)}
       deps={[usersById, emojis]}
     />
   );

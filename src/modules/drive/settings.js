@@ -1,9 +1,10 @@
 import React from "react";
-import { Button, FormGroup, InputGroup } from "@blueprintjs/core";
+import { Button, FormGroup } from "@blueprintjs/core";
 import { hasCorrectTokens, loadGoogleDriveClient, revokeRefreshToken } from "./auth";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+import ConfigurationForm from "../../components/configuration-form";
 
 export function DriveOauthButton({ disabled, configurationState }) {
   const configuration = configurationState.get();
@@ -38,22 +39,17 @@ export function DriveOauthButton({ disabled, configurationState }) {
 export default function DriveSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
 
-  const { clientId } = configuration.get();
-
   return (
     <>
       <form>
-        <FormGroup label="Client Id" labelFor="google-drive-client-id" labelInfo="(required)">
-          <InputGroup
-            id="google-drive-client-id"
-            placeholder="Client id"
-            value={clientId || ""}
-            onChange={(e) => configuration.nested.clientId.set(e.target.value)}
-          />
-        </FormGroup>
+        <ConfigurationForm
+          configuration={configurationState}
+          fields={["clientId", "pageSize"]}
+          isForm={false}
+        />
         <FormGroup>
           <DriveOauthButton
-            disabled={!_.isEmpty(clientId)}
+            disabled={_.isEmpty(configuration.nested.client.get())}
             configurationState={configurationState}
           />
         </FormGroup>

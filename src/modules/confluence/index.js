@@ -71,7 +71,7 @@ const confluenceFetcher = ({ username, password, baseUrl }) => async (url) => {
 };
 
 function parseConfluenceDocument(message) {
-  return message && message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `<b>$1</b>`);
+  return message && message.replace(/@@@hl@@@(.*?)@@@endhl@@@/gm, `$1`);
 }
 
 function ConfluenceDetail({ item, username, password, url, pageSize = 5, filter }) {

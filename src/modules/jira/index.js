@@ -13,8 +13,6 @@ import qs from "qs";
 
 const appSession = require("electron").remote.session;
 
-const pageSize = 5;
-
 const jiraFetcher = ({ username, password, baseUrl }) => async (url) => {
   const res = await fetch(url, {
     credentials: "omit",
@@ -133,7 +131,7 @@ function JiraResultItem({ item = {}, url }) {
   );
 }
 
-function getJiraPage(url, searchData, username, password) {
+function getJiraPage(url, searchData, username, password, pageSize = 5) {
   return (wrapper) => ({ offset = 0, withSWR }) => {
     const searchParams = qs.stringify({
       startAt: offset || 0,
@@ -168,7 +166,7 @@ function getJiraPage(url, searchData, username, password) {
 
 export default function JiraSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
-  const { username, password, url } = configuration.get();
+  const { username, password, url, pageSize } = configuration.get();
 
   return (
     <PaginatedSearchResults
@@ -182,7 +180,7 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
       itemDetailRenderer={(item) => (
         <JiraDetail password={password} username={username} item={item} url={url} />
       )}
-      pageFunc={getJiraPage(url, searchData, username, password)}
+      pageFunc={getJiraPage(url, searchData, username, password, pageSize)}
     />
   );
 }
