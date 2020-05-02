@@ -1,0 +1,38 @@
+.preview {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview :global(.bp3-spinner) {
+    position: absolute;
+}
+
+.document {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.page {
+    width: 100%;
+    height: auto;
+}
+
+.page > canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.navigation > p {
+    margin: 5px;
+}

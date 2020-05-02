@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
-import { Card, Classes, H2, Spinner, Tooltip } from "@blueprintjs/core";
+import { Button, Card, Spinner, Tooltip } from "@blueprintjs/core";
 import logo from "./logo.png";
-import ReactMarkdown from "react-markdown";
 import useSWR from "swr";
 import qs from "qs";
+import { Document, Page } from "react-pdf";
+import styles from "./drive.module.css";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
@@ -31,39 +32,82 @@ function DriveItemRender({ item }) {
 }
 
 function DriveDetailComponent({ item, configuration }) {
-  const [data, setData] = React.useState();
-  const [error, setError] = React.useState();
+  const [numPages, setNumPages] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
 
-  React.useEffect(() => {
-    async function fetchData() {
-      setError(null);
-      setData(null);
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
 
-      const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${item.id}/export?${qs.stringify({
-          mimeType: "text/plain",
-        })}`,
-        { headers: { Authorization: `Bearer ${configuration.nested.accessToken.get()}` } }
-      );
-
-      setData(await response.text());
-    }
-    fetchData().catch((e) => setError(e));
-  }, [item.id]);
-
-  if (!data) {
-    return <Spinner />;
-  }
+  const {
+    name,
+    iconLink,
+    webViewLink,
+    modifiedTime,
+    thumbnailLink,
+    hasThumbnail,
+    exportLinks,
+  } = item;
 
   return (
-    <div style={{ whiteSpace: "pre-wrap", paddingTop: "10px" }}>
-      {error ? (
-        <Card>Preview cannot be loaded.</Card>
-      ) : (
-        <>
-          <H2>{item.name}</H2>
-          <p className={Classes.RUNNING_TEXT}>{data && <ReactMarkdown source={data} />}</p>
-        </>
+    <div>
+      <p>
+        <Tooltip content={name} openOnTargetFocus={false}>
+          <img src={iconLink} alt="file icon" />
+        </Tooltip>
+        {"  "}
+        <ExternalLink href={webViewLink}>{name}</ExternalLink>
+      </p>
+      <p>
+        Last updated <Time iso={modifiedTime} />
+      </p>
+      {exportLinks && exportLinks["application/pdf"] && (
+        <Card>
+          <Document
+            className={styles.document}
+            file={{
+              url: `https://www.googleapis.com/drive/v3/files/${item.id}/export?${qs.stringify({
+                mimeType: "application/pdf",
+              })}`,
+              httpHeaders: { Authorization: `Bearer ${configuration.nested.accessToken.get()}` },
+            }}
+            onLoadSuccess={onDocumentLoadSuccess}
+            loading={
+              <div className={styles.preview}>
+                {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
+                <Spinner />
+              </div>
+            }
+          >
+            <Page
+              className={styles.page}
+              pageNumber={currentPage}
+              loading={
+                <div className={styles.preview}>
+                  {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
+                  <Spinner />
+                </div>
+              }
+            />
+            <div className={styles.navigation}>
+              <Button
+                disabled={currentPage <= 1}
+                icon={"chevron-left"}
+                minimal={true}
+                onClick={() => setCurrentPage(currentPage - 1)}
+              />
+              <p>
+                Page {currentPage} of {numPages}
+              </p>
+              <Button
+                disabled={currentPage >= numPages}
+                icon={"chevron-right"}
+                minimal={true}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              />
+            </div>
+          </Document>
+        </Card>
       )}
     </div>
   );
@@ -78,7 +122,8 @@ function getGoogleDrivePage(searchData, configuration) {
     const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
       q: `name contains '${searchData.input}'`,
       pageSize: configuration.nested.pageSize.get() ?? 5,
-      fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
+      fields:
+        "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink, thumbnailLink, hasThumbnail, exportLinks)",
       pageToken: cursor,
     })}`;
 
