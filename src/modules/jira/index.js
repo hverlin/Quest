@@ -71,10 +71,7 @@ function JiraDetail({ item, username, password, url }) {
     <div>
       <div>
         <H3>
-          <ExternalLink href={`${url}/browse/${key}`}>
-            {key}
-          </ExternalLink>{" "}
-          - {summary}
+          <ExternalLink href={`${url}/browse/${key}`}>{key}</ExternalLink> - {summary}
         </H3>
       </div>
       <p>
@@ -118,10 +115,7 @@ function JiraResultItem({ item = {}, url }) {
       <p>
         <IssueType issuetype={issuetype} />
         {"  "}
-        <ExternalLink href={url + "/browse/" + key}>
-          {key}
-        </ExternalLink>{" "}
-        - {summary}
+        <ExternalLink href={url + "/browse/" + key}>{key}</ExternalLink> - {summary}
       </p>
       <p>
         {status?.name} | Created: <Time iso={created} /> | Updated: <Time iso={updated} /> |{" "}

@@ -60,10 +60,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
     <div>
       <div>
         <H3>
-          <ExternalLink href={item.url}>
-            #{id}
-          </ExternalLink>{" "}
-          - {subject}
+          <ExternalLink href={item.url}>#{id}</ExternalLink> - {subject}
         </H3>
       </div>
       <p>
@@ -71,9 +68,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
         {project && (
           <>
             Project:{" "}
-            <ExternalLink href={`${baseUrl}/projects/${project?.id}`}>
-              {project?.name}
-            </ExternalLink>{" "}
+            <ExternalLink href={`${baseUrl}/projects/${project?.id}`}>{project?.name}</ExternalLink>{" "}
             |{" "}
           </>
         )}
@@ -90,10 +85,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
         {author && (
           <>
             Reported by:{" "}
-            <ExternalLink href={`${baseUrl}/users/${author?.id}`}>
-              {author?.name}
-            </ExternalLink>{" "}
-            |{" "}
+            <ExternalLink href={`${baseUrl}/users/${author?.id}`}>{author?.name}</ExternalLink> |{" "}
           </>
         )}
         {category && (
@@ -174,9 +166,7 @@ function RedmineDetailWiki({ apiKey, baseUrl, item }) {
     <div>
       <div>
         <H3>
-          <ExternalLink href={item.url}>
-            {title}
-          </ExternalLink>
+          <ExternalLink href={item.url}>{title}</ExternalLink>
         </H3>
       </div>
       <p>
@@ -185,9 +175,7 @@ function RedmineDetailWiki({ apiKey, baseUrl, item }) {
         {author && (
           <>
             Last edited by:{" "}
-            <ExternalLink href={`${baseUrl}/users/${author?.id}`}>
-              {author?.name}
-            </ExternalLink>
+            <ExternalLink href={`${baseUrl}/users/${author?.id}`}>{author?.name}</ExternalLink>
           </>
         )}
       </p>
@@ -208,9 +196,7 @@ function RedmineDetailDefault({ item }) {
     <div>
       <div>
         <H3>
-          <ExternalLink href={url}>
-            {title}
-          </ExternalLink>
+          <ExternalLink href={url}>{title}</ExternalLink>
         </H3>
       </div>
       <p>
@@ -244,9 +230,7 @@ function RedmineResultItem({ item = {} }) {
   return (
     <>
       <p>
-        <ExternalLink href={url}>
-          {title}
-        </ExternalLink>
+        <ExternalLink href={url}>{title}</ExternalLink>
       </p>
       <p>
         Updated: <Time iso={datetime} />

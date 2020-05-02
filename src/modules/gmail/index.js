@@ -10,7 +10,7 @@ import qs from "qs";
 import SafeHtmlElement from "../../components/safe-html-element";
 import IFrame from "../../components/iframe";
 import Highlighter from "../../components/highlighter";
-import { H3 } from "@blueprintjs/core";
+import { Callout, H3 } from "@blueprintjs/core";
 
 const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 const GMAIL_V1 = "https://www.googleapis.com/gmail/v1";
@@ -46,21 +46,29 @@ function b64DecodeUnicode(str) {
 
 function GmailMessage({ message, searchData }) {
   const headers = _.keyBy(message.payload.headers, "name");
-  const parts = _.keyBy(message.payload.parts, "mimeType");
+  let parts = _.keyBy(message.payload.parts, "mimeType");
 
-  const encodedBody =
-    parts["text/html"]?.body.data ?? btoa("<p>Unable to render this message.</p>");
+  if (parts["multipart/alternative"]) {
+    parts = _.keyBy(parts["multipart/alternative"].parts, "mimeType");
+  }
 
-  const html = b64DecodeUnicode(encodedBody) + iframeStyle;
+  const encodedBody = parts["text/html"]?.body.data ?? parts["text/plain"]?.body.data ?? null;
 
   return (
     <div style={{ paddingBottom: "5px" }}>
       <H3>{headers.Subject.value}</H3>
-      <IFrame style={{ width: "100%", height: "400px", border: "none", borderRadius: 3 }}>
-        <Highlighter text={searchData.input}>
-          <SafeHtmlElement html={html} />
-        </Highlighter>
-      </IFrame>
+      {encodedBody ? (
+        <IFrame style={{ width: "100%", height: "400px", border: "none", borderRadius: 3 }}>
+          <Highlighter text={searchData.input}>
+            <SafeHtmlElement html={b64DecodeUnicode(encodedBody) + iframeStyle} />
+          </Highlighter>
+        </IFrame>
+      ) : (
+        <Callout intent="danger">Unable to render this message</Callout>
+      )}
+      <ExternalLink href={`http://mail.google.com/mail/#inbox/${message.id}`}>
+        View in browser
+      </ExternalLink>
     </div>
   );
 }

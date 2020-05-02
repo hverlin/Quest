@@ -22,7 +22,7 @@ You can connect it to various services like JIRA, Confluence, Google Drive, Drop
 See the following links for more information on how to configure them.
 - [Confluence Server](src/modules/confluence/readme.md)
 - [Google Drive](src/modules/drive/readme.md)
-- [Google Drive](src/modules/gmail/readme.md)
+- [Gmail](src/modules/gmail/readme.md)
 - [JIRA Server](src/modules/jira/readme.md)
 - [Dropbox Paper](src/modules/paper/readme.md)
 - [Phabricator (revision)](src/modules/phab-revision/readme.md)
