@@ -359,6 +359,47 @@
                 "maximum": 50
               }
             }
+          },
+          {
+            "type": "object",
+            "required": ["moduleType", "enabled", "id", "name", "url", "apiKey"],
+            "additionalProperties": false,
+            "properties": {
+              "moduleType": {
+                "const": "redmine"
+              },
+              "id": {
+                "type": "string",
+                "default": "redmine",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "default": "Redmine"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "url": {
+                "title": "URL",
+                "type": "string",
+                "default": "",
+                "examples": ["https://www.redmine.org"]
+              },
+              "apiKey": {
+                "title": "API Key",
+                "type": "string",
+                "default": ""
+              },
+              "pageSize": {
+                "title": "Number of results per page",
+                "type": "integer",
+                "default": 5,
+                "minimum": 1,
+                "maximum": 50
+              }
+            }
           }
         ]
       },

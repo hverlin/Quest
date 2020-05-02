@@ -26,6 +26,7 @@ See the following links for more information on how to configure them.
 - [Dropbox Paper](src/modules/paper/readme.md)
 - [Phabricator (revision)](src/modules/phab-revision/readme.md)
 - [Slack](src/modules/slack/readme.md)
+- [Redmine](src/modules/redmine/readme.md)
 
 More to come...
 
