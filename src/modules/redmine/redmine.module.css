@@ -1,0 +1,20 @@
+.extra {
+    margin: auto;
+    --space: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.extra > * {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.extra > * + * {
+    margin-top: var(--space);
+}
+
+.extra :global(.bp3-card) {
+    padding: 10px;
+}
