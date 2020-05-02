@@ -10,9 +10,11 @@ import qs from "qs";
 import SafeHtmlElement from "../../components/safe-html-element";
 import IFrame from "../../components/iframe";
 import Highlighter from "../../components/highlighter";
-import { Button, Callout, H3 } from "@blueprintjs/core";
+import { Button, Callout, H4, Tag } from "@blueprintjs/core";
+import { DateTime } from "luxon";
 
 import styles from "./gmail.module.css";
+import { Time } from "../../components/time";
 
 const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 const GMAIL_V1 = "https://www.googleapis.com/gmail/v1";
@@ -32,6 +34,11 @@ const iframeStyle = `<style>
       background-color: unset !important;
   }
 </style>`;
+
+// e.g. Thu, 7 Mar 2019 11:53:55 -0800
+function parseMessageDate(dateString) {
+  return DateTime.fromFormat(dateString, "EEE, d MMM y HH:mm:ss ZZZ").toISO();
+}
 
 // https://stackoverflow.com/a/30106551/4981712
 function b64DecodeUnicode(str) {
@@ -58,11 +65,14 @@ function GmailMessage({ message, searchData, shouldExpand = false }) {
   const encodedBody = parts["text/html"]?.body.data ?? parts["text/plain"]?.body.data ?? null;
 
   return (
-    <div style={{ paddingBottom: "5px", position: "relative" }}>
-      <H3>{headers.Subject.value}</H3>
-      <ExternalLink href={`http://mail.google.com/mail/#inbox/${message.id}`}>
-        View in browser
-      </ExternalLink>
+    <div className={styles.gmailMessage}>
+      <H4>{headers.Subject.value}</H4>
+      <div style={{ display: "flex" }}>
+        <Tag minimal>{`From: ${headers.From.value}`}</Tag>
+        <div style={{ flexGrow: 1 }} />
+        <Time iso={parseMessageDate(headers.Date.value)} />
+      </div>
+
       {encodedBody ? (
         <>
           <IFrame initialSize={250} shouldExpand={isExpanded} className={styles.messageIframe}>
@@ -82,6 +92,11 @@ function GmailMessage({ message, searchData, shouldExpand = false }) {
               </Button>
             </div>
           )}
+          <div>
+            <ExternalLink href={`http://mail.google.com/mail/#inbox/${message.id}`}>
+              View in browser
+            </ExternalLink>
+          </div>
         </>
       ) : (
         <Callout intent="danger">Unable to render this message</Callout>

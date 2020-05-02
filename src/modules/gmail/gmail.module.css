@@ -1,6 +1,6 @@
 .expandButton {
     position: absolute;
-    bottom: 9px;
+    bottom: 22px;
     background: linear-gradient(180deg, transparent, white) !important;
     color: black !important;
     padding-top: 50px;
@@ -17,4 +17,9 @@
     border: none;
     border-radius: 3px;
     margin-top: 10px;
+}
+
+.gmailMessage {
+    margin-bottom: 15px;
+    position: relative;
 }
