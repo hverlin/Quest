@@ -287,7 +287,7 @@ function getRedminePage(url, searchData, apiKey, pageSize = 5) {
   };
 }
 
-export default function JiraSearchResults({ configuration, searchViewState }) {
+export default function RedmineSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
   const { apiKey, url, pageSize } = configuration.get();
 
