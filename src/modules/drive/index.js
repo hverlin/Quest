@@ -1,5 +1,5 @@
 import React from "react";
-import { hasCorrectTokens, loadGoogleDriveClient } from "./auth";
+import { hasCorrectTokens, makeGoogleRequest, hashConfiguration } from "../../shared/google-auth";
 import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
@@ -7,8 +7,10 @@ import { ExternalLink } from "../../components/external-link";
 import { Card, Classes, H2, Spinner, Tooltip } from "@blueprintjs/core";
 import logo from "./logo.png";
 import ReactMarkdown from "react-markdown";
-import log from "electron-log";
 import useSWR from "swr";
+import qs from "qs";
+
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
 function DriveItemRender({ item }) {
   const { name, webViewLink, iconLink, modifiedTime } = item;
@@ -28,7 +30,7 @@ function DriveItemRender({ item }) {
   );
 }
 
-function DriveDetailComponent({ item }) {
+function DriveDetailComponent({ item, configuration }) {
   const [data, setData] = React.useState();
   const [error, setError] = React.useState();
 
@@ -36,11 +38,15 @@ function DriveDetailComponent({ item }) {
     async function fetchData() {
       setError(null);
       setData(null);
-      const response = await window.gapi.client.drive.files.export({
-        fileId: item.id,
-        mimeType: "text/plain",
-      });
-      setData(response.body);
+
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${item.id}/export?${qs.stringify({
+          mimeType: "text/plain",
+        })}`,
+        { headers: { Authorization: `Bearer ${configuration.nested.accessToken.get()}` } }
+      );
+
+      setData(await response.text());
     }
     fetchData().catch((e) => setError(e));
   }, [item.id]);
@@ -63,50 +69,32 @@ function DriveDetailComponent({ item }) {
   );
 }
 
-async function listFiles({ searchData, configuration, pageToken }) {
-  const isAuthorized = await loadGoogleDriveClient(configuration, { logInIfUnauthorized: false });
-  if (!isAuthorized) {
-    return;
-  }
-
-  try {
-    return await window.gapi.client.drive.files.list({
-      q: `name contains '${searchData.input}'`,
-      pageSize: configuration.nested.pageSize.get() ?? 5,
-      fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
-      pageToken,
-    });
-  } catch (e) {
-    log.error(e);
-    if (e?.status !== 401) {
-      throw e;
-    }
-
-    configuration.nested.accessToken.set(null);
-    await loadGoogleDriveClient(configuration, { logInIfUnauthorized: false });
-    return listFiles({ isSignedIn: true, searchData, configuration });
-  }
-}
-
-const googleDriveFetcher = (configuration) => async (searchData, cursor) => {
-  return listFiles({ searchData, configuration, pageToken: cursor });
+const googleDriveFetcher = (configuration) => async (url) => {
+  return makeGoogleRequest({ configuration, scope: DRIVE_SCOPE, url });
 };
 
 function getGoogleDrivePage(searchData, configuration) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
+    const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
+      q: `name contains '${searchData.input}'`,
+      pageSize: configuration.nested.pageSize.get() ?? 5,
+      fields: "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink)",
+      pageToken: cursor,
+    })}`;
+
     const { data, error } = withSWR(
-      useSWR([searchData, cursor], googleDriveFetcher(configuration))
+      useSWR([url, hashConfiguration(configuration)], googleDriveFetcher(configuration))
     );
 
     if (error) {
       return wrapper({ error, item: null });
     }
 
-    if (!data?.result?.files) {
+    if (!data?.files) {
       return wrapper({ item: null });
     }
 
-    return data?.result?.files.map((item) =>
+    return data?.files.map((item) =>
       wrapper({
         key: item.id,
         component: <DriveItemRender item={item} />,
@@ -123,7 +111,9 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
     <PaginatedSearchResults
       searchViewState={searchViewState}
       logo={logo}
-      itemDetailRenderer={(item) => <DriveDetailComponent item={item} />}
+      itemDetailRenderer={(item) => (
+        <DriveDetailComponent item={item} configuration={configuration} />
+      )}
       error={
         hasCorrectTokens(configuration.get()) === false ? (
           <div>
@@ -134,9 +124,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
       }
       configuration={configuration}
       pageFunc={getGoogleDrivePage(searchData, configuration)}
-      computeNextOffset={({ data }) =>
-        data?.result?.nextPageToken ? data.result.nextPageToken : null
-      }
+      computeNextOffset={({ data }) => data?.nextPageToken ?? null}
     />
   );
 }

@@ -158,6 +158,49 @@
           },
           {
             "type": "object",
+            "required": ["moduleType", "enabled", "id", "name", "clientId"],
+            "additionalProperties": true,
+            "properties": {
+              "moduleType": {
+                "const": "gmail"
+              },
+              "id": {
+                "type": "string",
+                "default": "gmail",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "default": "Gmail"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "clientId": {
+                "title": "Client ID",
+                "type": "string",
+                "default": ""
+              },
+              "pageSize": {
+                "title": "Number of results per page",
+                "type": "integer",
+                "default": 5,
+                "minimum": 1,
+                "maximum": 50
+              },
+              "refreshToken": {
+                "type": "string",
+                "default": ""
+              },
+              "accessToken": {
+                "type": "string",
+                "default": ""
+              }
+            }
+          },
+          {
+            "type": "object",
             "required": ["moduleType", "enabled", "id", "name", "token"],
             "additionalProperties": false,
             "properties": {

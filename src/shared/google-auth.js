@@ -1,3 +1,8 @@
+import { useStateLink } from "@hookstate/core";
+import React from "react";
+import { Button } from "@blueprintjs/core";
+import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
+
 import { parse } from "url";
 import { remote } from "electron";
 import qs from "qs";
@@ -5,14 +10,13 @@ import log from "electron-log";
 
 const GOOGLE_AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-const discoveryDriveV3RestUrl = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
 
 // https://developers.google.com/identity/protocols/oauth2/native-app#request-parameter-redirect_uri
 function getRedirectUri(clientId) {
   return `com.googleusercontent.apps.${clientId.split(".")[0]}:/oauth2redirect`;
 }
 
-function signInWithPopup(clientId) {
+function signInWithPopup(clientId, { scope }) {
   return new Promise((resolve, reject) => {
     const authWindow = new remote.BrowserWindow({
       width: 500,
@@ -24,7 +28,7 @@ function signInWithPopup(clientId) {
       response_type: "code",
       redirect_uri: getRedirectUri(clientId),
       client_id: clientId,
-      scope: "https://www.googleapis.com/auth/drive.readonly",
+      scope,
     })}`;
 
     function handleNavigation(url) {
@@ -98,37 +102,9 @@ async function fetchAccessTokens(clientId, code) {
   }
 }
 
-async function googleSignIn(clientId) {
-  const code = await signInWithPopup(clientId);
+async function googleSignIn(clientId, { scope }) {
+  const code = await signInWithPopup(clientId, { scope });
   return fetchAccessTokens(clientId, code);
-}
-
-function insertGoogleDriveApiClientScript() {
-  const scriptId = "google-drive-api-client";
-  if (document.getElementById(scriptId)) {
-    return;
-  }
-
-  const script = document.createElement("script");
-  script.setAttribute("src", "https://apis.google.com/js/api.js");
-  script.setAttribute(
-    "onreadystatechange",
-    "if (this.readyState === 'complete') { console.log('gapi ready'); this.onload() }"
-  );
-  script.setAttribute("onload", "this.onload=function(){};console.log('gapi loaded');");
-  script.setAttribute("id", scriptId);
-  document.body.appendChild(script);
-}
-
-function waitForGoogleClient() {
-  return new Promise((resolve) => {
-    (function checkGoogleClient() {
-      if (window.gapi) {
-        return resolve();
-      }
-      setTimeout(checkGoogleClient, 30);
-    })();
-  });
 }
 
 export async function revokeRefreshToken({ refreshToken }) {
@@ -153,26 +129,11 @@ export function hasCorrectTokens(configuration) {
   return !!(clientId && refreshToken);
 }
 
-function loadGoogleClient() {
-  if (!window._gClient) {
-    window._gClient = new Promise((resolve) => window.gapi.load("client:auth2", resolve));
-  }
-  return window._gClient;
-}
-
-async function ensureGoogleClientLoaded() {
-  insertGoogleDriveApiClientScript();
-  await waitForGoogleClient();
-  await loadGoogleClient();
-}
-
-export async function loadGoogleDriveClient(
+export async function ensureAccessToken(
   configurationState,
-  { logInIfUnauthorized = true } = {}
+  { logInIfUnauthorized = true, scope } = {}
 ) {
-  await ensureGoogleClientLoaded();
-
-  const { clientId, apiKey, refreshToken, accessToken } = await configurationState.get();
+  const { clientId, refreshToken, accessToken } = await configurationState.get();
 
   if (!clientId) {
     return false;
@@ -186,7 +147,7 @@ export async function loadGoogleDriveClient(
     if (!accessToken) {
       const token = refreshToken
         ? await refreshAccessToken(clientId, refreshToken)
-        : await googleSignIn(clientId);
+        : await googleSignIn(clientId, { scope });
 
       if (!refreshToken) {
         configurationState.nested.refreshToken.set(token.refresh_token);
@@ -195,17 +156,76 @@ export async function loadGoogleDriveClient(
       configurationState.nested.accessToken.set(token.access_token);
     }
 
-    const { accessToken: token } = configurationState.get();
-
-    if (apiKey) {
-      window.gapi.client.setApiKey(apiKey);
-    }
-    window.gapi.client.setToken({ access_token: token });
-    await window.gapi.client.load(discoveryDriveV3RestUrl);
-
     return true;
   } catch (e) {
     log.error(e);
     return false;
   }
+}
+
+export function OauthButton({ disabled, configurationState, scope }) {
+  const configuration = useStateLink(configurationState);
+  const [isSignedIn, setIsSignedIn] = React.useState(hasCorrectTokens(configuration.get()));
+
+  React.useEffect(() => {
+    setIsSignedIn(hasCorrectTokens(configuration.get()));
+  });
+
+  async function handleSignoutClick() {
+    await revokeRefreshToken(configuration);
+    configurationState.nested.refreshToken.set(null);
+    configurationState.nested.accessToken.set(null);
+  }
+
+  return (
+    <div>
+      {isSignedIn || isSignedIn === null ? (
+        <Button className={isSignedIn === null ? SKELETON : ""} onClick={handleSignoutClick}>
+          Sign Out
+        </Button>
+      ) : (
+        <Button
+          disabled={disabled}
+          onClick={() => ensureAccessToken(configurationState, { scope })}
+        >
+          Authorize
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export async function makeGoogleRequest({ configuration, scope, url, shouldRetry = true }) {
+  const isAuthorized = await ensureAccessToken(configuration, {
+    logInIfUnauthorized: false,
+    scope,
+  });
+
+  if (!isAuthorized) {
+    return;
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${configuration.nested.accessToken.get()}` },
+    });
+
+    if (response.status === 401 && shouldRetry) {
+      configuration.nested.accessToken.set(null);
+      await ensureAccessToken(configuration, { logInIfUnauthorized: false, scope });
+      return makeGoogleRequest({ configuration, url, scope, shouldRetry: false });
+    }
+
+    return response.json();
+  } catch (e) {
+    log.error(e);
+  }
+}
+
+/**
+ * Small utility to prevent caching by SWR when using two Google modules
+ */
+export function hashConfiguration(configuration) {
+  const { clientId, refreshToken } = configuration.get();
+  return clientId + refreshToken;
 }

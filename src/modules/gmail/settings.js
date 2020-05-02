@@ -6,7 +6,7 @@ import ConfigurationForm from "../../components/configuration-form";
 import { OauthButton } from "../../shared/google-auth";
 
 // noinspection JSUnusedGlobalSymbols
-export default function DriveSettings({ configurationState }) {
+export default function GmailSettings({ configurationState }) {
   const configuration = useStateLink(configurationState);
 
   return (
@@ -20,7 +20,7 @@ export default function DriveSettings({ configurationState }) {
         <OauthButton
           disabled={_.isEmpty(configuration.nested.clientId.get())}
           configurationState={configurationState}
-          scope="https://www.googleapis.com/auth/drive.readonly"
+          scope="https://www.googleapis.com/auth/gmail.readonly"
         />
       </FormGroup>
     </form>
