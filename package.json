@@ -10,7 +10,12 @@
     "package": "electron-forge package",
     "make": "rm -rf .webpack && electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "keywords": [],
   "author": {
@@ -43,6 +48,7 @@
     "eslint-plugin-react": "^7.19.0",
     "file-loader": "^6.0.0",
     "filemanager-webpack-plugin": "^2.0.5",
+    "husky": "^4.2.5",
     "node-loader": "^0.6.0",
     "prettier": "^2.0.2",
     "react-refresh": "^0.8.1",
