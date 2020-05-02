@@ -10,7 +10,9 @@ import qs from "qs";
 import SafeHtmlElement from "../../components/safe-html-element";
 import IFrame from "../../components/iframe";
 import Highlighter from "../../components/highlighter";
-import { Callout, H3 } from "@blueprintjs/core";
+import { Button, Callout, H3 } from "@blueprintjs/core";
+
+import styles from "./gmail.module.css";
 
 const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 const GMAIL_V1 = "https://www.googleapis.com/gmail/v1";
@@ -44,7 +46,8 @@ function b64DecodeUnicode(str) {
   );
 }
 
-function GmailMessage({ message, searchData }) {
+function GmailMessage({ message, searchData, shouldExpand = false }) {
+  const [isExpanded, setIsExpanded] = React.useState(shouldExpand);
   const headers = _.keyBy(message.payload.headers, "name");
   let parts = _.keyBy(message.payload.parts, "mimeType");
 
@@ -55,20 +58,34 @@ function GmailMessage({ message, searchData }) {
   const encodedBody = parts["text/html"]?.body.data ?? parts["text/plain"]?.body.data ?? null;
 
   return (
-    <div style={{ paddingBottom: "5px" }}>
+    <div style={{ paddingBottom: "5px", position: "relative" }}>
       <H3>{headers.Subject.value}</H3>
-      {encodedBody ? (
-        <IFrame style={{ width: "100%", height: "400px", border: "none", borderRadius: 3 }}>
-          <Highlighter text={searchData.input}>
-            <SafeHtmlElement html={b64DecodeUnicode(encodedBody) + iframeStyle} />
-          </Highlighter>
-        </IFrame>
-      ) : (
-        <Callout intent="danger">Unable to render this message</Callout>
-      )}
       <ExternalLink href={`http://mail.google.com/mail/#inbox/${message.id}`}>
         View in browser
       </ExternalLink>
+      {encodedBody ? (
+        <>
+          <IFrame initialSize={250} shouldExpand={isExpanded} className={styles.messageIframe}>
+            <Highlighter text={searchData.input}>
+              <SafeHtmlElement html={b64DecodeUnicode(encodedBody) + iframeStyle} />
+            </Highlighter>
+          </IFrame>
+          {!isExpanded && (
+            <div>
+              <Button
+                className={styles.expandButton}
+                fill
+                minimal
+                onClick={() => setIsExpanded(true)}
+              >
+                Expand
+              </Button>
+            </div>
+          )}
+        </>
+      ) : (
+        <Callout intent="danger">Unable to render this message</Callout>
+      )}
     </div>
   );
 }
@@ -76,8 +93,13 @@ function GmailMessage({ message, searchData }) {
 function GmailDetailComponent({ item, searchData }) {
   return (
     <div style={{ paddingTop: "10px" }}>
-      {item.messages.map((m, index) => (
-        <GmailMessage key={index} message={m} searchData={searchData} />
+      {item.messages.map((message) => (
+        <GmailMessage
+          key={message.id}
+          message={message}
+          searchData={searchData}
+          shouldExpand={item.messages.length === 1}
+        />
       ))}
     </div>
   );
