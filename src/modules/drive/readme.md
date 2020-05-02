@@ -12,7 +12,6 @@ The Google Drive API needs to be enabled as well:
 https://console.developers.google.com/apis/library/drive.googleapis.com
 
 ## Limitations
-- Due to how the javascript Google API client works, only one Google Drive module is supported at once.
 - Google Slides and Google Docs are the only formats that support preview.
 - The Google Drive API does not return the total number of results. Therefore, it cannot be displayed.
 

@@ -9,7 +9,7 @@ QUEST
 ---
 
 ## Introduction
-*Quest* is meta-search client that can connect to various applications and sources. It will submit a search query to all the configured services and aggregate the results.
+*Quest* is a meta-search client that can connect to various applications and sources. It will submit a search query to all the configured services and aggregate the results.
 
 You can connect it to various services like JIRA, Confluence, Google Drive, Dropbox paper, Slack, etc.
 
@@ -22,6 +22,7 @@ You can connect it to various services like JIRA, Confluence, Google Drive, Drop
 See the following links for more information on how to configure them.
 - [Confluence Server](src/modules/confluence/readme.md)
 - [Google Drive](src/modules/drive/readme.md)
+- [Google Drive](src/modules/gmail/readme.md)
 - [JIRA Server](src/modules/jira/readme.md)
 - [Dropbox Paper](src/modules/paper/readme.md)
 - [Phabricator (revision)](src/modules/phab-revision/readme.md)

@@ -102,10 +102,10 @@ span[data-markjs] {
 }
 
 .bp3-running-text pre {
- background-color: rgb(251, 251, 251);
+  background-color: rgb(251, 251, 251);
 }
 
-  /*** Table styles ***/
+/*** Table styles ***/
 .bp3-running-text table {
   border-collapse: collapse;
   border-spacing: 0;
