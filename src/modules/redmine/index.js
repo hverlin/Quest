@@ -60,7 +60,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
     <div>
       <div>
         <H3>
-          <ExternalLink target="_blank" href={item.url}>
+          <ExternalLink href={item.url}>
             #{id}
           </ExternalLink>{" "}
           - {subject}
@@ -71,7 +71,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
         {project && (
           <>
             Project:{" "}
-            <ExternalLink target="_blank" href={`${baseUrl}/projects/${project?.id}`}>
+            <ExternalLink href={`${baseUrl}/projects/${project?.id}`}>
               {project?.name}
             </ExternalLink>{" "}
             |{" "}
@@ -81,7 +81,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
         {assigned_to && (
           <>
             Assigned to:{" "}
-            <ExternalLink target="_blank" href={`${baseUrl}/users/${assigned_to?.id}`}>
+            <ExternalLink href={`${baseUrl}/users/${assigned_to?.id}`}>
               {assigned_to?.name}
             </ExternalLink>{" "}
             |{" "}
@@ -90,7 +90,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
         {author && (
           <>
             Reported by:{" "}
-            <ExternalLink target="_blank" href={`${baseUrl}/users/${author?.id}`}>
+            <ExternalLink href={`${baseUrl}/users/${author?.id}`}>
               {author?.name}
             </ExternalLink>{" "}
             |{" "}
@@ -99,7 +99,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
         {category && (
           <>
             Category:{" "}
-            <ExternalLink target="_blank" href={`${baseUrl}/issue_categories/${category?.id}`}>
+            <ExternalLink href={`${baseUrl}/issue_categories/${category?.id}`}>
               {category?.name}
             </ExternalLink>
           </>
@@ -119,11 +119,11 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
             <H4>Attachments</H4>
             {attachments?.map((attachment) => (
               <Card key={attachment.id} className={Classes.RUNNING_TEXT}>
-                <ExternalLink target="_blank" href={attachment?.content_url}>
+                <ExternalLink href={attachment?.content_url}>
                   <b>{attachment?.filename}</b>
                 </ExternalLink>
                 <br />
-                <ExternalLink target="_blank" href={`${baseUrl}/users/${attachment?.author?.id}`}>
+                <ExternalLink href={`${baseUrl}/users/${attachment?.author?.id}`}>
                   {attachment?.author?.name}
                 </ExternalLink>{" "}
                 - <Time iso={attachment.created_on} />
@@ -174,7 +174,7 @@ function RedmineDetailWiki({ apiKey, baseUrl, item }) {
     <div>
       <div>
         <H3>
-          <ExternalLink target="_blank" href={item.url}>
+          <ExternalLink href={item.url}>
             {title}
           </ExternalLink>
         </H3>
@@ -185,7 +185,7 @@ function RedmineDetailWiki({ apiKey, baseUrl, item }) {
         {author && (
           <>
             Last edited by:{" "}
-            <ExternalLink target="_blank" href={`${baseUrl}/users/${author?.id}`}>
+            <ExternalLink href={`${baseUrl}/users/${author?.id}`}>
               {author?.name}
             </ExternalLink>
           </>
@@ -208,7 +208,7 @@ function RedmineDetailDefault({ item }) {
     <div>
       <div>
         <H3>
-          <ExternalLink target="_blank" href={url}>
+          <ExternalLink href={url}>
             {title}
           </ExternalLink>
         </H3>
@@ -244,7 +244,7 @@ function RedmineResultItem({ item = {} }) {
   return (
     <>
       <p>
-        <ExternalLink target="_blank" href={url}>
+        <ExternalLink href={url}>
           {title}
         </ExternalLink>
       </p>
