@@ -32,16 +32,11 @@ jobs:
           name: Quest-${{ matrix.os }}
           path: out/make
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Get Release
+        id: get_release
+        uses: bruceadams/get-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
 
       - name: Zip output directory
         run: zip -r release.zip out/make
@@ -52,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: release.zip
           asset_name: Quest-${{ matrix.os }}-${{ github.ref }}.zip
           asset_content_type: application/zip
