@@ -1,0 +1,33 @@
+name: Electron Forge CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Node - ${{ matrix.node_version }} OS - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node_version: [12]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node JS Version
+        uses: actions/setup-node@v1
+        with:
+          version: ${{ matrix.node_version }}
+
+      - name: npm ci, Electron Forge make
+        run: |
+          npm ci
+          npm run make
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: Quest-${{ matrix.os }}
+          path: out/make
