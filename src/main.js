@@ -40,7 +40,14 @@ const createWindow = async () => {
     await saveCredential("encryptionKey", encryptionKey);
   }
 
-  if (!isDev && !isAuthenticated && encryptionKey && systemPreferences.canPromptTouchID()) {
+  if (
+    !isDev &&
+    !isAuthenticated &&
+    encryptionKey &&
+    systemPreferences &&
+    systemPreferences.canPromptTouchID &&
+    systemPreferences.canPromptTouchID()
+  ) {
     await systemPreferences.promptTouchID("access your keychain");
   }
 
