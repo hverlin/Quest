@@ -51,4 +51,13 @@ module.exports = {
       },
     ],
   ],
+  publishers: [
+    {
+      name: "@electron-forge/publisher-github",
+      config: {
+        repository: { owner: "hverlin", name: "Quest" },
+        prerelease: true,
+      },
+    },
+  ],
 };
