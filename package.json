@@ -1,11 +1,14 @@
 {
   "name": "quest",
-  "productName": "Quest",
+  "productName": "quest",
   "private": true,
   "version": "0.0.1",
   "description": "Meta search client",
   "main": ".webpack/main",
+  "license": "MIT",
   "scripts": {
+    "rebuild": "electron-rebuild",
+    "postinstall": "electron-rebuild",
     "start": "rm -rf .webpack && electron-forge start",
     "package": "electron-forge package",
     "make": "rm -rf .webpack && electron-forge make",
@@ -42,6 +45,7 @@
     "css-loader": "^3.4.2",
     "electron": "8.2.0",
     "electron-devtools-installer": "^2.2.4",
+    "electron-rebuild": "^1.10.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.3",

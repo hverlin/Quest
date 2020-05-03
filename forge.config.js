@@ -16,11 +16,21 @@ module.exports = {
     },
     {
       name: "@electron-forge/maker-deb",
-      config: {},
+      config: {
+        options: {
+          description: "Quest is a Unified Engine for Searching Things",
+          depends: ["libsecret-1-dev"],
+          homepage: "https://github.com/hverlin/Quest",
+        },
+      },
     },
     {
       name: "@electron-forge/maker-rpm",
-      config: {},
+      config: {
+        description: "Quest is a Unified Engine for Searching Things",
+        requires: ["libsecret-devel"],
+        homepage: "https://github.com/hverlin/Quest",
+      },
     },
   ],
   plugins: [

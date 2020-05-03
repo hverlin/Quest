@@ -33,6 +33,14 @@ More to come...
 
 ## Development
 
+### Requirement for Linux only
+
+We use the package [keytar](http://atom.github.io/node-keytar/) to handle storage of encrypted settings and credentials in your system's keychain.
+Currently, this library uses `libsecret` on Linux platform, so you may need to install it before running `npm ci`:
+* Debian/Ubuntu: sudo apt-get install libsecret-1-dev
+* Red Hat-based: sudo yum install libsecret-devel
+* Arch Linux: sudo pacman -S libsecret
+
 ### Running
 ```
 npm ci
