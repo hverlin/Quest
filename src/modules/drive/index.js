@@ -17,8 +17,8 @@ import ReactMarkdown from "react-markdown";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
 const MIME_TYPES = {
-  PDF: "application/pdf",
   TEXT: "text/plain",
+  PDF: "application/pdf",
 };
 
 const formatFetcher = async (itemId, accessToken, mimeType) => {
@@ -139,7 +139,15 @@ function DriveItemRender({ item }) {
 function DriveDetailComponent({ item, configuration }) {
   const [currentTab, setCurrentTab] = React.useState(MIME_TYPES.TEXT);
 
-  const { name, iconLink, webViewLink, modifiedTime, exportLinks } = item;
+  const {
+    name,
+    iconLink,
+    webViewLink,
+    modifiedTime,
+    exportLinks,
+    hasThumbnail,
+    thumbnailLink,
+  } = item;
 
   const supportedFormats = new Set(_.isObject(exportLinks) ? Object.keys(exportLinks) : []);
 
@@ -182,7 +190,13 @@ function DriveDetailComponent({ item, configuration }) {
           )}
         </Tabs>
       ) : (
-        <Callout>Unable to render this document</Callout>
+        <div>
+          {hasThumbnail ? (
+            <img src={thumbnailLink} alt="Preview" />
+          ) : (
+            <Callout>Unable to render this document</Callout>
+          )}
+        </div>
       )}
     </div>
   );
