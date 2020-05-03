@@ -1,9 +1,3 @@
-import { initializeStore } from "./services/storage-service";
-import { getCredential, saveCredential } from "./services/credential-service";
-const crypto = require("crypto");
-const { promisify } = require("util");
-const log = require("electron-log");
-
 const {
   app,
   Menu,
@@ -14,6 +8,15 @@ const {
   nativeTheme,
   systemPreferences,
 } = require("electron");
+
+const crypto = require("crypto");
+const { promisify } = require("util");
+const log = require("electron-log");
+const keytar = require("keytar");
+
+const { initializeStore } = require("./services/storage-service");
+
+const SERVICE_NAME = "quest-app";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -34,10 +37,10 @@ function centerAndFocus(window) {
 
 let mainWindow;
 const createWindow = async () => {
-  let encryptionKey = await getCredential("encryptionKey");
+  let encryptionKey = await keytar.getPassword(SERVICE_NAME, "encryptionKey");
   if (!encryptionKey) {
     encryptionKey = (await promisify(crypto.randomBytes)(256)).toString("hex");
-    await saveCredential("encryptionKey", encryptionKey);
+    await keytar.setPassword(SERVICE_NAME, "encryptionKey", encryptionKey);
   }
 
   if (
