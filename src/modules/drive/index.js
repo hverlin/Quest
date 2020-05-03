@@ -209,7 +209,7 @@ const googleDriveFetcher = (configuration) => async (url) => {
 function getGoogleDrivePage(searchData, configuration) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
     const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
-      q: `name contains '${searchData.input}'`,
+      q: `name contains '${searchData.input}' or fullText contains '${searchData.input}'`,
       pageSize: configuration.nested.pageSize.get() ?? 5,
       fields:
         "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink, thumbnailLink, hasThumbnail, exportLinks)",
