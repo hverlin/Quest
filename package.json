@@ -13,7 +13,8 @@
     "package": "electron-forge package",
     "make": "rm -rf .webpack && electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ignore-path .gitignore . --fix"
+    "lint": "eslint --ignore-path .gitignore .",
+    "lint-fix": "eslint --ignore-path .gitignore . --fix"
   },
   "husky": {
     "hooks": {
