@@ -9,6 +9,10 @@
     position: absolute;
 }
 
+.pdfView span[data-markjs] {
+    background: none !important;
+}
+
 .document {
     display: flex;
     flex-direction: column;
@@ -28,9 +32,11 @@
 }
 
 .navigation {
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 10px;
 }
 
 .navigation > p {

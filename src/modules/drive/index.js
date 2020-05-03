@@ -1,17 +1,122 @@
+import _ from "lodash";
 import React from "react";
 import { hasCorrectTokens, makeGoogleRequest, hashConfiguration } from "../../shared/google-auth";
 import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
-import { Button, Card, Spinner, Tooltip } from "@blueprintjs/core";
+import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout } from "@blueprintjs/core";
 import logo from "./logo.png";
 import useSWR from "swr";
 import qs from "qs";
-import { Document, Page } from "react-pdf";
+import { Document, Page } from "react-pdf/dist/entry.webpack";
+
 import styles from "./drive.module.css";
+import ReactMarkdown from "react-markdown";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
+
+const MIME_TYPES = {
+  PDF: "application/pdf",
+  TEXT: "text/plain",
+};
+
+const formatFetcher = async (itemId, accessToken, mimeType) => {
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${itemId}/export?${qs.stringify({ mimeType })}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+
+  return mimeType === MIME_TYPES.TEXT ? res.text() : res.blob();
+};
+
+function PDFView({ configuration, item }) {
+  const [numPages, setNumPages] = React.useState(0);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const { data } = useSWR(
+    [item.id, configuration.nested.accessToken.get(), MIME_TYPES.PDF],
+    formatFetcher
+  );
+  const { thumbnailLink, hasThumbnail } = item;
+
+  React.useEffect(() => {
+    setNumPages(0);
+    setCurrentPage(1);
+  }, [item]);
+
+  if (!data) {
+    return (
+      <div className={styles.preview}>
+        {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
+        <Spinner />
+      </div>
+    );
+  }
+  return (
+    <div className={styles.pdfView}>
+      <div className={styles.navigation}>
+        <Button
+          disabled={currentPage <= 1}
+          icon={"chevron-left"}
+          minimal={true}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        />
+        <p>
+          Page {currentPage} of {numPages}
+        </p>
+        <Button
+          disabled={currentPage >= numPages}
+          icon={"chevron-right"}
+          minimal={true}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        />
+      </div>
+      <Document
+        className={styles.document}
+        file={data}
+        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+        loading={
+          <div className={styles.preview}>
+            {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
+            <Spinner />
+          </div>
+        }
+      >
+        <Page
+          className={styles.page}
+          pageNumber={currentPage}
+          loading={
+            <div className={styles.preview}>
+              {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
+              <Spinner />
+            </div>
+          }
+        />
+      </Document>
+    </div>
+  );
+}
+
+function TextView({ item, configuration }) {
+  const { data, error } = useSWR(
+    [item.id, configuration.nested.accessToken.get(), MIME_TYPES.TEXT],
+    formatFetcher
+  );
+
+  if (!data) {
+    return <Spinner />;
+  }
+
+  return (
+    <div style={{ whiteSpace: "pre-wrap", paddingTop: "10px" }}>
+      {error ? (
+        <Callout>Preview cannot be loaded.</Callout>
+      ) : (
+        <p className={Classes.RUNNING_TEXT}>{data && <ReactMarkdown source={data} />}</p>
+      )}
+    </div>
+  );
+}
 
 function DriveItemRender({ item }) {
   const { name, webViewLink, iconLink, modifiedTime } = item;
@@ -32,22 +137,20 @@ function DriveItemRender({ item }) {
 }
 
 function DriveDetailComponent({ item, configuration }) {
-  const [numPages, setNumPages] = React.useState(false);
-  const [currentPage, setCurrentPage] = React.useState(1);
+  const [currentTab, setCurrentTab] = React.useState(MIME_TYPES.TEXT);
 
-  const onDocumentLoadSuccess = ({ numPages }) => {
-    setNumPages(numPages);
-  };
+  const { name, iconLink, webViewLink, modifiedTime, exportLinks } = item;
 
-  const {
-    name,
-    iconLink,
-    webViewLink,
-    modifiedTime,
-    thumbnailLink,
-    hasThumbnail,
-    exportLinks,
-  } = item;
+  const supportedFormats = new Set(_.isObject(exportLinks) ? Object.keys(exportLinks) : []);
+
+  React.useEffect(() => {
+    if (!supportedFormats.has(currentTab)) {
+      const mimeType = Object.values(MIME_TYPES).find((mimeTypes) =>
+        supportedFormats.has(mimeTypes)
+      );
+      setCurrentTab(mimeType);
+    }
+  }, [item]);
 
   return (
     <div>
@@ -61,53 +164,25 @@ function DriveDetailComponent({ item, configuration }) {
       <p>
         Last updated <Time iso={modifiedTime} />
       </p>
-      {exportLinks && exportLinks["application/pdf"] && (
-        <Card>
-          <Document
-            className={styles.document}
-            file={{
-              url: `https://www.googleapis.com/drive/v3/files/${item.id}/export?${qs.stringify({
-                mimeType: "application/pdf",
-              })}`,
-              httpHeaders: { Authorization: `Bearer ${configuration.nested.accessToken.get()}` },
-            }}
-            onLoadSuccess={onDocumentLoadSuccess}
-            loading={
-              <div className={styles.preview}>
-                {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
-                <Spinner />
-              </div>
-            }
-          >
-            <Page
-              className={styles.page}
-              pageNumber={currentPage}
-              loading={
-                <div className={styles.preview}>
-                  {hasThumbnail && <img src={thumbnailLink} alt="Preview" />}
-                  <Spinner />
-                </div>
-              }
+      {currentTab ? (
+        <Tabs id="FormatTabs" onChange={setCurrentTab} selectedTabId={currentTab}>
+          {supportedFormats.has(MIME_TYPES.TEXT) && (
+            <Tab
+              id={MIME_TYPES.TEXT}
+              title="Text"
+              panel={<TextView item={item} configuration={configuration} />}
             />
-            <div className={styles.navigation}>
-              <Button
-                disabled={currentPage <= 1}
-                icon={"chevron-left"}
-                minimal={true}
-                onClick={() => setCurrentPage(currentPage - 1)}
-              />
-              <p>
-                Page {currentPage} of {numPages}
-              </p>
-              <Button
-                disabled={currentPage >= numPages}
-                icon={"chevron-right"}
-                minimal={true}
-                onClick={() => setCurrentPage(currentPage + 1)}
-              />
-            </div>
-          </Document>
-        </Card>
+          )}
+          {supportedFormats.has(MIME_TYPES.PDF) && (
+            <Tab
+              id={MIME_TYPES.PDF}
+              title="PDF"
+              panel={<PDFView item={item} configuration={configuration} />}
+            />
+          )}
+        </Tabs>
+      ) : (
+        <Callout>Unable to render this document</Callout>
       )}
     </div>
   );
