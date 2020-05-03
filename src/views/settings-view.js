@@ -272,7 +272,15 @@ export function SettingsView({ store }) {
             </tbody>
           </HTMLTable>
         </Card>
-        <ExternalLink href="https://github.com/hverlin/Quest">Learn more about Quest</ExternalLink>
+        <div style={{ display: "flex" }}>
+          <ButtonLink icon="cog" minimal to="/json-config">
+            Edit configuration
+          </ButtonLink>
+          <div style={{ flexGrow: 1 }} />
+          <ExternalLink href="https://github.com/hverlin/Quest">
+            Learn more about Quest
+          </ExternalLink>
+        </div>
       </div>
     </div>
   );

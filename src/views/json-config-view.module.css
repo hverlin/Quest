@@ -1,0 +1,28 @@
+.header {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1000;
+}
+
+.jsonEditor > div {
+    height: 100vh;
+}
+
+:global(.jsoneditor-poweredBy) {
+    display: none;
+}
+
+:global(.jsoneditor) {
+    border: none !important;
+}
+
+:global(.jsoneditor-menu) {
+    background: #394b59 !important;
+    border: none !important;
+    color: #f5f8fa !important;
+}
+
+.header :global(.bp3-button) span {
+    color: #f5f8fa !important;
+}

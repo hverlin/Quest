@@ -66,11 +66,11 @@ function GmailMessage({ message, searchData, shouldExpand = false }) {
 
   return (
     <div className={styles.gmailMessage}>
-      <H4>{headers.Subject.value}</H4>
+      <H4>{headers.Subject?.value}</H4>
       <div style={{ display: "flex" }}>
-        <Tag minimal>{`From: ${headers.From.value}`}</Tag>
+        <Tag minimal>{`From: ${headers.From?.value}`}</Tag>
         <div style={{ flexGrow: 1 }} />
-        <Time iso={parseMessageDate(headers.Date.value)} />
+        <Time iso={parseMessageDate(headers.Date?.value)} />
       </div>
 
       {encodedBody ? (
@@ -129,8 +129,8 @@ function GmailItem({ item }) {
 
   return (
     <>
-      <p>{headers.Subject.value}</p>
-      <SafeHtmlElement html={messageSnippet.value} />
+      <p>{headers.Subject?.value}</p>
+      <SafeHtmlElement html={messageSnippet?.value} />
       <ExternalLink href={`http://mail.google.com/mail/#inbox/${id}`}>View email</ExternalLink>
     </>
   );

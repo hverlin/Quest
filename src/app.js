@@ -6,6 +6,7 @@ import { SWRConfig } from "swr";
 
 import { SearchView } from "./views/search-view";
 import { SettingsView } from "./views/settings-view";
+import { JsonConfigView } from "./views/json-config-view";
 
 const swrConfig = {
   refreshInterval: 0,
@@ -25,6 +26,9 @@ function AppBody({ store }) {
         <Switch location={location}>
           <Route path="/settings">
             <SettingsView store={store} />
+          </Route>
+          <Route path="/json-config">
+            <JsonConfigView store={store} />
           </Route>
           <Route path="/">
             <SearchView store={store} />

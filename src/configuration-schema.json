@@ -49,6 +49,11 @@
           "description": "Close sidebar, settings, modal, etc.",
           "type": "string",
           "default": "Escape"
+        },
+        "saveConfig": {
+          "description": "Save the configuration",
+          "type": "string",
+          "default": "CommandOrControl+s"
         }
       }
     },

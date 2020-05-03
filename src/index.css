@@ -118,7 +118,7 @@ span[data-markjs] {
   text-align: center;
 }
 
-table td,
+.bp3-running-text table td,
 .bp3-running-text table th {
   border-left: 1px solid #cbcbcb;
   font-size: inherit;

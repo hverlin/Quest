@@ -62,7 +62,7 @@ function Sidebar({ searchViewState }) {
 
   return (
     <ResizePanel>
-      <>
+      <ErrorBoundary>
         <Button
           title="Close"
           minimal
@@ -75,7 +75,7 @@ function Sidebar({ searchViewState }) {
             {(window.detailView || _.noop)(state.get().selectedItem)}
           </Highlighter>
         </div>
-      </>
+      </ErrorBoundary>
     </ResizePanel>
   );
 }
