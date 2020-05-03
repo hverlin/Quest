@@ -31,15 +31,18 @@ See the following links for more information on how to configure them.
 
 More to come...
 
+## Download
+You can install *Quest* by going to the [releases page](https://github.com/hverlin/Quest/releases).
+
 ## Development
 
 ### Requirement for Linux only
 
 We use the package [keytar](http://atom.github.io/node-keytar/) to handle storage of encrypted settings and credentials in your system's keychain.
 Currently, this library uses `libsecret` on Linux platform, so you may need to install it before running `npm ci`:
-* Debian/Ubuntu: sudo apt-get install libsecret-1-dev
-* Red Hat-based: sudo yum install libsecret-devel
-* Arch Linux: sudo pacman -S libsecret
+* Debian/Ubuntu: `sudo apt-get install libsecret-1-dev`
+* Red Hat-based: `sudo yum install libsecret-devel`
+* Arch Linux: `sudo pacman -S libsecret`
 
 ### Running
 ```

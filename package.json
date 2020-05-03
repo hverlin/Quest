@@ -6,6 +6,10 @@
   "description": "Meta search client",
   "main": ".webpack/main",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hverlin/Quest"
+  },
   "scripts": {
     "rebuild": "electron-rebuild",
     "postinstall": "electron-rebuild",

@@ -7,7 +7,7 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",
       config: {
-        name: "my_search",
+        name: "quest",
       },
     },
     {
