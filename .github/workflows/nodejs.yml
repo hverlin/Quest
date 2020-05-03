@@ -21,6 +21,7 @@ jobs:
       - name: npm ci, Electron Forge make
         run: |
           npm ci
+          npm run rebuild
           npm run make
 
       - name: Upload Artifact
