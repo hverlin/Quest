@@ -32,6 +32,18 @@ jobs:
           name: Quest-${{ matrix.os }}
           path: out/make
 
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
       - name: Get Release
         id: get_release
         uses: bruceadams/get-release@v1.2.0
