@@ -54,6 +54,11 @@
           "description": "Save the configuration",
           "type": "string",
           "default": "CommandOrControl+s"
+        },
+        "quickModuleList": {
+          "description": "Quick module list (enable/disable modules)",
+          "type": "string",
+          "default": "CommandOrControl+Shift+m"
         }
       }
     },

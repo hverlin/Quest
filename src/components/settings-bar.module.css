@@ -1,10 +1,14 @@
 .settingsBar {
-  width: 100%;
-  display: flex;
-  position: fixed;
-  bottom: 0;
-  background-color: var(--background-3);
-  box-shadow: inset 0 0 0 1px rgba(16,22,26,.2);
-  align-content: center;
-  align-items: center;
+    width: 100%;
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    background-color: var(--background-3);
+    box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2);
+    align-content: center;
+    align-items: center;
+}
+
+.moduleList {
+    padding: 10px;
 }

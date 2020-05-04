@@ -35,7 +35,7 @@ export function JsonConfigView({ store }) {
   return (
     <div>
       <div className={styles.header}>
-        <Button onClick={saveConfiguration} style={{ height: 35 }} minimal icon="tick">
+        <Button onClick={saveConfiguration} style={{ height: 35 }} minimal icon="floppy-disk">
           save
         </Button>
         <ButtonLink to="/settings" style={{ height: 35 }} minimal icon="cross">
