@@ -3,15 +3,12 @@
 ## Authentication
 It is done using an API token.
 To get one, you need to create a Slack application.
-
-Then go to Oauth and permissions.
-
-- enable the correct *user token scopes*: 
-    - channels:history
-    - channels:read
-    - emoji:read
-    - search:read
-    - users:read
+Then go to *Oauth and permissions* and do the following:
+ 
+- enable the correct **user token scopes**: 
+  - emoji:read (View custom emoji in the workspace)
+  - search:read (Search the workspace’s content)
+  - users:read (View people in the workspace)
 - click install app
 - copy the OAuth Access Token
 
