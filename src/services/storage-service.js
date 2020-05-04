@@ -1,9 +1,15 @@
+import _ from "lodash";
 import Store from "electron-store";
 import schema from "../configuration-schema";
 import { Logger } from "@hookstate/logger";
 import { createStateLink } from "@hookstate/core";
 
 function Persistence(localStore) {
+  function storeState(state) {
+    localStore.set(state);
+  }
+  const _store = _.debounce(storeState, 100);
+
   return () => ({
     id: Symbol("LocalPersistence"),
     create: (state) => {
@@ -13,7 +19,7 @@ function Persistence(localStore) {
       return {
         onSet: async (p) => {
           if ("state" in p) {
-            localStore.set(p.state);
+            _store(p.state);
           } else {
             localStore.reset();
           }
