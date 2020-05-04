@@ -85,7 +85,8 @@ const createWindow = async () => {
       nodeIntegration: true,
       additionalArguments: [`--encryptionKey=${encryptionKey}`, `--theme=${theme}`],
     },
-    backgroundColor: nativeTheme.shouldUseDarkColors && theme !== "light" ? "#293742" : "",
+    backgroundColor:
+      theme === "dark" || (theme === "system" && nativeTheme.shouldUseDarkColors) ? "#293742" : "",
   });
 
   // eslint-disable-next-line no-undef

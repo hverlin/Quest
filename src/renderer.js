@@ -16,16 +16,10 @@ import App from "./app";
 import { initializeStore } from "./services/storage-service";
 import { FocusStyleManager } from "@blueprintjs/core";
 import spatialNavigation from "spatial-navigation-js";
-import { remote } from "electron";
 import { ShortcutPlugin } from "./services/shortcut-manager";
+import { ThemeManager } from "./services/theme-service";
 
-const args = window.process.argv;
-
-const theme = args.find((a) => a.startsWith("--theme")).split("=")[1];
-
-if (remote.nativeTheme.shouldUseDarkColors && theme !== "light") {
-  document.body.classList.add("bp3-dark");
-}
+ThemeManager.setInitialTheme();
 
 function resetFocusManager() {
   FocusStyleManager.alwaysShowFocus();
@@ -53,11 +47,18 @@ function setupGlobalKeyboardNavigation() {
 
 setupGlobalKeyboardNavigation();
 
-const encryptionKey = args.find((a) => a.startsWith("--encryptionKey")).split("=")[1];
+const encryptionKey = window.process.argv
+  .find((a) => a.startsWith("--encryptionKey"))
+  .split("=")[1];
+
 const store = initializeStore({
   isProduction: process.env.NODE_ENV === "production",
   encryptionKey,
 }).with(ShortcutPlugin);
+
+ThemeManager.on("change:theme", (theme) =>
+  store.access().nested.appearance.nested.theme.set(theme)
+);
 
 if (!store.nested.appearance.nested.highlightResults.get()) {
   document.body.classList.add("no-highlight");

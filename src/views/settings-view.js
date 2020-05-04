@@ -17,7 +17,6 @@ import {
 import styles from "./settings-view.module.css";
 
 import { useStateLink } from "@hookstate/core";
-import { remote } from "electron";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
 import { Select } from "@blueprintjs/select";
@@ -32,6 +31,7 @@ import Backend from "react-dnd-html5-backend";
 import SortableList from "../components/sortable-list/sortable-list";
 import { ExternalLink } from "../components/external-link";
 import { version } from "../../package.json";
+import { ThemeManager, THEMES } from "../services/theme-service";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -118,14 +118,9 @@ function UIPreferences({ store }) {
         <HTMLSelect
           id="theme-selector"
           value={theme.get()}
-          options={["system", "light", "dark"]}
+          options={[THEMES.SYSTEM, THEMES.LIGHT, THEMES.DARK]}
           onChange={(e) => {
-            theme.set(e.target.value);
-            if (remote.nativeTheme.shouldUseDarkColors && theme.get() !== "light") {
-              document.body.classList.add("bp3-dark");
-            } else {
-              document.body.classList.remove("bp3-dark");
-            }
+            ThemeManager.setTheme(e.target.value);
           }}
         />
       </FormGroup>
