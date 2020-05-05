@@ -35,6 +35,8 @@ More to come...
 ## Download
 You can install *Quest* by going to the [releases page](https://github.com/hverlin/Quest/releases).
 
+Note that the application is not signed yet, so you might need to [allow it to run](https://www.wikihow.com/Install-Software-from-Unsigned-Developers-on-a-Mac).
+
 ## Development
 
 ### Requirement for Linux only
