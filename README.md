@@ -13,7 +13,8 @@ QUEST
 
 You can connect it to various services like JIRA, Confluence, Google Drive, Dropbox paper, Slack, etc.
 
----
+![Quest - screenshot](./doc/screenshot.png)
+
 - Settings and credentials are encrypted and stored locally. The encryption key is stored in your system's keychain.
 - You will need to configure all the modules you want to connect to.
 - Built with React, Electron and [Blueprint](https://blueprintjs.com)
