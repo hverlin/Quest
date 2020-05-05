@@ -1,10 +1,11 @@
+import _ from "lodash";
 import React from "react";
-import { Button, Popover, Switch, Tooltip } from "@blueprintjs/core";
+import { Button, NonIdealState, Popover, Switch, Tooltip } from "@blueprintjs/core";
 import styles from "./settings-bar.module.css";
 import ButtonLink from "./button-link";
 import { useStateLink } from "@hookstate/core";
 import { useShortcut } from "../services/shortcut-manager";
-import { withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { ThemeManager } from "../services/theme-service";
 
 function LeftSettings({ configuration }) {
@@ -59,6 +60,12 @@ function ModuleList({ configuration }) {
 
   return (
     <div className={styles.moduleList}>
+      {_.isEmpty(modules.nested) && (
+        <NonIdealState
+          description="No search modules configured"
+          action={<Link to="/settings">Settings</Link>}
+        />
+      )}
       {modules.nested.map((module) => {
         return (
           <div key={module.nested.id.get()}>
@@ -87,7 +94,6 @@ function SettingsBar({ configuration, history }) {
       <LeftSettings configuration={state.nested.appearance} />
       <Popover
         hasBackdrop
-        minimal
         target={
           <Tooltip content="Enable/disable modules">
             <Button ref={buttonRef} small minimal icon="segmented-control">

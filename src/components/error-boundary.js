@@ -8,8 +8,8 @@ export default class ErrorBoundary extends React.Component {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
@@ -17,10 +17,18 @@ export default class ErrorBoundary extends React.Component {
   }
 
   render() {
+    const { children, displayStacktrace, message = "" } = this.props;
+
     if (this.state.hasError) {
-      return <Callout intent="danger">Something went wrong.</Callout>;
+      return (
+        <Callout intent="danger">
+          Something went wrong.
+          {message}
+          {displayStacktrace && <pre>{this.state.error.stack}</pre>}
+        </Callout>
+      );
     }
 
-    return this.props.children;
+    return children;
   }
 }

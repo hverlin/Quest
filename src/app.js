@@ -7,6 +7,8 @@ import { SWRConfig } from "swr";
 import { SearchView } from "./views/search-view";
 import { SettingsView } from "./views/settings-view";
 import { JsonConfigView } from "./views/json-config-view";
+import ErrorBoundary from "./components/error-boundary";
+import { ExternalLink } from "./components/external-link";
 
 const swrConfig = {
   refreshInterval: 0,
@@ -43,7 +45,18 @@ function App({ store }) {
   return (
     <SWRConfig value={swrConfig}>
       <HashRouter>
-        <AppBody store={store} />
+        <ErrorBoundary
+          displayStacktrace
+          message={
+            <div>
+              <ExternalLink href="https://github.com/hverlin/Quest/issues">
+                Report an issue on Github
+              </ExternalLink>
+            </div>
+          }
+        >
+          <AppBody store={store} />
+        </ErrorBoundary>
       </HashRouter>
     </SWRConfig>
   );
