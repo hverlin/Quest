@@ -400,7 +400,8 @@
               "apiKey": {
                 "title": "API Key",
                 "type": "string",
-                "default": ""
+                "default": "",
+                "x-component": "password"
               },
               "pageSize": {
                 "title": "Number of results per page",
