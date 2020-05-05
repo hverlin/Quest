@@ -32,6 +32,7 @@ import SortableList from "../components/sortable-list/sortable-list";
 import { ExternalLink } from "../components/external-link";
 import { version } from "../../package.json";
 import { ThemeManager, THEMES } from "../services/theme-service";
+import HelpDialog from "../components/help-dialog";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -91,6 +92,13 @@ function SettingCard({ moduleState, onDelete }) {
   const moduleConfiguration = useStateLink(moduleState);
   const { moduleType, id } = moduleConfiguration.get();
   const ModuleView = getModuleView(moduleType);
+  const [helpText, setHelpText] = React.useState("");
+
+  React.useEffect(() => {
+    import(`../modules/${moduleType}/readme.md`).then((text) => {
+      setHelpText(text.default.replace(/#.*/, "").trim());
+    });
+  }, []);
 
   return (
     <Card elevation={Elevation.TWO}>
@@ -99,6 +107,10 @@ function SettingCard({ moduleState, onDelete }) {
         <ModuleView configurationState={moduleConfiguration} />
       </Suspense>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <HelpDialog
+          helpText={helpText}
+          title={moduleSchemaByType[moduleType].properties.name.default}
+        />
         <Button icon="trash" minimal intent="danger" onClick={() => onDelete(id)}>
           Remove
         </Button>
