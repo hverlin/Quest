@@ -238,9 +238,12 @@ app.on("ready", async () => {
 
 // Quit when all windows are closed.
 app.on("window-all-closed", (e) => {
-  // prevent quitting the app so it can be opened with the global shortcut
-  e.preventDefault();
-  e.returnValue = false;
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== "darwin") {
+    app.quit();
+    e.returnValue = false;
+  }
 });
 
 app.on("activate", () => {
