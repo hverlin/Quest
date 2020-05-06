@@ -355,6 +355,22 @@
                 "type": "boolean",
                 "default": true
               },
+              "clientId": {
+                "title": "Client ID",
+                "type": "string",
+                "default": ""
+              },
+              "clientSecret": {
+                "title": "Client secret",
+                "type": "string",
+                "default": "",
+                "x-component": "password"
+              },
+              "redirectPort": {
+                "title": "Redirect port",
+                "type": "integer",
+                "default": 9289
+              },
               "token": {
                 "title": "API Token",
                 "type": "string",

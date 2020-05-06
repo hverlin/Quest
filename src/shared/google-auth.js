@@ -7,6 +7,7 @@ import { parse } from "url";
 import { remote } from "electron";
 import qs from "qs";
 import log from "electron-log";
+import { notify } from "../services/notification-service";
 
 const GOOGLE_AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -154,10 +155,12 @@ export async function ensureAccessToken(
       }
 
       configurationState.nested.accessToken.set(token.access_token);
+      notify("Authentication successful");
     }
 
     return true;
   } catch (e) {
+    notify("Error during the authentication");
     log.error(e);
     return false;
   }

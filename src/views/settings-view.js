@@ -36,6 +36,7 @@ import { ExternalLink } from "../components/external-link";
 import { version } from "../../package.json";
 import { ThemeManager, THEMES } from "../services/theme-service";
 import HelpDialog from "../components/help-dialog";
+import { EDITABLE_TEXT } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -65,8 +66,16 @@ function SettingCardHeader({ configurationState, onExpandClick, isExpanded }) {
   const { name, enabled } = moduleConfiguration.get();
 
   return (
-    <div style={{ display: "flex " }}>
-      <div style={{ flexGrow: 1 }} onClick={onExpandClick}>
+    <div style={{ display: "flex", marginBottom: isExpanded ? 10 : 0, cursor: "pointer" }}>
+      <div
+        style={{ flexGrow: 1 }}
+        onClick={(e) => {
+          if (e.target.classList.contains(EDITABLE_TEXT)) {
+            return;
+          }
+          onExpandClick(e);
+        }}
+      >
         <Tooltip content={isExpanded ? "collapse" : "expand"} hoverOpenDelay={1000}>
           <Button minimal small onClick={onExpandClick} style={{ marginRight: 5 }} tabIndex={0}>
             <Icon icon={isExpanded ? "chevron-down" : "chevron-right"} />
@@ -84,7 +93,7 @@ function SettingCardHeader({ configurationState, onExpandClick, isExpanded }) {
 
       <div>
         <Switch
-          style={{ marginBottom: isExpanded ? undefined : 0 }}
+          style={{ marginBottom: 0 }}
           label={enabled ? "Enabled" : "Disabled"}
           onChange={() =>
             moduleConfiguration.nested.enabled.set(!moduleConfiguration.nested.enabled.get())

@@ -1,10 +1,8 @@
 # Slack Module
 
-## Authentication
-It is done using an API token.
-To get one, you need to create a Slack application.
-Then go to *Oauth and permissions* and do the following:
- 
+## Setup
+You or someone in your organization needs to create a Slack application.
+Give it the name you want and then go to *Oauth and permissions*:
 - enable the correct **user token scopes**: 
   - `emoji:read` (View custom emoji in the workspace)
   - `search:read` (Search the workspace’s content)
@@ -12,13 +10,20 @@ Then go to *Oauth and permissions* and do the following:
 - click install app
 - copy the OAuth Access Token
 
-Eventually we would support use Oauth directly by starting a local server to handle the redirect URL of the Oauth flow.
+## Authentication
+It is done using Oauth.
+You will need the `client_id` and `client_secret`[1] of the Slack application. 
+When you click the `Authorize` button, Quest will open a local http server to handle the Oauth flow.
+
+[1] The client secret should usually not be shared, but that would require an additional server. 
+The alternative would be to add all the users as collaborator to the application, which would also let them access to the client secret anyway.
 
 ## Limitations
 - Message attachments are not yet supported.
-- At the moment, might not work well for workspaces with a lot of channels.
+- At the moment, might not work perfectly for workspaces with a lot of channels (10 000+)
 
 ## Resources
-- https://api.slack.com/methods/reactions.get
+The application uses the following endpoints:
+- https://api.slack.com/methods/channels.list
+- https://api.slack.com/methods/admin.emoji.list
 - https://api.slack.com/methods/search.messages
-- https://api.slack.com/methods/search.all
