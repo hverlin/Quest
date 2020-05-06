@@ -152,10 +152,10 @@ export async function ensureAccessToken(
 
       if (!refreshToken) {
         configurationState.nested.refreshToken.set(token.refresh_token);
+        notify("Authentication successful");
       }
 
       configurationState.nested.accessToken.set(token.access_token);
-      notify("Authentication successful");
     }
 
     return true;

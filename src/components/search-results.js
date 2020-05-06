@@ -21,6 +21,7 @@ export function PaginatedSearchResults({
   computeNextOffset,
   deps = [],
   getTotal = _.noop,
+  filters,
 }) {
   const state = useStateLink(searchViewState);
   const { name } = configuration.get();
@@ -72,7 +73,7 @@ export function PaginatedSearchResults({
 
   return (
     <div className={styles.results}>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         {logo && (
           <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} alt={`${name} logo`} />
         )}
@@ -82,6 +83,8 @@ export function PaginatedSearchResults({
             ({numberFormatter.format(total)} {total === 1 ? "result" : "results"})
           </p>
         )}
+        <div style={{ flexGrow: 1 }} />
+        <div style={{ display: "flex", marginLeft: 15 }}>{filters}</div>
       </div>
 
       <div className={styles.resultList}>

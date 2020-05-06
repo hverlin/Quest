@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
-import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout } from "@blueprintjs/core";
+import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout, MenuItem } from "@blueprintjs/core";
 import logo from "./logo.png";
 import useSWR from "swr";
 import qs from "qs";
@@ -13,8 +13,73 @@ import { Document, Page } from "react-pdf/dist/entry.webpack";
 
 import styles from "./drive.module.css";
 import ReactMarkdown from "react-markdown";
+import { Select } from "@blueprintjs/select";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
+
+const FILTERS = {
+  ANY: "any",
+  DOCUMENT: "document",
+  SPREADSHEET: "spreadsheet",
+  PRESENTATION: "presentation",
+  IMAGE: "image",
+};
+
+const FILTER_DESCRIPTION = {
+  [FILTERS.ANY]: {
+    value: "Any",
+    mimeTypes: [],
+  },
+  [FILTERS.DOCUMENT]: {
+    value: "Documents",
+    mimeTypes: [
+      "application/vnd.google-apps.document",
+      "application/rtf",
+      "application/vnd.oasis.opendocument.text",
+      "text/html",
+      "application/pdf",
+      "application/epub+zip",
+      "application/zip",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ],
+  },
+  [FILTERS.SPREADSHEET]: {
+    value: "Spreadsheets",
+    mimeTypes: [
+      "application/vnd.google-apps.spreadsheet",
+      "application/x-vnd.oasis.opendocument.spreadsheet",
+      "text/tab-separated-values",
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/csv",
+      "application/zip",
+      "application/vnd.oasis.opendocument.spreadsheet",
+    ],
+  },
+  [FILTERS.PRESENTATION]: {
+    value: "Presentations",
+    mimeTypes: [
+      "application/vnd.google-apps.presentation",
+      "application/vnd.oasis.opendocument.presentation",
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/plain",
+    ],
+  },
+  [FILTERS.IMAGE]: {
+    value: "Images",
+    mimeTypes: [
+      "application/vnd.google-apps.drawing",
+      "image/svg+xml",
+      "image/png",
+      "application/pdf",
+      "image/jpeg",
+    ],
+  },
+};
+
+const documentTypes = Object.entries(FILTER_DESCRIPTION).map(([id, { value }]) => ({ id, value }));
 
 const MIME_TYPES = {
   TEXT: "text/plain",
@@ -206,10 +271,21 @@ const googleDriveFetcher = (configuration) => async (url) => {
   return makeGoogleRequest({ configuration, scope: DRIVE_SCOPE, url });
 };
 
-function getGoogleDrivePage(searchData, configuration) {
+function generateTypeQuery(fileType) {
+  const types = FILTER_DESCRIPTION[fileType].mimeTypes;
+  return `(${types.map((type) => `mimeType = '${type}'`).join(" or ")})`;
+}
+
+function getGoogleDrivePage(searchData, configuration, { fileType }) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
+    let query = `(name contains '${searchData.input}' or fullText contains '${searchData.input}')`;
+
+    if (fileType !== "any") {
+      query += ` and ${generateTypeQuery(fileType)}`;
+    }
+
     const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
-      q: `name contains '${searchData.input}' or fullText contains '${searchData.input}'`,
+      q: query,
       pageSize: configuration.nested.pageSize.get() ?? 5,
       fields:
         "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink, thumbnailLink, hasThumbnail, exportLinks)",
@@ -238,11 +314,21 @@ function getGoogleDrivePage(searchData, configuration) {
   };
 }
 
+function typeItemRenderer(type, { handleClick, modifiers: { matchesPredicate, active } = {} }) {
+  if (!matchesPredicate) {
+    return null;
+  }
+
+  return <MenuItem key={type.id} active={active} onClick={handleClick} text={type.value} />;
+}
+
 export default function DriveSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
+  const [fileType, setFileType] = React.useState("any");
 
   return (
     <PaginatedSearchResults
+      searchKey={fileType}
       searchViewState={searchViewState}
       logo={logo}
       itemDetailRenderer={(item) => (
@@ -257,8 +343,25 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
         ) : null
       }
       configuration={configuration}
-      pageFunc={getGoogleDrivePage(searchData, configuration)}
+      pageFunc={getGoogleDrivePage(searchData, configuration, {
+        fileType,
+      })}
       computeNextOffset={({ data }) => data?.nextPageToken ?? null}
+      filters={
+        <div style={{ flexGrow: 1 }}>
+          <Select
+            items={documentTypes}
+            itemRenderer={typeItemRenderer}
+            onItemSelect={(type) => setFileType(type.id)}
+            itemPredicate={(query, type) =>
+              type.value.toLowerCase().indexOf(query.toLowerCase()) >= 0
+            }
+          >
+            <Button minimal>Type: {FILTER_DESCRIPTION[fileType].value}</Button>
+          </Select>
+        </div>
+      }
+      deps={[fileType]}
     />
   );
 }
