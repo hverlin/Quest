@@ -4,8 +4,12 @@ const rules = require("./webpack.rules");
 
 rules.push(
   {
-    test: /\.(png|svg|jpg|gif|md)$/,
+    test: /\.(png|svg|jpg|gif)$/,
     use: ["file-loader"],
+  },
+  {
+    test: /\.(md)$/,
+    use: ["raw-loader"],
   },
   {
     test: /\.module.css$/,

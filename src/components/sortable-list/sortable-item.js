@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { Icon } from "@blueprintjs/core";
-import { CARD } from "@blueprintjs/core/lib/esm/common/classes";
+import { H5, Icon } from "@blueprintjs/core";
+import { CARD, ELEVATION_2 } from "@blueprintjs/core/lib/esm/common/classes";
 
 // https://react-dnd.github.io/react-dnd/examples/sortable/simple
 function SortableItem({ id, text, index, moveCard }) {
@@ -46,9 +46,13 @@ function SortableItem({ id, text, index, moveCard }) {
 
   drag(drop(ref));
   return (
-    <div className={CARD} ref={ref} style={{ opacity, margin: "2px 2px", cursor: "move" }}>
+    <div
+      className={`${CARD} ${ELEVATION_2}`}
+      ref={ref}
+      style={{ opacity, margin: "8px 0px", cursor: "move" }}
+    >
       <Icon icon="drag-handle-vertical" />
-      {text}
+      <H5 style={{ display: "inline" }}>{text}</H5>
     </div>
   );
 }
