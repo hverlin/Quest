@@ -3,6 +3,7 @@ import _ from "lodash";
 import {
   Button,
   Card,
+  Collapse,
   EditableText,
   Elevation,
   FormGroup,
@@ -11,8 +12,10 @@ import {
   H5,
   HTMLSelect,
   HTMLTable,
+  Icon,
   MenuItem,
   Switch,
+  Tooltip,
 } from "@blueprintjs/core";
 import styles from "./settings-view.module.css";
 
@@ -57,14 +60,19 @@ function createDefaultValuesForModule(moduleType) {
 
 const getModuleView = (id) => React.memo(React.lazy(() => import(`../modules/${id}/settings`)));
 
-function SettingCardHeader({ configurationState }) {
+function SettingCardHeader({ configurationState, onExpandClick, isExpanded }) {
   const moduleConfiguration = useStateLink(configurationState);
   const { name, enabled } = moduleConfiguration.get();
 
   return (
     <div style={{ display: "flex " }}>
-      <div style={{ flexGrow: 1 }}>
-        <H5>
+      <div style={{ flexGrow: 1 }} onClick={onExpandClick}>
+        <Tooltip content={isExpanded ? "collapse" : "expand"} hoverOpenDelay={1000}>
+          <Button minimal small onClick={onExpandClick} style={{ marginRight: 5 }} tabIndex={0}>
+            <Icon icon={isExpanded ? "chevron-down" : "chevron-right"} />
+          </Button>
+        </Tooltip>
+        <H5 style={{ display: "inline", verticalAlign: "middle" }}>
           <EditableText
             maxLength={35}
             value={name}
@@ -76,6 +84,7 @@ function SettingCardHeader({ configurationState }) {
 
       <div>
         <Switch
+          style={{ marginBottom: isExpanded ? undefined : 0 }}
           label={enabled ? "Enabled" : "Disabled"}
           onChange={() =>
             moduleConfiguration.nested.enabled.set(!moduleConfiguration.nested.enabled.get())
@@ -93,6 +102,7 @@ function SettingCard({ moduleState, onDelete }) {
   const { moduleType, id } = moduleConfiguration.get();
   const ModuleView = getModuleView(moduleType);
   const [helpText, setHelpText] = React.useState("");
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   React.useEffect(() => {
     import(`../modules/${moduleType}/readme.md`).then((text) => {
@@ -102,19 +112,25 @@ function SettingCard({ moduleState, onDelete }) {
 
   return (
     <Card elevation={Elevation.TWO}>
-      <SettingCardHeader configurationState={moduleConfiguration} />
-      <Suspense fallback={<div />}>
-        <ModuleView configurationState={moduleConfiguration} />
-      </Suspense>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <HelpDialog
-          helpText={helpText}
-          title={moduleSchemaByType[moduleType].properties.name.default}
-        />
-        <Button icon="trash" minimal intent="danger" onClick={() => onDelete(id)}>
-          Remove
-        </Button>
-      </div>
+      <SettingCardHeader
+        configurationState={moduleConfiguration}
+        onExpandClick={() => setIsExpanded(!isExpanded)}
+        isExpanded={isExpanded}
+      />
+      <Collapse isOpen={isExpanded} transitionDuration={0}>
+        <Suspense fallback={<div />}>
+          <ModuleView configurationState={moduleConfiguration} />
+        </Suspense>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <HelpDialog
+            helpText={helpText}
+            title={moduleSchemaByType[moduleType].properties.name.default}
+          />
+          <Button icon="trash" minimal intent="danger" onClick={() => onDelete(id)}>
+            Remove
+          </Button>
+        </div>
+      </Collapse>
     </Card>
   );
 }
@@ -285,7 +301,7 @@ export function SettingsView({ store }) {
             Edit configuration
           </ButtonLink>
           <div style={{ flexGrow: 1 }} />
-          <ExternalLink href="https://github.com/hverlin/Quest">
+          <ExternalLink href="https://github.com/hverlin/Quest" style={{ alignSelf: "center" }}>
             Learn more about Quest ({version})
           </ExternalLink>
         </div>

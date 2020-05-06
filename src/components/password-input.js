@@ -10,6 +10,7 @@ export default function PasswordInput(props) {
   const lockButton = (
     <Tooltip content={`${showPassword.get() ? "Hide" : "Show"} Password`} disabled={props.disabled}>
       <Button
+        aria-label={`${showPassword.get() ? "Hide" : "Show"} Password`}
         disabled={props.disabled}
         icon={showPassword.get() ? "unlock" : "lock"}
         intent={Intent.WARNING}
