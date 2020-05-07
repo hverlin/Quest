@@ -11,7 +11,7 @@ import log from "electron-log";
 function signInWithPopup(configuration) {
   const http = require("http");
 
-  const { clientId, clientSecret, redirectPort } = configuration.get();
+  const { clientId, clientSecret, redirectPort = 9289 } = configuration.get();
 
   const authWindow = new remote.BrowserWindow({ width: 600, height: 800, show: true });
   const redirectUri = `http://localhost:${redirectPort}`;

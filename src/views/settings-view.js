@@ -36,7 +36,7 @@ import { ExternalLink } from "../components/external-link";
 import { version } from "../../package.json";
 import { ThemeManager, THEMES } from "../services/theme-service";
 import HelpDialog from "../components/help-dialog";
-import { EDITABLE_TEXT } from "@blueprintjs/core/lib/cjs/common/classes";
+import { EDITABLE_TEXT, EDITABLE_TEXT_INPUT } from "@blueprintjs/core/lib/cjs/common/classes";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -70,7 +70,10 @@ function SettingCardHeader({ configurationState, onExpandClick, isExpanded }) {
       <div
         style={{ flexGrow: 1 }}
         onClick={(e) => {
-          if (e.target.classList.contains(EDITABLE_TEXT)) {
+          if (
+            e.target.classList.contains(EDITABLE_TEXT) ||
+            e.target.classList.contains(EDITABLE_TEXT_INPUT)
+          ) {
             return;
           }
           onExpandClick(e);

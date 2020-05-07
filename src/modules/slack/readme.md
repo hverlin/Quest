@@ -9,11 +9,14 @@ Give it the name you want and then go to *Oauth and permissions*:
   - `users:read` (View people in the workspace)
 - click install app
 - copy the OAuth Access Token
+- Add `http://localhost:9289` as a redirect URI
 
 ## Authentication
 It is done using Oauth.
 You will need the `client_id` and `client_secret`[1] of the Slack application. 
 When you click the `Authorize` button, Quest will open a local http server to handle the Oauth flow.
+
+The redirect URI is http://localhost:9289 by default.
 
 [1] The client secret should usually not be shared, but that would require an additional server. 
 The alternative would be to add all the users as collaborator to the application, which would also let them access to the client secret anyway.
