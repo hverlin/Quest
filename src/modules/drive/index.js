@@ -10,6 +10,7 @@ import logo from "./logo.png";
 import useSWR from "swr";
 import qs from "qs";
 import { Document, Page } from "react-pdf/dist/entry.webpack";
+import { DateTime } from "luxon";
 
 import styles from "./drive.module.css";
 import ReactMarkdown from "react-markdown";
@@ -17,7 +18,7 @@ import { Select } from "@blueprintjs/select";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
-const FILTERS = {
+const TYPE_FILTERS = {
   ANY: "any",
   DOCUMENT: "document",
   SPREADSHEET: "spreadsheet",
@@ -25,12 +26,12 @@ const FILTERS = {
   IMAGE: "image",
 };
 
-const FILTER_DESCRIPTION = {
-  [FILTERS.ANY]: {
+const TYPE_FILTER_DESCRIPTION = {
+  [TYPE_FILTERS.ANY]: {
     value: "Any",
     mimeTypes: [],
   },
-  [FILTERS.DOCUMENT]: {
+  [TYPE_FILTERS.DOCUMENT]: {
     value: "Documents",
     mimeTypes: [
       "application/vnd.google-apps.document",
@@ -39,52 +40,120 @@ const FILTER_DESCRIPTION = {
       "text/html",
       "application/pdf",
       "application/epub+zip",
-      "application/zip",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
     ],
   },
-  [FILTERS.SPREADSHEET]: {
+  [TYPE_FILTERS.SPREADSHEET]: {
     value: "Spreadsheets",
     mimeTypes: [
       "application/vnd.google-apps.spreadsheet",
       "application/x-vnd.oasis.opendocument.spreadsheet",
       "text/tab-separated-values",
-      "application/pdf",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "text/csv",
-      "application/zip",
       "application/vnd.oasis.opendocument.spreadsheet",
     ],
   },
-  [FILTERS.PRESENTATION]: {
+  [TYPE_FILTERS.PRESENTATION]: {
     value: "Presentations",
     mimeTypes: [
       "application/vnd.google-apps.presentation",
       "application/vnd.oasis.opendocument.presentation",
       "application/pdf",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "text/plain",
     ],
   },
-  [FILTERS.IMAGE]: {
+  [TYPE_FILTERS.IMAGE]: {
     value: "Images",
-    mimeTypes: [
-      "application/vnd.google-apps.drawing",
-      "image/svg+xml",
-      "image/png",
-      "application/pdf",
-      "image/jpeg",
-    ],
+    mimeTypes: ["application/vnd.google-apps.drawing", "image/svg+xml", "image/png", "image/jpeg"],
   },
 };
 
-const documentTypes = Object.entries(FILTER_DESCRIPTION).map(([id, { value }]) => ({ id, value }));
+const OWNERSHIP_FILTERS = {
+  ANYONE: "anyone",
+  ME: "me",
+  OTHERS: "others",
+};
+
+const OWNERSHIP_FILTERS_DESCRIPTION = {
+  [OWNERSHIP_FILTERS.ANYONE]: { value: "Anyone" },
+  [OWNERSHIP_FILTERS.ME]: { value: "me" },
+  [OWNERSHIP_FILTERS.OTHERS]: { value: "Others" },
+};
+
+const DATE_FILTERS = {
+  ANYTIME: "anytime",
+  TODAY: "today",
+  YESTERDAY: "yesterday",
+  LAST_7_DAYS: "last_7_days",
+  LAST_30_DAYS: "last_30_days",
+  LAST_90_DAYS: "last_90_days",
+};
+
+function computeDate(days) {
+  return () => DateTime.local().minus({ days }).toISODate();
+}
+
+const DATE_FILTERS_DESCRIPTION = {
+  [DATE_FILTERS.ANYTIME]: {
+    value: "Anytime",
+  },
+  [DATE_FILTERS.TODAY]: {
+    value: "Today",
+    date: computeDate(0),
+  },
+  [DATE_FILTERS.YESTERDAY]: {
+    value: "Yesterday",
+    date: computeDate(1),
+  },
+  [DATE_FILTERS.LAST_7_DAYS]: {
+    value: "Last 7 days",
+    date: computeDate(7),
+  },
+  [DATE_FILTERS.LAST_30_DAYS]: {
+    value: "Last 30 days",
+    date: computeDate(30),
+  },
+  [DATE_FILTERS.LAST_90_DAYS]: {
+    value: "Last 90 days",
+    date: computeDate(90),
+  },
+};
 
 const MIME_TYPES = {
   TEXT: "text/plain",
   PDF: "application/pdf",
 };
+
+const itemPredicate = (query, option) =>
+  option.value.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+
+function itemRenderer(option, { handleClick, modifiers: { matchesPredicate, active } = {} }) {
+  if (!matchesPredicate) {
+    return null;
+  }
+
+  return <MenuItem key={option.id} active={active} onClick={handleClick} text={option.value} />;
+}
+
+function Filter({ descriptions, value, setter, label, defaultId }) {
+  const items = Object.entries(descriptions).map(([id, { value }]) => ({ id, value }));
+
+  return (
+    <Select
+      filterable={false}
+      items={items}
+      itemRenderer={itemRenderer}
+      onItemSelect={(option) => setter(option.id)}
+      itemPredicate={itemPredicate}
+    >
+      <Button minimal>
+        {defaultId === value ? label : `${label}: ${descriptions[value].value}`}
+      </Button>
+    </Select>
+  );
+}
 
 const formatFetcher = async (itemId, accessToken, mimeType) => {
   const res = await fetch(
@@ -272,16 +341,29 @@ const googleDriveFetcher = (configuration) => async (url) => {
 };
 
 function generateTypeQuery(fileType) {
-  const types = FILTER_DESCRIPTION[fileType].mimeTypes;
+  const types = TYPE_FILTER_DESCRIPTION[fileType].mimeTypes;
   return `(${types.map((type) => `mimeType = '${type}'`).join(" or ")})`;
 }
 
-function getGoogleDrivePage(searchData, configuration, { fileType }) {
+function getGoogleDrivePage(searchData, configuration, { fileType, owner, dateFilter }) {
   return (wrapper) => ({ offset: cursor = null, withSWR }) => {
-    let query = `(name contains '${searchData.input}' or fullText contains '${searchData.input}')`;
+    // https://developers.google.com/drive/api/v3/ref-search-terms
+    const text = searchData.input.replace(/'/, "\\'");
+    let query = `(name contains '${text}' or fullText contains '${text}')`;
 
     if (fileType !== "any") {
       query += ` and ${generateTypeQuery(fileType)}`;
+    }
+
+    if (owner === OWNERSHIP_FILTERS.ME) {
+      query += ` and ('me' in owners)`;
+    } else if (owner === OWNERSHIP_FILTERS.OTHERS) {
+      query += ` and not ('me' in owners)`;
+    }
+
+    if (dateFilter !== DATE_FILTERS.ANYTIME) {
+      const date = DATE_FILTERS_DESCRIPTION[dateFilter].date();
+      query += ` and (modifiedTime >= '${date}' or viewedByMeTime >= '${date}')`;
     }
 
     const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
@@ -314,17 +396,11 @@ function getGoogleDrivePage(searchData, configuration, { fileType }) {
   };
 }
 
-function typeItemRenderer(type, { handleClick, modifiers: { matchesPredicate, active } = {} }) {
-  if (!matchesPredicate) {
-    return null;
-  }
-
-  return <MenuItem key={type.id} active={active} onClick={handleClick} text={type.value} />;
-}
-
 export default function DriveSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
-  const [fileType, setFileType] = React.useState("any");
+  const [fileType, setFileType] = React.useState(TYPE_FILTERS.ANY);
+  const [owner, setOwner] = React.useState(OWNERSHIP_FILTERS.ANYONE);
+  const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
   return (
     <PaginatedSearchResults
@@ -343,25 +419,34 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
         ) : null
       }
       configuration={configuration}
-      pageFunc={getGoogleDrivePage(searchData, configuration, {
-        fileType,
-      })}
+      pageFunc={getGoogleDrivePage(searchData, configuration, { fileType, owner, dateFilter })}
       computeNextOffset={({ data }) => data?.nextPageToken ?? null}
       filters={
         <div style={{ flexGrow: 1 }}>
-          <Select
-            items={documentTypes}
-            itemRenderer={typeItemRenderer}
-            onItemSelect={(type) => setFileType(type.id)}
-            itemPredicate={(query, type) =>
-              type.value.toLowerCase().indexOf(query.toLowerCase()) >= 0
-            }
-          >
-            <Button minimal>Type: {FILTER_DESCRIPTION[fileType].value}</Button>
-          </Select>
+          <Filter
+            value={fileType}
+            defaultId={TYPE_FILTERS.ANY}
+            descriptions={TYPE_FILTER_DESCRIPTION}
+            label="Type"
+            setter={setFileType}
+          />
+          <Filter
+            value={owner}
+            defaultId={OWNERSHIP_FILTERS.ANYONE}
+            descriptions={OWNERSHIP_FILTERS_DESCRIPTION}
+            label="Owner"
+            setter={setOwner}
+          />
+          <Filter
+            value={dateFilter}
+            defaultId={DATE_FILTERS.ANYTIME}
+            descriptions={DATE_FILTERS_DESCRIPTION}
+            label="Date"
+            setter={setDateFilter}
+          />
         </div>
       }
-      deps={[fileType]}
+      deps={[fileType, owner, dateFilter]}
     />
   );
 }
