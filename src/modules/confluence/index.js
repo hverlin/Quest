@@ -1,6 +1,4 @@
-import useSWR from "swr";
 import React from "react";
-import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import _ from "lodash";
 import logo from "./logo.svg";
@@ -8,6 +6,8 @@ import { H2, Spinner, Classes, Tag } from "@blueprintjs/core";
 import SafeHtmlElement from "../../components/safe-html-element";
 import cheerio from "cheerio";
 import qs from "qs";
+import { PaginatedResults } from "../../components/paginated-results/paginated-results";
+import { useQuery } from "react-query";
 
 const appSession = require("electron").remote.session;
 
@@ -77,7 +77,7 @@ function parseConfluenceDocument(message) {
 function ConfluenceDetail({ item, username, password, url, pageSize = 5, filter }) {
   const link = `${_.get(item, "content._links.self")}?expand=body.view`;
 
-  const { data, error } = useSWR(
+  const { data, error } = useQuery(
     link,
     confluenceFetcher({ username, password, baseUrl: url, pageSize, filter })
   );
@@ -121,40 +121,45 @@ function ConfluenceItem({ item = {}, url }) {
   );
 }
 
-function getConfluencePage(url, searchData, username, password, pageSize, filter) {
-  return (wrapper) => ({ offset = 0, withSWR }) => {
-    const searchParams = qs.stringify({
-      cql: `(siteSearch ~ "${searchData.input}" and type = "page"${
-        filter ? ` and ${filter}` : ""
-      })`,
-      expand: "content.metadata.labels",
-      start: offset || 0,
-      limit: pageSize,
-    });
-
-    const { data, error } = withSWR(
-      useSWR(
-        () => (url ? `${url}/rest/api/search?${searchParams}` : null),
-        confluenceFetcher({ username, password, baseUrl: url })
-      )
-    );
-
-    if (error) {
-      return wrapper({ error, item: null });
-    }
-
-    if (!data) {
-      return wrapper({ item: null });
-    }
-
-    return data?.results.map((result) =>
-      wrapper({
+const makeConfluenceRenderer = (url) => ({ pages }) => {
+  return _.flatten(
+    pages.map(({ results }) => {
+      return results?.map((result) => ({
         key: result.content.id,
-        component: <ConfluenceItem url={url} item={result} />,
+        component: <ConfluenceItem key={result.content.id} url={url} item={result} />,
         item: result,
-      })
-    );
-  };
+      }));
+    })
+  );
+};
+
+async function confluenceResultsFetcher(
+  key,
+  { input, filter, pageSize, username, password, baseUrl },
+  offset
+) {
+  const searchParams = qs.stringify({
+    cql: `(siteSearch ~ "${input}" and type = "page"${filter ? ` and ${filter}` : ""})`,
+    expand: "content.metadata.labels",
+    start: offset || 0,
+    limit: pageSize,
+  });
+
+  const res = await fetch(`${baseUrl}/rest/api/search?${searchParams}`, {
+    credentials: "omit",
+    headers: {
+      Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+      Content: "application/json",
+      Origin: baseUrl,
+    },
+  });
+
+  if (res.headers.has("quest-cookie")) {
+    const [name, value] = res.headers.get("quest-cookie").split(";")[0].split("=");
+    await appSession.defaultSession.cookies.set({ url: baseUrl, name, httpOnly: true, value });
+  }
+
+  return res.json();
 }
 
 export default function ConfluenceSearchResults({ configuration, searchViewState }) {
@@ -162,19 +167,24 @@ export default function ConfluenceSearchResults({ configuration, searchViewState
   const { username, password, url, pageSize, filter } = configuration.get();
 
   return (
-    <PaginatedSearchResults
+    <PaginatedResults
+      queryKey={[
+        "confluence",
+        { input: searchData.input, username, password, filter, baseUrl: url, pageSize },
+      ]}
       searchViewState={searchViewState}
       logo={logo}
-      error={!url ? "Confluence module is not configured correctly. URL is missing." : null}
+      fetcher={confluenceResultsFetcher}
+      globalError={!url ? "Confluence module is not configured correctly. URL is missing." : null}
       configuration={configuration}
+      renderPages={makeConfluenceRenderer(url)}
       itemDetailRenderer={(item) => (
         <ConfluenceDetail item={item} username={username} password={password} url={url} />
       )}
-      computeNextOffset={({ data }) =>
-        data && data.totalSize > data.start + data.size ? data.start + pageSize : null
+      getFetchMore={({ totalSize, start, size }) =>
+        totalSize > start + size ? start + pageSize : null
       }
-      pageFunc={getConfluencePage(url, searchData, username, password, pageSize, filter)}
-      getTotal={(pageSWRs) => _.get(pageSWRs, [0, "data", "totalSize"], null)}
+      getTotal={(pages) => _.get(pages, [0, "totalSize"], null)}
     />
   );
 }
