@@ -9,6 +9,15 @@ import { SettingsView } from "./views/settings-view";
 import { JsonConfigView } from "./views/json-config-view";
 import ErrorBoundary from "./components/error-boundary";
 import { ExternalLink } from "./components/external-link";
+import { ReactQueryConfigProvider } from "react-query";
+
+const queryConfig = {
+  // useQuery
+  retry: 3,
+  refetchInterval: false,
+  refetchOnMount: true,
+  refetchAllOnWindowFocus: false,
+};
 
 const swrConfig = {
   refreshInterval: 0,
@@ -43,22 +52,24 @@ function AppBody({ store }) {
 
 function App({ store }) {
   return (
-    <SWRConfig value={swrConfig}>
-      <HashRouter>
-        <ErrorBoundary
-          displayStacktrace
-          message={
-            <div>
-              <ExternalLink href="https://github.com/hverlin/Quest/issues">
-                Report an issue on Github
-              </ExternalLink>
-            </div>
-          }
-        >
-          <AppBody store={store} />
-        </ErrorBoundary>
-      </HashRouter>
-    </SWRConfig>
+    <ReactQueryConfigProvider config={queryConfig}>
+      <SWRConfig value={swrConfig}>
+        <HashRouter>
+          <ErrorBoundary
+            displayStacktrace
+            message={
+              <div>
+                <ExternalLink href="https://github.com/hverlin/Quest/issues">
+                  Report an issue on Github
+                </ExternalLink>
+              </div>
+            }
+          >
+            <AppBody store={store} />
+          </ErrorBoundary>
+        </HashRouter>
+      </SWRConfig>
+    </ReactQueryConfigProvider>
   );
 }
 

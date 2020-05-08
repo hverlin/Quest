@@ -1,8 +1,6 @@
-import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
-import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import { Card } from "@blueprintjs/core";
 import logo from "./logo.svg";
@@ -14,6 +12,7 @@ import {
   DateFilter,
   Filter,
 } from "../../components/filters/filters";
+import { PaginatedResults } from "../../components/paginated-results/paginated-results";
 
 const OWNERSHIP_FILTERS = {
   ANYONE: "anyone",
@@ -130,42 +129,35 @@ function SlackDetail({ item, users, emojis }) {
   );
 }
 
-function getSlackPage(searchData, { token, pageSize, userId, users, emojis, dateFilter, owner }) {
-  return (wrapper) => ({ offset = 1, withSWR }) => {
-    let query = searchData.input;
-    if (owner === OWNERSHIP_FILTERS.ME) {
-      query += ` from:${userId}`;
-    }
-
-    if (dateFilter !== DATE_FILTERS.ANYTIME) {
-      query += ` after:${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
-    }
-
-    const { data, error } = withSWR(
-      useSWR(
-        `https://slack.com/api/search.messages?query=${query}&token=${token}&count=${
-          pageSize || 5
-        }&page=${offset || 1}`
-      )
-    );
-
-    if (error) {
-      return wrapper({ error, item: null });
-    }
-
-    if (!data?.messages?.matches) {
-      return wrapper({ item: null });
-    }
-
-    return data?.messages?.matches.map((message) =>
-      wrapper({
-        key: message.ts,
-        component: <SlackMessage message={message} users={users} emojis={emojis} showChannel />,
-        item: message,
-      })
-    );
-  };
+async function fetchMessages(key, { query, token, pageSize }, offset = 1) {
+  const res = await fetch(
+    `https://slack.com/api/search.messages?query=${query}&token=${token}&count=${
+      pageSize || 5
+    }&page=${offset}`,
+    { headers: { accept: "application/json" } }
+  );
+  return res.json();
 }
+
+const slackResultsRenderer = (users, emojis) => ({ pages }) => {
+  return _.flatten(
+    pages.map(({ messages }) => {
+      return messages?.matches.map((message) => ({
+        key: message.ts,
+        component: (
+          <SlackMessage
+            key={message.ts}
+            message={message}
+            users={users}
+            emojis={emojis}
+            showChannel
+          />
+        ),
+        item: message,
+      }));
+    })
+  );
+};
 
 export default function SlackSearchResults({ configuration, searchViewState }) {
   const { token, pageSize, userId } = configuration.get();
@@ -183,32 +175,35 @@ export default function SlackSearchResults({ configuration, searchViewState }) {
 
   const usersById = _.keyBy(users, "id");
 
+  let query = searchData.input;
+  if (owner === OWNERSHIP_FILTERS.ME) {
+    query += ` from:${userId}`;
+  }
+
+  if (dateFilter !== DATE_FILTERS.ANYTIME) {
+    query += ` after:${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
+  }
+
   return (
-    <PaginatedSearchResults
+    <PaginatedResults
       searchViewState={searchViewState}
       logo={logo}
       configuration={configuration}
-      computeNextOffset={({ data }) => {
-        if (!data?.messages) {
+      queryKey={["slack", { query, token, pageSize }]}
+      fetcher={fetchMessages}
+      renderPages={slackResultsRenderer(usersById, emojis)}
+      getFetchMore={({ ok, messages }) => {
+        if (!ok || !messages) {
           return null;
         }
-        const { page, pages } = data.messages.paging;
+
+        const { page, pages } = messages.paging;
         return pages > page ? page + 1 : null;
       }}
       itemDetailRenderer={(item) => (
         <SlackDetail token={token} item={item} users={usersById} emojis={emojis} />
       )}
-      pageFunc={getSlackPage(searchData, {
-        token,
-        pageSize,
-        userId,
-        users: usersById,
-        emojis,
-        dateFilter,
-        owner,
-      })}
-      deps={[usersById, emojis, dateFilter, owner]}
-      getTotal={(pageSWRs) => _.get(pageSWRs, [0, "data", "messages", "total"], null)}
+      getTotal={(pages) => _.get(pages, [0, "messages", "total"], null)}
       filters={
         <div style={{ flexGrow: 1 }}>
           <Filter
