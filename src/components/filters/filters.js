@@ -89,4 +89,42 @@ export function DateFilter({ value, setter, label = "Date", defaultId = DATE_FIL
   );
 }
 
-export { DATE_FILTERS, DATE_FILTERS_DESCRIPTION };
+const OWNERSHIP_FILTERS = {
+  ANYONE: "anyone",
+  ME: "me",
+  OTHERS: "others",
+};
+
+const OWNERSHIP_FILTERS_DESCRIPTION = {
+  [OWNERSHIP_FILTERS.ANYONE]: { value: "Anyone" },
+  [OWNERSHIP_FILTERS.ME]: { value: "me" },
+  [OWNERSHIP_FILTERS.OTHERS]: { value: "Others" },
+};
+
+export function OwnerFilter({
+  value,
+  setter,
+  label = "Owner",
+  defaultId = OWNERSHIP_FILTERS.ANYONE,
+}) {
+  const items = Object.entries(OWNERSHIP_FILTERS_DESCRIPTION).map(([id, { value }]) => ({
+    id,
+    value,
+  }));
+
+  return (
+    <Select
+      filterable={false}
+      items={items}
+      itemRenderer={itemRenderer}
+      onItemSelect={(option) => setter(option.id)}
+      itemPredicate={itemPredicate}
+    >
+      <Button minimal>
+        {defaultId === value ? label : `${label}: ${OWNERSHIP_FILTERS_DESCRIPTION[value].value}`}
+      </Button>
+    </Select>
+  );
+}
+
+export { DATE_FILTERS, DATE_FILTERS_DESCRIPTION, OWNERSHIP_FILTERS, OWNERSHIP_FILTERS_DESCRIPTION };

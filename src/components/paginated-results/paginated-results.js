@@ -71,7 +71,7 @@ export function PaginatedResults({
     canFetchMore,
     error,
     isFetching,
-  } = useInfiniteQuery(queryKey, fetcher, { getFetchMore });
+  } = useInfiniteQuery(globalError ? null : queryKey, fetcher, { getFetchMore });
 
   const total = getTotal(data);
   const { name, pageSize } = configuration.get();
@@ -98,11 +98,11 @@ export function PaginatedResults({
       <div className={styles.resultList}>
         {globalError ? (
           <Callout intent="danger" className={styles.resultItem}>
-            {error}
+            {globalError}
           </Callout>
         ) : status === "loading" ? null : status === "error" ? (
           <Callout intent="danger" className={styles.resultItem}>
-            {error}
+            {error.message}
           </Callout>
         ) : _.isEmpty(pages) ? (
           <Card className={styles.resultItem}>No results.</Card>
@@ -111,7 +111,7 @@ export function PaginatedResults({
             renderResults({ key, component, item, state, itemDetailRenderer })
           )
         )}
-        {(isFetching && isEmpty) || isFetchingMore
+        {(!globalError && isFetching && isEmpty) || isFetchingMore
           ? Array(isFetching ? pageSize : 1)
               .fill(0)
               .map((id, index) => <React.Fragment key={index}>{loader}</React.Fragment>)

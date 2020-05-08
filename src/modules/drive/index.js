@@ -17,6 +17,8 @@ import {
   DATE_FILTERS_DESCRIPTION,
   DateFilter,
   Filter,
+  OwnerFilter,
+  OWNERSHIP_FILTERS,
 } from "../../components/filters/filters";
 import { PaginatedResults } from "../../components/paginated-results/paginated-results";
 
@@ -72,18 +74,6 @@ const TYPE_FILTER_DESCRIPTION = {
     value: "Images",
     mimeTypes: ["application/vnd.google-apps.drawing", "image/svg+xml", "image/png", "image/jpeg"],
   },
-};
-
-const OWNERSHIP_FILTERS = {
-  ANYONE: "anyone",
-  ME: "me",
-  OTHERS: "others",
-};
-
-const OWNERSHIP_FILTERS_DESCRIPTION = {
-  [OWNERSHIP_FILTERS.ANYONE]: { value: "Anyone" },
-  [OWNERSHIP_FILTERS.ME]: { value: "me" },
-  [OWNERSHIP_FILTERS.OTHERS]: { value: "Others" },
 };
 
 const MIME_TYPES = {
@@ -317,7 +307,7 @@ const googleDriveResultRenderer = ({ pages }) => {
     pages.map(({ files }) => {
       return files?.map((file) => ({
         key: file.id,
-        component: <DriveItemRender item={file} />,
+        component: <DriveItemRender key={file.id} item={file} />,
         item: file,
       }));
     })
@@ -362,13 +352,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
             label="Type"
             setter={setFileType}
           />
-          <Filter
-            value={owner}
-            defaultId={OWNERSHIP_FILTERS.ANYONE}
-            descriptions={OWNERSHIP_FILTERS_DESCRIPTION}
-            label="Owner"
-            setter={setOwner}
-          />
+          <OwnerFilter value={owner} setter={setOwner} />
           <DateFilter value={dateFilter} setter={setDateFilter} />
         </div>
       }
