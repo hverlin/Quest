@@ -5,10 +5,10 @@ import { Button, NonIdealState } from "@blueprintjs/core";
 import { useStateLink } from "@hookstate/core";
 
 import styles from "./search-view.module.css";
-import { SearchForm } from "../components/search-bar";
-import ResizePanel from "../components/side-bar";
+import { SearchForm } from "../components/search-bar/search-bar";
+import ResizePanel from "../components/side-bar/side-bar";
 import Highlighter from "../components/highlighter";
-import SettingsBar from "../components/settings-bar";
+import SettingsBar from "../components/settings-bar/settings-bar";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
 

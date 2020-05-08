@@ -2,11 +2,11 @@ import _ from "lodash";
 import React from "react";
 import { Button, NonIdealState, Popover, Switch, Tooltip } from "@blueprintjs/core";
 import styles from "./settings-bar.module.css";
-import ButtonLink from "./button-link";
+import ButtonLink from "../button-link";
 import { useStateLink } from "@hookstate/core";
-import { useShortcut } from "../services/shortcut-manager";
+import { useShortcut } from "../../services/shortcut-manager";
 import { Link, withRouter } from "react-router-dom";
-import { ThemeManager } from "../services/theme-service";
+import { ThemeManager } from "../../services/theme-service";
 
 function LeftSettings({ configuration }) {
   const state = useStateLink(configuration);

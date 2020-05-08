@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, InputGroup, Tooltip } from "@blueprintjs/core";
 import styles from "./search-bar.module.css";
-import { useShortcut } from "../services/shortcut-manager";
+import { useShortcut } from "../../services/shortcut-manager";
 
 export function SearchForm({ onSubmit }) {
   const [input, setInput] = React.useState("");
