@@ -8,6 +8,22 @@ import { Card } from "@blueprintjs/core";
 import logo from "./logo.svg";
 import EmojiJS from "emoji-js";
 import SafeHtmlElement from "../../components/safe-html-element";
+import {
+  DATE_FILTERS,
+  DATE_FILTERS_DESCRIPTION,
+  DateFilter,
+  Filter,
+} from "../../components/filters/filters";
+
+const OWNERSHIP_FILTERS = {
+  ANYONE: "anyone",
+  ME: "me",
+};
+
+const OWNERSHIP_FILTERS_DESCRIPTION = {
+  [OWNERSHIP_FILTERS.ANYONE]: { value: "Anyone" },
+  [OWNERSHIP_FILTERS.ME]: { value: "me" },
+};
 
 const emojiConverter = new EmojiJS();
 const rx_colons = new RegExp(":([a-zA-Z0-9-_+]+):", "g");
@@ -114,11 +130,20 @@ function SlackDetail({ item, users, emojis }) {
   );
 }
 
-function getSlackPage(token, pageSize, searchData, users, emojis) {
+function getSlackPage(searchData, { token, pageSize, userId, users, emojis, dateFilter, owner }) {
   return (wrapper) => ({ offset = 1, withSWR }) => {
+    let query = searchData.input;
+    if (owner === OWNERSHIP_FILTERS.ME) {
+      query += ` from:${userId}`;
+    }
+
+    if (dateFilter !== DATE_FILTERS.ANYTIME) {
+      query += ` after:${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
+    }
+
     const { data, error } = withSWR(
       useSWR(
-        `https://slack.com/api/search.messages?query=${searchData.input}&token=${token}&count=${
+        `https://slack.com/api/search.messages?query=${query}&token=${token}&count=${
           pageSize || 5
         }&page=${offset || 1}`
       )
@@ -143,11 +168,13 @@ function getSlackPage(token, pageSize, searchData, users, emojis) {
 }
 
 export default function SlackSearchResults({ configuration, searchViewState }) {
-  const { token, pageSize } = configuration.get();
+  const { token, pageSize, userId } = configuration.get();
   const searchData = searchViewState.get();
 
   const [users, setUsers] = React.useState([]);
   const [emojis, setEmojis] = React.useState([]);
+  const [owner, setOwner] = React.useState(OWNERSHIP_FILTERS.ANYONE);
+  const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
   React.useEffect(() => {
     getUsersMemo(token).then((u) => setUsers(u.members));
@@ -171,9 +198,29 @@ export default function SlackSearchResults({ configuration, searchViewState }) {
       itemDetailRenderer={(item) => (
         <SlackDetail token={token} item={item} users={usersById} emojis={emojis} />
       )}
-      pageFunc={getSlackPage(token, pageSize, searchData, usersById, emojis)}
-      deps={[usersById, emojis]}
+      pageFunc={getSlackPage(searchData, {
+        token,
+        pageSize,
+        userId,
+        users: usersById,
+        emojis,
+        dateFilter,
+        owner,
+      })}
+      deps={[usersById, emojis, dateFilter, owner]}
       getTotal={(pageSWRs) => _.get(pageSWRs, [0, "data", "messages", "total"], null)}
+      filters={
+        <div style={{ flexGrow: 1 }}>
+          <Filter
+            value={owner}
+            defaultId={OWNERSHIP_FILTERS.ANYONE}
+            descriptions={OWNERSHIP_FILTERS_DESCRIPTION}
+            label="From"
+            setter={setOwner}
+          />
+          <DateFilter value={dateFilter} setter={setDateFilter} />
+        </div>
+      }
     />
   );
 }

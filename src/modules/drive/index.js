@@ -5,16 +5,20 @@ import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
 import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
-import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout, MenuItem } from "@blueprintjs/core";
+import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout } from "@blueprintjs/core";
 import logo from "./logo.png";
 import useSWR from "swr";
 import qs from "qs";
 import { Document, Page } from "react-pdf/dist/entry.webpack";
-import { DateTime } from "luxon";
 
 import styles from "./drive.module.css";
 import ReactMarkdown from "react-markdown";
-import { Select } from "@blueprintjs/select";
+import {
+  DATE_FILTERS,
+  DATE_FILTERS_DESCRIPTION,
+  DateFilter,
+  Filter,
+} from "../../components/filters/filters";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
@@ -82,78 +86,10 @@ const OWNERSHIP_FILTERS_DESCRIPTION = {
   [OWNERSHIP_FILTERS.OTHERS]: { value: "Others" },
 };
 
-const DATE_FILTERS = {
-  ANYTIME: "anytime",
-  TODAY: "today",
-  YESTERDAY: "yesterday",
-  LAST_7_DAYS: "last_7_days",
-  LAST_30_DAYS: "last_30_days",
-  LAST_90_DAYS: "last_90_days",
-};
-
-function computeDate(days) {
-  return () => DateTime.local().minus({ days }).toISODate();
-}
-
-const DATE_FILTERS_DESCRIPTION = {
-  [DATE_FILTERS.ANYTIME]: {
-    value: "Anytime",
-  },
-  [DATE_FILTERS.TODAY]: {
-    value: "Today",
-    date: computeDate(0),
-  },
-  [DATE_FILTERS.YESTERDAY]: {
-    value: "Yesterday",
-    date: computeDate(1),
-  },
-  [DATE_FILTERS.LAST_7_DAYS]: {
-    value: "Last 7 days",
-    date: computeDate(7),
-  },
-  [DATE_FILTERS.LAST_30_DAYS]: {
-    value: "Last 30 days",
-    date: computeDate(30),
-  },
-  [DATE_FILTERS.LAST_90_DAYS]: {
-    value: "Last 90 days",
-    date: computeDate(90),
-  },
-};
-
 const MIME_TYPES = {
   TEXT: "text/plain",
   PDF: "application/pdf",
 };
-
-const itemPredicate = (query, option) =>
-  option.value.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-
-function itemRenderer(option, { handleClick, modifiers: { matchesPredicate, active } = {} }) {
-  if (!matchesPredicate) {
-    return null;
-  }
-
-  return <MenuItem key={option.id} active={active} onClick={handleClick} text={option.value} />;
-}
-
-function Filter({ descriptions, value, setter, label, defaultId }) {
-  const items = Object.entries(descriptions).map(([id, { value }]) => ({ id, value }));
-
-  return (
-    <Select
-      filterable={false}
-      items={items}
-      itemRenderer={itemRenderer}
-      onItemSelect={(option) => setter(option.id)}
-      itemPredicate={itemPredicate}
-    >
-      <Button minimal>
-        {defaultId === value ? label : `${label}: ${descriptions[value].value}`}
-      </Button>
-    </Select>
-  );
-}
 
 const formatFetcher = async (itemId, accessToken, mimeType) => {
   const res = await fetch(
@@ -437,13 +373,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
             label="Owner"
             setter={setOwner}
           />
-          <Filter
-            value={dateFilter}
-            defaultId={DATE_FILTERS.ANYTIME}
-            descriptions={DATE_FILTERS_DESCRIPTION}
-            label="Date"
-            setter={setDateFilter}
-          />
+          <DateFilter value={dateFilter} setter={setDateFilter} />
         </div>
       }
       deps={[fileType, owner, dateFilter]}

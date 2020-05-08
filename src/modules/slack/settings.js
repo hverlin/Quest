@@ -42,6 +42,7 @@ function signInWithPopup(configuration) {
 
         const body = await r.json();
         configuration.nested.token.set(body.access_token);
+        configuration.nested.userId.set(body.user_id);
         notify("Authentication to Slack successful");
       } catch (e) {
         notify("Failure when authenticating to Slack");

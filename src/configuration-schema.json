@@ -374,8 +374,12 @@
               "token": {
                 "title": "API Token",
                 "type": "string",
-                "default": "",
-                "x-component": "password"
+                "default": ""
+              },
+              "userId": {
+                "title": "UserId",
+                "type": "string",
+                "default": ""
               },
               "pageSize": {
                 "title": "Number of results per page",
