@@ -55,10 +55,11 @@ export function PaginatedResults({
   queryKey,
   fetcher,
   getFetchMore,
-  renderPages = JSON.stringify,
+  renderPages = _.noop,
   getTotal = _.noop,
   filters,
   itemDetailRenderer,
+  globalError,
 }) {
   const state = useStateLink(searchViewState);
 
@@ -95,7 +96,11 @@ export function PaginatedResults({
       </div>
 
       <div className={styles.resultList}>
-        {status === "loading" ? null : status === "error" ? (
+        {globalError ? (
+          <Callout intent="danger" className={styles.resultItem}>
+            {error}
+          </Callout>
+        ) : status === "loading" ? null : status === "error" ? (
           <Callout intent="danger" className={styles.resultItem}>
             {error}
           </Callout>

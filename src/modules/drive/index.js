@@ -3,7 +3,6 @@ import React from "react";
 import { hasCorrectTokens, makeGoogleRequest, hashConfiguration } from "../../shared/google-auth";
 import { Link } from "react-router-dom";
 import { Time } from "../../components/time";
-import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout } from "@blueprintjs/core";
 import logo from "./logo.png";
@@ -19,6 +18,7 @@ import {
   DateFilter,
   Filter,
 } from "../../components/filters/filters";
+import { PaginatedResults } from "../../components/paginated-results/paginated-results";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
@@ -272,65 +272,57 @@ function DriveDetailComponent({ item, configuration }) {
   );
 }
 
-const googleDriveFetcher = (configuration) => async (url) => {
-  return makeGoogleRequest({ configuration, scope: DRIVE_SCOPE, url });
-};
-
 function generateTypeQuery(fileType) {
   const types = TYPE_FILTER_DESCRIPTION[fileType].mimeTypes;
   return `(${types.map((type) => `mimeType = '${type}'`).join(" or ")})`;
 }
 
-function getGoogleDrivePage(searchData, configuration, { fileType, owner, dateFilter }) {
-  return (wrapper) => ({ offset: cursor = null, withSWR }) => {
-    // https://developers.google.com/drive/api/v3/ref-search-terms
-    const text = searchData.input.replace(/'/, "\\'");
-    let query = `(name contains '${text}' or fullText contains '${text}')`;
+const makeGoogleDriveFetcher = (configuration) => async (
+  key,
+  { input, fileType, owner, dateFilter },
+  cursor
+) => {
+  // https://developers.google.com/drive/api/v3/ref-search-terms
+  const text = input.replace(/'/, "\\'");
+  let query = `(name contains '${text}' or fullText contains '${text}')`;
 
-    if (fileType !== "any") {
-      query += ` and ${generateTypeQuery(fileType)}`;
-    }
+  if (fileType !== "any") {
+    query += ` and ${generateTypeQuery(fileType)}`;
+  }
 
-    if (owner === OWNERSHIP_FILTERS.ME) {
-      query += ` and ('me' in owners)`;
-    } else if (owner === OWNERSHIP_FILTERS.OTHERS) {
-      query += ` and not ('me' in owners)`;
-    }
+  if (owner === OWNERSHIP_FILTERS.ME) {
+    query += ` and ('me' in owners)`;
+  } else if (owner === OWNERSHIP_FILTERS.OTHERS) {
+    query += ` and not ('me' in owners)`;
+  }
 
-    if (dateFilter !== DATE_FILTERS.ANYTIME) {
-      const date = DATE_FILTERS_DESCRIPTION[dateFilter].date();
-      query += ` and (modifiedTime >= '${date}' or viewedByMeTime >= '${date}')`;
-    }
+  if (dateFilter !== DATE_FILTERS.ANYTIME) {
+    const date = DATE_FILTERS_DESCRIPTION[dateFilter].date();
+    query += ` and (modifiedTime > '${date}' or viewedByMeTime > '${date}')`;
+  }
 
-    const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
-      q: query,
-      pageSize: configuration.nested.pageSize.get() ?? 5,
-      fields:
-        "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink, thumbnailLink, hasThumbnail, exportLinks)",
-      pageToken: cursor,
-    })}`;
+  const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
+    q: query,
+    pageSize: configuration.nested.pageSize.get() ?? 5,
+    fields:
+      "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink, thumbnailLink, hasThumbnail, exportLinks)",
+    pageToken: cursor,
+  })}`;
 
-    const { data, error } = withSWR(
-      useSWR([url, hashConfiguration(configuration)], googleDriveFetcher(configuration))
-    );
+  return makeGoogleRequest({ configuration, scope: DRIVE_SCOPE, url });
+};
 
-    if (error) {
-      return wrapper({ error, item: null });
-    }
-
-    if (!data?.files) {
-      return wrapper({ item: null });
-    }
-
-    return data?.files.map((item) =>
-      wrapper({
-        key: item.id,
-        component: <DriveItemRender item={item} />,
-        item,
-      })
-    );
-  };
-}
+const googleDriveResultRenderer = ({ pages }) => {
+  return _.flatten(
+    pages.map(({ files }) => {
+      return files?.map((file) => ({
+        key: file.id,
+        component: <DriveItemRender item={file} />,
+        item: file,
+      }));
+    })
+  );
+};
 
 export default function DriveSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
@@ -339,14 +331,17 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
   const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
   return (
-    <PaginatedSearchResults
-      searchKey={fileType}
+    <PaginatedResults
+      queryKey={[
+        "drive" + hashConfiguration(configuration),
+        { input: searchData.input, fileType, owner, dateFilter },
+      ]}
       searchViewState={searchViewState}
       logo={logo}
       itemDetailRenderer={(item) => (
         <DriveDetailComponent item={item} configuration={configuration} />
       )}
-      error={
+      globalError={
         hasCorrectTokens(configuration.get()) === false ? (
           <div>
             Not authenticated. Go to the <Link to="/settings">settings</Link> to setup the Google
@@ -355,8 +350,9 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
         ) : null
       }
       configuration={configuration}
-      pageFunc={getGoogleDrivePage(searchData, configuration, { fileType, owner, dateFilter })}
-      computeNextOffset={({ data }) => data?.nextPageToken ?? null}
+      fetcher={makeGoogleDriveFetcher(configuration)}
+      renderPages={googleDriveResultRenderer}
+      getFetchMore={({ nextPageToken } = {}) => nextPageToken ?? null}
       filters={
         <div style={{ flexGrow: 1 }}>
           <Filter

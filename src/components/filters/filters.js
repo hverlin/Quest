@@ -51,11 +51,11 @@ const DATE_FILTERS_DESCRIPTION = {
   },
   [DATE_FILTERS.TODAY]: {
     value: "Today",
-    date: computeDate(0),
+    date: computeDate(1),
   },
   [DATE_FILTERS.YESTERDAY]: {
     value: "Yesterday",
-    date: computeDate(1),
+    date: computeDate(2),
   },
   [DATE_FILTERS.LAST_7_DAYS]: {
     value: "Last 7 days",
