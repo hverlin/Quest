@@ -1,12 +1,12 @@
-import useSWR from "swr";
 import _ from "lodash";
 import React from "react";
 import { Time } from "../../components/time";
-import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import ReactMarkdown from "react-markdown";
 import logo from "./logo.svg";
 import { Classes, Spinner } from "@blueprintjs/core";
+import { PaginatedResults } from "../../components/paginated-results/paginated-results";
+import { useQuery } from "react-query";
 
 const paperDetailFetcher = (token) => async (id) => {
   const res = await fetch("https://api.dropboxapi.com/2/paper/docs/download", {
@@ -24,29 +24,32 @@ const paperDetailFetcher = (token) => async (id) => {
   return res.text();
 };
 
-const paperFetcher = (token, pageSize = 5) => async (url, query, cursor = null) => {
-  const res = await fetch(`${url}${cursor ? "/continue" : ""}_v2`, {
-    method: "POST",
+async function paperFetcher(key, { token, input, pageSize }, cursor = null) {
+  const res = await fetch(
+    `https://api.dropboxapi.com/2/files/search${cursor ? "/continue" : ""}_v2`,
+    {
+      method: "POST",
 
-    credentials: "omit",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(
-      cursor
-        ? { cursor }
-        : {
-            query,
-            include_highlights: false,
-            options: { max_results: pageSize || 5 },
-          }
-    ),
-  });
+      credentials: "omit",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(
+        cursor
+          ? { cursor }
+          : {
+              query: input,
+              include_highlights: false,
+              options: { max_results: pageSize || 5 },
+            }
+      ),
+    }
+  );
 
   return res.json();
-};
+}
 
 function PaperResultItem({
   item: { metadata: { metadata: { id, name, server_modified } = {} } = {} } = {},
@@ -66,7 +69,7 @@ function PaperResultItem({
 function PaperDocDetail({ item, token }) {
   const id = _.get(item, "metadata.metadata.id");
 
-  const { data, error } = useSWR(id, paperDetailFetcher(token));
+  const { data, error } = useQuery(id, paperDetailFetcher(token));
 
   if (error) {
     return <p>Failed to load document: {id}</p>;
@@ -83,46 +86,32 @@ function PaperDocDetail({ item, token }) {
   );
 }
 
-function getPaperPage(token, searchData, pageSize) {
-  return (wrapper) => ({ offset: cursor = null, withSWR }) => {
-    const { data, error } = withSWR(
-      useSWR(
-        [`https://api.dropboxapi.com/2/files/search`, searchData?.input, cursor],
-        paperFetcher(token, pageSize)
-      )
-    );
-
-    if (error) {
-      return wrapper({ error, item: null });
-    }
-
-    if (!data?.matches) {
-      return wrapper({ item: null });
-    }
-
-    return data.matches.map((item) =>
-      wrapper({
+const paperRenderer = ({ pages }) => {
+  return _.flatten(
+    pages.map(({ matches }) => {
+      return matches?.map((item) => ({
         key: item.metadata.metadata.id,
-        component: <PaperResultItem item={item} />,
+        component: <PaperResultItem key={item.metadata.metadata.id} item={item} />,
         item,
-      })
-    );
-  };
-}
+      }));
+    })
+  );
+};
 
 export default function PaperSearchResults({ configuration, searchViewState }) {
   const { token, pageSize } = configuration.get();
   const searchData = searchViewState.get();
 
   return (
-    <PaginatedSearchResults
+    <PaginatedResults
+      queryKey={["paper", { input: searchData.input, token, pageSize }]}
+      fetcher={paperFetcher}
+      renderPages={paperRenderer}
       searchViewState={searchViewState}
       logo={logo}
       configuration={configuration}
       itemDetailRenderer={(item) => <PaperDocDetail item={item} token={token} />}
-      deps={[token]}
-      pageFunc={getPaperPage(token, searchData, pageSize)}
-      computeNextOffset={({ data }) => (data?.cursor ? data.cursor : null)}
+      getFetchMore={({ cursor }) => cursor ?? null}
     />
   );
 }
