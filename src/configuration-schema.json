@@ -436,6 +436,58 @@
                 "maximum": 50
               }
             }
+          },
+          {
+            "type": "object",
+            "required": ["moduleType", "enabled", "id", "name", "url", "username", "password"],
+            "additionalProperties": false,
+            "properties": {
+              "moduleType": {
+                "const": "nextcloud"
+              },
+              "id": {
+                "type": "string",
+                "default": "nextcloud",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string",
+                "default": "Nextcloud"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "url": {
+                "title": "URL",
+                "type": "string",
+                "default": "",
+                "examples": ["https://cloud.example.com"]
+              },
+              "useBasicAuth": {
+                "title": "Use basic authentication (required for Nextcloud version < 17)",
+                "type": "boolean",
+                "default": false
+              },
+              "username": {
+                "title": "Username",
+                "type": "string",
+                "default": ""
+              },
+              "password": {
+                "title": "Password",
+                "type": "string",
+                "default": "",
+                "x-component": "password"
+              },
+              "pageSize": {
+                "title": "Number of results per page",
+                "type": "integer",
+                "default": 5,
+                "minimum": 1,
+                "maximum": 50
+              }
+            }
           }
         ]
       },
