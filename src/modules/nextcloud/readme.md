@@ -6,9 +6,9 @@ You need to install this [Quest-nextcloud](https://github.com/antitoine/Quest-ne
 
 ## Authentication
 
-For Nextcloud versions >= 17, you can use the "Sign In" process directly in Quest. Thus, an application password will be generated for Quest only.
+* **For Nextcloud versions >= 17**, you can use the "Sign In" process directly in Quest. Thus, an application password will be generated for Quest only.
 
-For Nextcloud versions < 17, you need to use the basic authentication with your credentials.
+* **For Nextcloud versions < 17**, you need to use the basic authentication with your credentials (you can also use application password, but generated manually in security section of your Nextcloud account settings).
 
 ## Resources
 
