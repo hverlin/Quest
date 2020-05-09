@@ -5,8 +5,20 @@ import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.svg";
 import { PaginatedResults } from "../../components/paginated-results/paginated-results";
 import _ from "lodash";
+import {
+  DATE_FILTERS,
+  DATE_FILTERS_DESCRIPTION,
+  DateFilter,
+} from "../../components/filters/filters";
 
-async function revisionSearchFetcher(key, { baseUrl, pageSize, token, input }, cursor) {
+// /conduit/method/differential.revision.search/
+async function revisionSearchFetcher(key, { baseUrl, pageSize, token, input, dateFilter }, cursor) {
+  const constraints = { query: input };
+
+  if (dateFilter !== DATE_FILTERS.ANYTIME) {
+    constraints.modifiedStart = +new Date(DATE_FILTERS_DESCRIPTION[dateFilter].date()) / 1000;
+  }
+
   const res = await fetch(`${baseUrl}/api/differential.revision.search`, {
     method: "POST",
     headers: {
@@ -16,7 +28,7 @@ async function revisionSearchFetcher(key, { baseUrl, pageSize, token, input }, c
     },
     body: qs.stringify({
       "api.token": token,
-      constraints: { query: input },
+      constraints,
       limit: pageSize,
       after: cursor,
     }),
@@ -57,16 +69,25 @@ const makePhabRenderer = (url) => ({ pages }) => {
 export default function PaperSearchResults({ configuration, searchViewState }) {
   const { url, token, pageSize } = configuration.get();
   const searchData = searchViewState.get();
+  const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
   return (
     <PaginatedResults
-      queryKey={["phabricator", { input: searchData.input, token, baseUrl: url, pageSize }]}
+      queryKey={[
+        "phabricator",
+        { input: searchData.input, token, baseUrl: url, pageSize, dateFilter },
+      ]}
       renderPages={makePhabRenderer(url)}
       fetcher={revisionSearchFetcher}
       searchViewState={searchViewState}
       logo={logo}
       configuration={configuration}
       getFetchMore={({ result }) => (result?.cursor?.after ? result?.cursor?.after : null)}
+      filters={
+        <div style={{ flexGrow: 1 }}>
+          <DateFilter label="Last updated" value={dateFilter} setter={setDateFilter} />
+        </div>
+      }
     />
   );
 }
