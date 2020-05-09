@@ -285,12 +285,13 @@ function makeRedmineRenderer({ pages }) {
   return _.flatten(
     pages.map(({ response, redirected = false, redirectedUrl = null }) => {
       if (redirected && response.issue) {
+        const issue = response.issue;
         return [
           {
-            key: response.issue.id,
-            component: <RedmineIssuesItem issue={response.issue} url={redirectedUrl} />,
+            key: "issue-" + issue.id,
+            component: <RedmineIssuesItem key={issue.id} issue={issue} url={redirectedUrl} />,
             item: {
-              ...response.issue,
+              ...issue,
               type: "issue",
               url: redirectedUrl,
             },
