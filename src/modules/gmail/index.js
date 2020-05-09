@@ -26,19 +26,106 @@ const GMAIL_BATCH_V1 = "https://www.googleapis.com/batch/gmail/v1";
 
 const iframeStyle = `<style>
   body {
-      background-color: #ffffff;
-      font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "Icons16", sans-serif;
+    background-color: #ffffff;
+    font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto",
+      "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "Icons16",
+      sans-serif;
   }
 
   span[data-markjs] {
-      color: unset;
-      background: #fdedbe;
+    color: unset;
+    background: #fdedbe;
   }
 
   .no-highlight span[data-markjs] {
-      background-color: unset !important;
+    background-color: unset !important;
   }
-</style>`;
+  ::-webkit-scrollbar {
+    height: 16px;
+    overflow: visible;
+    width: 16px;
+  }
+
+  ::-webkit-scrollbar-button {
+    height: 0;
+    width: 0;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-clip: padding-box;
+    border: solid transparent;
+    border-width: 0 0 0 4px;
+  }
+
+  ::-webkit-scrollbar-track:horizontal {
+    border-width: 4px 0 0;
+  }
+
+  ::-webkit-scrollbar-track:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    -webkit-box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.1);
+    box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.1);
+  }
+
+  ::-webkit-scrollbar-track:horizontal:hover {
+    -webkit-box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  ::-webkit-scrollbar-track:active {
+    background-color: rgba(0, 0, 0, 0.05);
+    -webkit-box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.14),
+      inset -1px 0 0 rgba(0, 0, 0, 0.07);
+    box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.14),
+      inset -1px 0 0 rgba(0, 0, 0, 0.07);
+  }
+
+  ::-webkit-scrollbar-track:horizontal:active {
+    -webkit-box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.14),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.14),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    background-clip: padding-box;
+    border: solid transparent;
+    border-width: 1px 1px 1px 6px;
+    min-height: 28px;
+    padding: 100px 0 0;
+    -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+  }
+
+  ::-webkit-scrollbar-thumb:horizontal {
+    border-width: 6px 1px 1px;
+    padding: 0 0 0 100px;
+    -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1),
+      inset -1px 0 0 rgba(0, 0, 0, 0.07);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.1),
+      inset -1px 0 0 rgba(0, 0, 0, 0.07);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.25);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.35);
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.35);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+</style>
+`;
 
 // e.g. Thu, 7 Mar 2019 11:53:55 -0800
 function parseMessageDate(dateString) {
@@ -88,6 +175,7 @@ function GmailMessage({ message, searchData, shouldExpand = false }) {
           {!isExpanded && (
             <div>
               <Button
+                icon="expand-all"
                 className={styles.expandButton}
                 fill
                 minimal

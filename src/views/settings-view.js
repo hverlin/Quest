@@ -237,85 +237,91 @@ export function SettingsView({ store }) {
           </ButtonLink>
         </div>
       </div>
-      <div className={styles.settingsBody}>
-        <H4>Modules</H4>
-        <div style={{ display: "flex" }}>
-          <Select
-            disabled={isReordering}
-            itemPredicate={(query, module) =>
-              module.name.toLowerCase().indexOf(query.toLowerCase()) >= 0
-            }
-            items={availableModules}
-            itemRenderer={moduleItemRenderer}
-            onItemSelect={(module) => {
-              configuration.nested.modules.set((modules) =>
-                modules.concat(createDefaultValuesForModule(module.type))
-              );
-            }}
-          >
-            <Button disabled={isReordering} icon="plus">
-              Add search module
+      <div className={styles.wrapper}>
+        <div className={styles.settingsBody}>
+          <H4>Modules</H4>
+          <div style={{ display: "flex" }}>
+            <Select
+              disabled={isReordering}
+              itemPredicate={(query, module) =>
+                module.name.toLowerCase().indexOf(query.toLowerCase()) >= 0
+              }
+              items={availableModules}
+              itemRenderer={moduleItemRenderer}
+              onItemSelect={(module) => {
+                configuration.nested.modules.set((modules) =>
+                  modules.concat(createDefaultValuesForModule(module.type))
+                );
+              }}
+            >
+              <Button disabled={isReordering} icon="plus">
+                Add search module
+              </Button>
+            </Select>
+            <div style={{ flexGrow: "1" }} />
+            <Button
+              disabled={configuration.nested.modules.get().length < 2}
+              minimal={!isReordering}
+              intent={isReordering ? "primary" : "none"}
+              icon={isReordering ? "small-tick" : "swap-vertical"}
+              onClick={onReorderingClicked}
+            >
+              {isReordering ? "Done" : "Reorder"}
             </Button>
-          </Select>
-          <div style={{ flexGrow: "1" }} />
-          <Button
-            disabled={configuration.nested.modules.get().length < 2}
-            minimal={!isReordering}
-            intent={isReordering ? "primary" : "none"}
-            icon={isReordering ? "small-tick" : "swap-vertical"}
-            onClick={onReorderingClicked}
-          >
-            {isReordering ? "Done" : "Reorder"}
-          </Button>
-        </div>
-        {isReordering && (
-          <DndProvider backend={Backend}>
-            <SortableList initialItems={items} onChange={setItems} />
-          </DndProvider>
-        )}
-        {!isReordering &&
-          configuration.nested.modules.nested.map((moduleState) => (
-            <ErrorBoundary key={moduleState.nested.id.get()}>
-              <SettingCard
-                moduleState={moduleState}
-                onDelete={(id) =>
-                  configuration.nested.modules.set((modules) =>
-                    modules.filter((module) => module.id !== id)
+          </div>
+          {isReordering && (
+            <DndProvider backend={Backend}>
+              <SortableList initialItems={items} onChange={setItems} />
+            </DndProvider>
+          )}
+          {!isReordering &&
+            configuration.nested.modules.nested.map((moduleState) => (
+              <ErrorBoundary key={moduleState.nested.id.get()}>
+                <SettingCard
+                  moduleState={moduleState}
+                  onDelete={(id) =>
+                    configuration.nested.modules.set((modules) =>
+                      modules.filter((module) => module.id !== id)
+                    )
+                  }
+                />
+              </ErrorBoundary>
+            ))}
+          <H4>Appearance</H4>
+          <UIPreferences store={configuration.nested.appearance} />
+          <H4>Shortcuts</H4>
+          <p>
+            Use <kbd>Tab</kbd> and the arrow keys to navigate between the search results.
+          </p>
+          <Card>
+            <HTMLTable style={{ border: "none", width: "100%" }}>
+              <tbody>
+                {Object.entries(configSchema.properties.shortcuts.properties).map(
+                  ([id, action]) => (
+                    <tr key={id}>
+                      <td style={{ borderLeft: "none", boxShadow: "none" }}>
+                        {action.description}
+                      </td>
+                      <td style={{ borderLeft: "none", boxShadow: "none", textAlign: "right" }}>
+                        <kbd className={styles.shortcut}>
+                          {Shortcut.shortcut2symbols(action.default)}
+                        </kbd>
+                      </td>
+                    </tr>
                   )
-                }
-              />
-            </ErrorBoundary>
-          ))}
-        <H4>Appearance</H4>
-        <UIPreferences store={configuration.nested.appearance} />
-        <H4>Shortcuts</H4>
-        <p>
-          Use <kbd>Tab</kbd> and the arrow keys to navigate between the search results.
-        </p>
-        <Card>
-          <HTMLTable style={{ border: "none", width: "100%" }}>
-            <tbody>
-              {Object.entries(configSchema.properties.shortcuts.properties).map(([id, action]) => (
-                <tr key={id}>
-                  <td style={{ borderLeft: "none", boxShadow: "none" }}>{action.description}</td>
-                  <td style={{ borderLeft: "none", boxShadow: "none", textAlign: "right" }}>
-                    <kbd className={styles.shortcut}>
-                      {Shortcut.shortcut2symbols(action.default)}
-                    </kbd>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </HTMLTable>
-        </Card>
-        <div style={{ display: "flex" }}>
-          <ButtonLink icon="cog" minimal to="/json-config">
-            Edit configuration
-          </ButtonLink>
-          <div style={{ flexGrow: 1 }} />
-          <ExternalLink href="https://github.com/hverlin/Quest" style={{ alignSelf: "center" }}>
-            Learn more about Quest ({version})
-          </ExternalLink>
+                )}
+              </tbody>
+            </HTMLTable>
+          </Card>
+          <div style={{ display: "flex" }}>
+            <ButtonLink icon="cog" minimal to="/json-config">
+              Edit configuration
+            </ButtonLink>
+            <div style={{ flexGrow: 1 }} />
+            <ExternalLink href="https://github.com/hverlin/Quest" style={{ alignSelf: "center" }}>
+              Learn more about Quest ({version})
+            </ExternalLink>
+          </div>
         </div>
       </div>
     </div>

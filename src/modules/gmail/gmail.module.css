@@ -1,14 +1,14 @@
 .expandButton {
     position: absolute;
     bottom: 22px;
-    background: linear-gradient(180deg, transparent, white) !important;
-    color: black !important;
+    background: linear-gradient(180deg, transparent, var(--background)) !important;
+    color: var(--text-primary) !important;
     padding-top: 50px;
 }
 
 .expandButton:hover,
 .expandButton:focus {
-    background: linear-gradient(180deg, transparent, #a8a8a8) !important;
+    background: linear-gradient(180deg, transparent, var(--background-2)) !important;
 }
 
 .messageIframe {
