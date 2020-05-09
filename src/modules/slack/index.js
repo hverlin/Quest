@@ -129,7 +129,24 @@ function SlackDetail({ item, users, emojis }) {
   );
 }
 
-async function fetchMessages(key, { query, token, pageSize }, offset = 1) {
+async function fetchMessages(
+  key,
+  { input, userId, token, pageSize, owner, dateFilter },
+  offset = 1
+) {
+  let query = input;
+  if (owner === OWNERSHIP_FILTERS.ME) {
+    query += ` from:${userId}`;
+  }
+
+  if (dateFilter !== DATE_FILTERS.ANYTIME) {
+    query += ` after:${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
+  }
+
+  if (query.length === 0) {
+    query = "after:1990"; // return most recent messages in case the query is empty
+  }
+
   const res = await fetch(
     `https://slack.com/api/search.messages?query=${query}&token=${token}&count=${
       pageSize || 5
@@ -175,21 +192,12 @@ export default function SlackSearchResults({ configuration, searchViewState }) {
 
   const usersById = _.keyBy(users, "id");
 
-  let query = searchData.input;
-  if (owner === OWNERSHIP_FILTERS.ME) {
-    query += ` from:${userId}`;
-  }
-
-  if (dateFilter !== DATE_FILTERS.ANYTIME) {
-    query += ` after:${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
-  }
-
   return (
     <PaginatedResults
       searchViewState={searchViewState}
       logo={logo}
       configuration={configuration}
-      queryKey={["slack", { query, token, pageSize }]}
+      queryKey={["slack", { input: searchData.input, token, pageSize, userId, owner, dateFilter }]}
       fetcher={fetchMessages}
       renderPages={slackResultsRenderer(usersById, emojis)}
       getFetchMore={({ ok, messages }) => {

@@ -2,7 +2,7 @@ import React from "react";
 import Mark from "mark.js";
 import _ from "lodash";
 
-function Highlighter({ text, children }) {
+function Highlighter({ text = "", children }) {
   const elRef = React.useRef();
   React.useEffect(() => {
     const instance = new Mark(elRef.current);

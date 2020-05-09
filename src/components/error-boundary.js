@@ -17,7 +17,11 @@ export default class ErrorBoundary extends React.Component {
   }
 
   render() {
-    const { children, displayStacktrace, message = "" } = this.props;
+    const {
+      children,
+      displayStacktrace = process.env.NODE_ENV !== "production",
+      message = "",
+    } = this.props;
 
     if (this.state.hasError) {
       return (

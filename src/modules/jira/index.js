@@ -143,23 +143,26 @@ async function jiraResultsFetcher(
   const text = input.replace(/"/, '\\"');
 
   const isKey = input.match(/^[A-Z]{2}-.\d+$/);
-  let jqlQuery = `(text+~+"${text}"${isKey ? ` OR key = ${text}` : ""})`;
+  const jqlQuery = [];
+  if (text.length > 0) {
+    jqlQuery.push(`(text+~+"${text}"${isKey ? ` OR key = ${text}` : ""})`);
+  }
 
   if (owner === OWNERSHIP_FILTERS.ME) {
-    jqlQuery += ` AND assignee = currentUser()`;
+    jqlQuery.push(`assignee = currentUser()`);
   } else if (owner === OWNERSHIP_FILTERS.OTHERS) {
-    jqlQuery += ` AND assignee != currentUser()`;
+    jqlQuery.push(`assignee != currentUser()`);
   }
 
   if (dateFilter !== DATE_FILTERS.ANYTIME) {
-    jqlQuery += ` AND updated > ${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
+    jqlQuery.push(`updated > ${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`);
   }
 
   if (filter) {
-    jqlQuery += ` AND (${filter})`;
+    jqlQuery.push(`(${filter})`);
   }
 
-  const url = `${baseUrl}/rest/api/2/search?${searchParams}&jql=${jqlQuery}`;
+  const url = `${baseUrl}/rest/api/2/search?${searchParams}&jql=${jqlQuery.join(" AND ")}`;
 
   const res = await fetch(url, {
     credentials: "omit",

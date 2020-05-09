@@ -40,7 +40,7 @@ async function paperFetcher(key, { token, input, pageSize }, cursor = null) {
         cursor
           ? { cursor }
           : {
-              query: input,
+              query: input.length > 0 ? input : " ", // the API returns an error if the query is empty
               include_highlights: false,
               options: { max_results: pageSize || 5 },
             }

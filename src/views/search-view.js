@@ -11,6 +11,7 @@ import Highlighter from "../components/highlighter";
 import SettingsBar from "../components/settings-bar/settings-bar";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
+import SearchString from "../shared/search-query-parser";
 
 import icon from "../icon.svg";
 import { useShortcut } from "../services/shortcut-manager";
@@ -82,7 +83,13 @@ function Sidebar({ searchViewState }) {
 
 export function SearchView({ store }) {
   const configuration = useStateLink(store);
-  const searchViewState = useStateLink({ input: "", selectedItem: null, renderer: null });
+  const searchViewState = useStateLink({
+    input: "",
+    rawQuery: "",
+    queryObj: {},
+    selectedItem: null,
+    renderer: null,
+  });
 
   const enabledModules = configuration.nested.modules.nested.filter((module) =>
     module.nested.enabled.get()
@@ -94,11 +101,18 @@ export function SearchView({ store }) {
     <div>
       <SearchForm
         onSubmit={(input) => {
-          searchViewState.nested.input.set(input);
+          const searchQueryObj = SearchString.parse(input, {
+            keywords: ["subject"],
+            ranges: ["date"],
+          });
+
+          searchViewState.nested.rawQuery.set(input);
+          searchViewState.nested.input.set(searchQueryObj.text ?? "");
+          searchViewState.nested.queryObj.set(searchQueryObj);
           searchViewState.nested.selectedItem.set(null);
         }}
       />
-      {searchViewState.nested.input.get() && hasModules ? (
+      {searchViewState.nested.rawQuery.get() && hasModules ? (
         <div style={{ display: "flex" }}>
           <div className={styles.searchResults}>
             {enabledModules.map((moduleState) => {
