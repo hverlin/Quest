@@ -99,7 +99,11 @@ function SlackMessage({ message = {}, users, emojis, showChannel = false }) {
             {_.get(users, [message?.channel?.name, "real_name"], message?.channel?.name)}
           </ExternalLink>{" "}
           | {timestamp && <Time seconds={timestamp} />} |{" "}
-          <ExternalLink href={message?.permalink}>View in Slack</ExternalLink>
+          <ExternalLink
+            href={`slack://channel?id=${message?.channel?.id}&team=${message.team}&message=${message.ts}`}
+          >
+            View in Slack
+          </ExternalLink>
         </p>
       )}
     </>
