@@ -10,6 +10,59 @@ import qs from "qs";
 import ReactMarkdown from "react-markdown";
 import { PaginatedResults } from "../../components/paginated-results/paginated-results";
 import { useQuery } from "react-query";
+import { Filter } from "../../components/filters/filters";
+
+const TYPE_FILTERS = {
+  ANY: "any",
+  ISSUES: "issues",
+  DOCUMENTS: "documents",
+  NEWS: "news",
+  CHANGESETS: "changesets",
+  WIKI_PAGES: "wiki_pages",
+  MESSAGES: "messages",
+  PROJECTS: "projects",
+};
+
+const TYPE_FILTER_DESCRIPTION = {
+  [TYPE_FILTERS.ANY]: {
+    value: "Any",
+  },
+  [TYPE_FILTERS.ISSUES]: {
+    value: "Issues",
+  },
+  [TYPE_FILTERS.DOCUMENTS]: {
+    value: "Documents",
+  },
+  [TYPE_FILTERS.NEWS]: {
+    value: "News",
+  },
+  [TYPE_FILTERS.CHANGESETS]: {
+    value: "Changesets",
+  },
+  [TYPE_FILTERS.WIKI_PAGES]: {
+    value: "Wiki pages",
+  },
+  [TYPE_FILTERS.MESSAGES]: {
+    value: "Messages",
+  },
+  [TYPE_FILTERS.PROJECTS]: {
+    value: "Projects",
+  },
+};
+
+const SCOPE_FILTERS = {
+  ALL: "all",
+  MY_PROJECTS: "my_projects",
+};
+
+const SCOPE_FILTER_DESCRIPTION = {
+  [SCOPE_FILTERS.ALL]: {
+    value: "Everywhere",
+  },
+  [SCOPE_FILTERS.MY_PROJECTS]: {
+    value: "My projects",
+  },
+};
 
 const redmineFetcher = ({ baseUrl, apiKey }) => async (url) => {
   let res = await fetch(url, {
@@ -272,13 +325,25 @@ function RedmineIssuesItem({ issue = {}, url }) {
   );
 }
 
-async function redmineResultsFetcher(key, { input, apiKey, baseUrl, pageSize }, offset = 0) {
-  const searchParams = qs.stringify({
+async function redmineResultsFetcher(
+  key,
+  { input, apiKey, baseUrl, pageSize, itemType, scope },
+  offset = 0
+) {
+  const searchParams = {
     offset,
     limit: pageSize,
-  });
+  };
+  if (itemType !== null && TYPE_FILTERS.ANY !== itemType) {
+    searchParams[itemType] = 1;
+  }
+  if (scope !== null) {
+    searchParams.scope = scope;
+  }
 
-  return redmineFetcher({ baseUrl, apiKey })(`${baseUrl}/search.json?${searchParams}&q=${input}`);
+  return redmineFetcher({ baseUrl, apiKey })(
+    `${baseUrl}/search.json?${qs.stringify(searchParams)}&q=${input}`
+  );
 }
 
 function makeRedmineRenderer({ pages }) {
@@ -315,6 +380,8 @@ function makeRedmineRenderer({ pages }) {
 export default function RedmineSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
   const { apiKey, url, pageSize } = configuration.get();
+  const [itemType, setItemType] = React.useState(TYPE_FILTERS.ANY);
+  const [scope, setScope] = React.useState(SCOPE_FILTERS.ALL);
 
   return (
     <PaginatedResults
@@ -325,6 +392,8 @@ export default function RedmineSearchResults({ configuration, searchViewState })
           apiKey,
           baseUrl: url,
           pageSize,
+          itemType,
+          scope,
         },
       ]}
       searchViewState={searchViewState}
@@ -338,6 +407,24 @@ export default function RedmineSearchResults({ configuration, searchViewState })
       itemDetailRenderer={(item) => <RedmineDetail apiKey={apiKey} item={item} url={url} />}
       renderPages={makeRedmineRenderer}
       getTotal={(pages) => (pages?.[0]?.response?.issue ? 1 : pages?.[0]?.response?.total_count)}
+      filters={
+        <div style={{ flexGrow: 1 }}>
+          <Filter
+            value={itemType}
+            defaultId={TYPE_FILTERS.ANY}
+            descriptions={TYPE_FILTER_DESCRIPTION}
+            label="Type"
+            setter={setItemType}
+          />
+          <Filter
+            value={scope}
+            defaultId={SCOPE_FILTERS.ALL}
+            descriptions={SCOPE_FILTER_DESCRIPTION}
+            label="Scope"
+            setter={setScope}
+          />
+        </div>
+      }
     />
   );
 }
