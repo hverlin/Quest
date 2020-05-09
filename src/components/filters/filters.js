@@ -14,6 +14,14 @@ function itemRenderer(option, { handleClick, modifiers: { matchesPredicate, acti
   return <MenuItem key={option.id} active={active} onClick={handleClick} text={option.value} />;
 }
 
+function FilterButton({ label }) {
+  return (
+    <Button minimal icon="caret-down">
+      {label}
+    </Button>
+  );
+}
+
 export function Filter({ descriptions, value, setter, label, defaultId }) {
   const items = Object.entries(descriptions).map(([id, { value }]) => ({ id, value }));
 
@@ -25,9 +33,9 @@ export function Filter({ descriptions, value, setter, label, defaultId }) {
       onItemSelect={(option) => setter(option.id)}
       itemPredicate={itemPredicate}
     >
-      <Button minimal>
-        {defaultId === value ? label : `${label}: ${descriptions[value].value}`}
-      </Button>
+      <FilterButton
+        label={defaultId === value ? label : `${label}: ${descriptions[value].value}`}
+      />
     </Select>
   );
 }
@@ -82,9 +90,9 @@ export function DateFilter({ value, setter, label = "Date", defaultId = DATE_FIL
       onItemSelect={(option) => setter(option.id)}
       itemPredicate={itemPredicate}
     >
-      <Button minimal>
-        {defaultId === value ? label : `${label}: ${DATE_FILTERS_DESCRIPTION[value].value}`}
-      </Button>
+      <FilterButton
+        label={defaultId === value ? label : `${label}: ${DATE_FILTERS_DESCRIPTION[value].value}`}
+      />
     </Select>
   );
 }
@@ -120,9 +128,11 @@ export function OwnerFilter({
       onItemSelect={(option) => setter(option.id)}
       itemPredicate={itemPredicate}
     >
-      <Button minimal>
-        {defaultId === value ? label : `${label}: ${OWNERSHIP_FILTERS_DESCRIPTION[value].value}`}
-      </Button>
+      <FilterButton
+        label={
+          defaultId === value ? label : `${label}: ${OWNERSHIP_FILTERS_DESCRIPTION[value].value}`
+        }
+      />
     </Select>
   );
 }

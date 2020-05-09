@@ -81,7 +81,7 @@ function SettingCardHeader({ configurationState, onExpandClick, isExpanded }) {
       >
         <Tooltip content={isExpanded ? "collapse" : "expand"} hoverOpenDelay={1000}>
           <Button minimal small onClick={onExpandClick} style={{ marginRight: 5 }} tabIndex={0}>
-            <Icon icon={isExpanded ? "chevron-down" : "chevron-right"} />
+            <Icon icon={isExpanded ? "caret-down" : "caret-right"} />
           </Button>
         </Tooltip>
         <H5 style={{ display: "inline", verticalAlign: "middle" }}>
