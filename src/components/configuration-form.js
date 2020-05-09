@@ -1,5 +1,5 @@
 import React from "react";
-import { FormGroup, InputGroup, NumericInput } from "@blueprintjs/core";
+import { FormGroup, InputGroup, NumericInput, Switch } from "@blueprintjs/core";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
 import configurationSchema from "../configuration-schema.json";
@@ -52,7 +52,17 @@ export default function ConfigurationForm({ configuration, fields = [], isForm =
           onValueChange={(num) => state.nested[fieldId].set(num ? Math.round(num) : 5)}
         />
       );
+    } else if (fieldSchema.type === "boolean") {
+      const checked = state.nested[fieldId].get();
+      return (
+        <Switch
+          checked={checked}
+          label={checked ? "Enabled" : "Disabled"}
+          onChange={() => state.nested[fieldId].set(!checked)}
+        />
+      );
     }
+    return null;
   }
 
   const Component = isForm ? "form" : React.Fragment;

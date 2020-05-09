@@ -459,6 +459,11 @@
                 "default": "",
                 "examples": ["https://cloud.example.com"]
               },
+              "basic": {
+                "title": "Use basic authentication (required for Nextcloud version < 17)",
+                "type": "boolean",
+                "default": false
+              },
               "username": {
                 "title": "Username",
                 "type": "string",
