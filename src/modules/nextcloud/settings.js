@@ -94,7 +94,7 @@ async function signOut(configuration) {
 // noinspection JSUnusedGlobalSymbols
 export default function NextcloudSettings({ configurationState }) {
   const config = useStateLink(configurationState);
-  const { url, basic, username, password } = config.get();
+  const { url, useBasicAuth, username, password } = config.get();
   const { data } = useQuery(
     url && username && password ? `${url}/index.php/apps/quest/api/0.1/check` : null,
     async (requestUrl) => {
@@ -119,10 +119,10 @@ export default function NextcloudSettings({ configurationState }) {
     <form>
       <ConfigurationForm
         configuration={config}
-        fields={["url", "pageSize", "basic"]}
+        fields={["url", "pageSize", "useBasicAuth"]}
         isForm={false}
       />
-      {basic ? (
+      {useBasicAuth ? (
         <ConfigurationForm
           configuration={config}
           fields={["username", "password"]}
