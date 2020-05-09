@@ -226,7 +226,7 @@ export async function makeGoogleRequest({ configuration, scope, url, shouldRetry
 }
 
 /**
- * Small utility to prevent caching by SWR when using two Google modules
+ * Small utility to prevent caching by React Query when using two Google modules
  */
 export function hashConfiguration(configuration) {
   const { clientId, refreshToken } = configuration.get();
