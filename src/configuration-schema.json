@@ -289,6 +289,11 @@
                 "default": 5,
                 "minimum": 1,
                 "maximum": 50
+              },
+              "filter": {
+                "title": "Filter",
+                "type": "string",
+                "default": ""
               }
             }
           },

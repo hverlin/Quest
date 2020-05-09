@@ -6,7 +6,7 @@ export default function JiraSettings({ configurationState }) {
   return (
     <ConfigurationForm
       configuration={configurationState}
-      fields={["url", "username", "password", "pageSize"]}
+      fields={["url", "username", "password", "filter", "pageSize"]}
     />
   );
 }

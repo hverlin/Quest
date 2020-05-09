@@ -136,7 +136,7 @@ const makeJiraRenderer = (url) => ({ pages }) => {
 
 async function jiraResultsFetcher(
   key,
-  { input, owner, dateFilter, pageSize, username, password, baseUrl },
+  { input, owner, dateFilter, pageSize, username, password, baseUrl, filter },
   offset
 ) {
   const searchParams = qs.stringify({ startAt: offset || 0, maxResults: pageSize });
@@ -153,6 +153,10 @@ async function jiraResultsFetcher(
 
   if (dateFilter !== DATE_FILTERS.ANYTIME) {
     jqlQuery += ` AND updated > ${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
+  }
+
+  if (filter) {
+    jqlQuery += ` AND (${filter})`;
   }
 
   const url = `${baseUrl}/rest/api/2/search?${searchParams}&jql=${jqlQuery}`;
@@ -176,7 +180,7 @@ async function jiraResultsFetcher(
 
 export default function JiraSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
-  const { username, password, url, pageSize } = configuration.get();
+  const { username, password, url, pageSize, filter } = configuration.get();
   const [owner, setOwner] = React.useState(OWNERSHIP_FILTERS.ANYONE);
   const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
@@ -184,7 +188,16 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
     <PaginatedResults
       queryKey={[
         "jira",
-        { input: searchData.input, owner, dateFilter, username, password, baseUrl: url, pageSize },
+        {
+          input: searchData.input,
+          owner,
+          dateFilter,
+          username,
+          password,
+          baseUrl: url,
+          pageSize,
+          filter,
+        },
       ]}
       searchViewState={searchViewState}
       logo={logo}
