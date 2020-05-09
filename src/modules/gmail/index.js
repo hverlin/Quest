@@ -2,10 +2,8 @@ import _ from "lodash";
 import React from "react";
 import { hasCorrectTokens, hashConfiguration, makeGoogleRequest } from "../../shared/google-auth";
 import { Link } from "react-router-dom";
-import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.png";
-import useSWR from "swr";
 import qs from "qs";
 import SafeHtmlElement from "../../components/safe-html-element";
 import IFrame from "../../components/iframe";
@@ -15,6 +13,12 @@ import { DateTime } from "luxon";
 
 import styles from "./gmail.module.css";
 import { Time } from "../../components/time";
+import { PaginatedResults } from "../../components/paginated-results/paginated-results";
+import {
+  DATE_FILTERS,
+  DATE_FILTERS_DESCRIPTION,
+  DateFilter,
+} from "../../components/filters/filters";
 
 const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 const GMAIL_V1 = "https://www.googleapis.com/gmail/v1";
@@ -23,6 +27,7 @@ const GMAIL_BATCH_V1 = "https://www.googleapis.com/batch/gmail/v1";
 const iframeStyle = `<style>
   body {
       background-color: #ffffff;
+      font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "Icons16", sans-serif;
   }
 
   span[data-markjs] {
@@ -187,73 +192,78 @@ GET /gmail/v1/users/me/threads/${thread.id}
   );
 }
 
-const gmailFetcher = (configuration) => async (url) => {
-  const { threads, nextPageToken } = await makeGoogleRequest({
-    configuration,
-    scope: GMAIL_SCOPE,
-    url,
-  });
-
-  return {
-    threads: _.map(
-      await getThreads(configuration.nested.accessToken.get(), threads),
-      (content) => content
-    ),
-    nextPageToken,
-  };
+const gmailResultRenderer = ({ pages }) => {
+  return _.flatten(
+    pages.map(({ threads }) => {
+      return threads?.map((item) => ({
+        key: item.id,
+        component: <GmailItem key={item.id} item={item} />,
+        item: item,
+      }));
+    })
+  );
 };
 
-function getGmailPage(searchData, configuration) {
-  return (wrapper) => ({ offset: cursor = null, withSWR }) => {
+function makeGmailFetcher(configuration) {
+  return async (key, { input, pageSize, dateFilter }, cursor) => {
+    let query = input;
+    if (dateFilter !== DATE_FILTERS.ANYTIME) {
+      query += ` after:${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`;
+    }
+
     const url = `${GMAIL_V1}/users/me/threads?${qs.stringify({
-      q: searchData.input,
-      maxResults: configuration.nested.pageSize.get() ?? 5,
+      q: query,
+      maxResults: pageSize ?? 5,
       pageToken: cursor,
     })}`;
 
-    const { data, error } = withSWR(
-      useSWR([url, hashConfiguration(configuration)], gmailFetcher(configuration))
-    );
+    const { threads, nextPageToken } = await makeGoogleRequest({
+      configuration,
+      scope: GMAIL_SCOPE,
+      url,
+    });
 
-    if (error) {
-      return wrapper({ error, item: null });
-    }
-
-    if (!data) {
-      return wrapper({ item: null });
-    }
-
-    return _.isArray(data?.threads)
-      ? data.threads.map((item) =>
-          wrapper({
-            key: item.id,
-            component: <GmailItem item={item} />,
-            item,
-          })
-        )
-      : wrapper({ error: "test", item: null });
+    return {
+      threads: _.map(
+        await getThreads(configuration.nested.accessToken.get(), threads),
+        (content) => content
+      ),
+      nextPageToken,
+    };
   };
 }
 
 export default function GmailSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
+  const { pageSize } = configuration.get();
+  const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
   return (
-    <PaginatedSearchResults
+    <PaginatedResults
       searchViewState={searchViewState}
       logo={logo}
-      error={
-        hasCorrectTokens(configuration.get()) === false ? (
+      queryKey={[
+        `gmail${hashConfiguration(configuration)}`,
+        { input: searchData.input, dateFilter, pageSize },
+      ]}
+      fetcher={makeGmailFetcher(configuration)}
+      renderPages={gmailResultRenderer}
+      globalError={
+        hasCorrectTokens(configuration.get()) === false && (
           <div>
             Not authenticated. Go to the <Link to="/settings">settings</Link> to setup the Gmail
             module.
           </div>
-        ) : null
+        )
       }
       configuration={configuration}
-      pageFunc={getGmailPage(searchData, configuration)}
-      computeNextOffset={({ data }) => data?.nextPageToken ?? null}
+      getFetchMore={({ nextPageToken }) => nextPageToken ?? null}
       itemDetailRenderer={(item) => <GmailDetailComponent item={item} searchData={searchData} />}
+      filters={
+        <div style={{ flexGrow: 1 }}>
+          <DateFilter value={dateFilter} setter={setDateFilter} />
+        </div>
+      }
     />
   );
 }

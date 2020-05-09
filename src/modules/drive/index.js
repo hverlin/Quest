@@ -6,7 +6,6 @@ import { Time } from "../../components/time";
 import { ExternalLink } from "../../components/external-link";
 import { Classes, Button, Spinner, Tab, Tabs, Tooltip, Callout } from "@blueprintjs/core";
 import logo from "./logo.png";
-import useSWR from "swr";
 import qs from "qs";
 import { Document, Page } from "react-pdf/dist/entry.webpack";
 
@@ -21,6 +20,7 @@ import {
   OWNERSHIP_FILTERS,
 } from "../../components/filters/filters";
 import { PaginatedResults } from "../../components/paginated-results/paginated-results";
+import { useQuery } from "react-query";
 
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
@@ -93,7 +93,7 @@ const formatFetcher = async (itemId, accessToken, mimeType) => {
 function PDFView({ configuration, item }) {
   const [numPages, setNumPages] = React.useState(0);
   const [currentPage, setCurrentPage] = React.useState(1);
-  const { data } = useSWR(
+  const { data } = useQuery(
     [item.id, configuration.nested.accessToken.get(), MIME_TYPES.PDF],
     formatFetcher
   );
@@ -158,7 +158,7 @@ function PDFView({ configuration, item }) {
 }
 
 function TextView({ item, configuration }) {
-  const { data, error } = useSWR(
+  const { data, error } = useQuery(
     [item.id, configuration.nested.accessToken.get(), MIME_TYPES.TEXT],
     formatFetcher
   );
