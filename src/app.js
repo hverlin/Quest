@@ -1,9 +1,6 @@
 import React from "react";
 import { HashRouter, Route, Switch, useLocation } from "react-router-dom";
-import { TransitionGroup, CSSTransition } from "react-transition-group";
-
-import { SWRConfig } from "swr";
-
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { SearchView } from "./views/search-view";
 import { SettingsView } from "./views/settings-view";
 import { JsonConfigView } from "./views/json-config-view";
@@ -17,15 +14,6 @@ const queryConfig = {
   refetchInterval: false,
   refetchOnMount: true,
   refetchAllOnWindowFocus: false,
-};
-
-const swrConfig = {
-  refreshInterval: 0,
-  revalidateOnFocus: false,
-  fetcher: async function (url) {
-    const res = await fetch(url, { credentials: "omit" });
-    return res.json();
-  },
 };
 
 function AppBody({ store }) {
@@ -53,22 +41,20 @@ function AppBody({ store }) {
 function App({ store }) {
   return (
     <ReactQueryConfigProvider config={queryConfig}>
-      <SWRConfig value={swrConfig}>
-        <HashRouter>
-          <ErrorBoundary
-            displayStacktrace
-            message={
-              <div>
-                <ExternalLink href="https://github.com/hverlin/Quest/issues">
-                  Report an issue on Github
-                </ExternalLink>
-              </div>
-            }
-          >
-            <AppBody store={store} />
-          </ErrorBoundary>
-        </HashRouter>
-      </SWRConfig>
+      <HashRouter>
+        <ErrorBoundary
+          displayStacktrace
+          message={
+            <div>
+              <ExternalLink href="https://github.com/hverlin/Quest/issues">
+                Report an issue on Github
+              </ExternalLink>
+            </div>
+          }
+        >
+          <AppBody store={store} />
+        </ErrorBoundary>
+      </HashRouter>
     </ReactQueryConfigProvider>
   );
 }

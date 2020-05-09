@@ -1,8 +1,6 @@
 import _ from "lodash";
-import useSWR from "swr";
 import React from "react";
 import { Time } from "../../components/time";
-import { PaginatedSearchResults } from "../../components/search-results";
 import { ExternalLink } from "../../components/external-link";
 import logo from "./logo.png";
 import { Card, Classes, H3, H4, Spinner } from "@blueprintjs/core";
@@ -10,14 +8,16 @@ import styles from "./redmine.module.css";
 import log from "electron-log";
 import qs from "qs";
 import ReactMarkdown from "react-markdown";
+import { PaginatedResults } from "../../components/paginated-results/paginated-results";
+import { useQuery } from "react-query";
 
-const redmineFetcher = ({ apiKey }) => async (url) => {
+const redmineFetcher = ({ baseUrl, apiKey }) => async (url) => {
   let res = await fetch(url, {
     credentials: "omit",
     headers: {
       "X-Redmine-API-Key": apiKey,
-      Content: "application/json",
-      Origin: url,
+      "Content-Type": "application/json",
+      Origin: baseUrl,
     },
   });
 
@@ -27,8 +27,8 @@ const redmineFetcher = ({ apiKey }) => async (url) => {
       credentials: "omit",
       headers: {
         "X-Redmine-API-Key": apiKey,
-        Content: "application/json",
-        Origin: url,
+        "Content-Type": "application/json",
+        Origin: baseUrl,
       },
     });
     return { response: await res.json(), redirected: true, redirectedUrl };
@@ -38,9 +38,9 @@ const redmineFetcher = ({ apiKey }) => async (url) => {
 };
 
 function RedmineDetailIssue({ apiKey, baseUrl, item }) {
-  const { data, error } = useSWR(
+  const { data, error } = useQuery(
     `${item.url}.json?include=attachments,journals`,
-    redmineFetcher({ apiKey, baseUrl })
+    redmineFetcher({ baseUrl, apiKey })
   );
 
   if (error) {
@@ -163,7 +163,7 @@ function RedmineDetailIssue({ apiKey, baseUrl, item }) {
 }
 
 function RedmineDetailWiki({ apiKey, baseUrl, item }) {
-  const { data, error } = useSWR(`${item.url}.json`, redmineFetcher({ apiKey, baseUrl }));
+  const { data, error } = useQuery(`${item.url}.json`, redmineFetcher({ apiKey, baseUrl }));
 
   if (error) {
     log.error(error);
@@ -272,56 +272,44 @@ function RedmineIssuesItem({ issue = {}, url }) {
   );
 }
 
-function getRedminePage(url, searchData, apiKey, pageSize = 5) {
-  return (wrapper) => ({ offset = 0, withSWR }) => {
-    const searchParams = qs.stringify({
-      offset: offset || 0,
-      limit: pageSize,
-    });
+async function redmineResultsFetcher(key, { input, apiKey, baseUrl, pageSize }, offset = 0) {
+  const searchParams = qs.stringify({
+    offset,
+    limit: pageSize,
+  });
 
-    const { data, error } = withSWR(
-      useSWR(
-        () => (url ? `${url}/search.json?${searchParams}&q=${searchData.input}` : null),
-        redmineFetcher({ apiKey, baseUrl: url })
-      )
-    );
+  return redmineFetcher({ baseUrl, apiKey })(`${baseUrl}/search.json?${searchParams}&q=${input}`);
+}
 
-    if (error) {
-      return wrapper({ error: error, item: null });
-    }
-
-    if (!data) {
-      return wrapper({ item: null });
-    }
-
-    const { response, redirected = false, redirectedUrl = null } = data;
-
-    if (redirected && response.issue) {
-      return [
-        wrapper({
-          key: response.issue.id,
-          component: <RedmineIssuesItem issue={response.issue} url={redirectedUrl} />,
-          item: {
-            ...response.issue,
-            type: "issue",
-            url: redirectedUrl,
+function makeRedmineRenderer({ pages }) {
+  return _.flatten(
+    pages.map(({ response, redirected = false, redirectedUrl = null }) => {
+      if (redirected && response.issue) {
+        const issue = response.issue;
+        return [
+          {
+            key: "issue-" + issue.id,
+            component: <RedmineIssuesItem key={issue.id} issue={issue} url={redirectedUrl} />,
+            item: {
+              ...issue,
+              type: "issue",
+              url: redirectedUrl,
+            },
           },
-        }),
-      ];
-    }
+        ];
+      }
 
-    if (!response.results) {
-      return wrapper({ item: null });
-    }
+      if (!response.results) {
+        return [];
+      }
 
-    return response?.results.map((item) =>
-      wrapper({
+      return response?.results.map((item) => ({
         key: item.id,
         component: <RedmineResultItem key={item.id} item={item} />,
         item,
-      })
-    );
-  };
+      }));
+    })
+  );
 }
 
 export default function RedmineSearchResults({ configuration, searchViewState }) {
@@ -329,21 +317,27 @@ export default function RedmineSearchResults({ configuration, searchViewState })
   const { apiKey, url, pageSize } = configuration.get();
 
   return (
-    <PaginatedSearchResults
+    <PaginatedResults
+      queryKey={[
+        "redmine",
+        {
+          input: searchData.input,
+          apiKey,
+          baseUrl: url,
+          pageSize,
+        },
+      ]}
       searchViewState={searchViewState}
       logo={logo}
-      error={!url ? "Redmine module is not configured correctly. URL is missing." : null}
+      globalError={!url ? "Redmine module is not configured correctly. URL is missing." : null}
       configuration={configuration}
-      computeNextOffset={({ data }) =>
-        data?.response?.total_count > data?.response?.offset + pageSize
-          ? data.response.offset + pageSize
-          : null
+      getFetchMore={({ response }) =>
+        response?.total_count > response?.offset + pageSize ? response.offset + pageSize : null
       }
+      fetcher={redmineResultsFetcher}
       itemDetailRenderer={(item) => <RedmineDetail apiKey={apiKey} item={item} url={url} />}
-      pageFunc={getRedminePage(url, searchData, apiKey, pageSize)}
-      getTotal={(pageSWRs) =>
-        pageSWRs?.[0]?.data?.response?.issue ? 1 : pageSWRs?.[0]?.data?.response?.total_count
-      }
+      renderPages={makeRedmineRenderer}
+      getTotal={(pages) => (pages?.[0]?.response?.issue ? 1 : pages?.[0]?.response?.total_count)}
     />
   );
 }
