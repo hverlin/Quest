@@ -408,7 +408,7 @@ export default function RedmineSearchResults({ configuration, searchViewState })
       renderPages={makeRedmineRenderer}
       getTotal={(pages) => (pages?.[0]?.response?.issue ? 1 : pages?.[0]?.response?.total_count)}
       filters={
-        <div style={{ flexGrow: 1 }}>
+        <>
           <Filter
             value={itemType}
             defaultId={TYPE_FILTERS.ANY}
@@ -423,7 +423,7 @@ export default function RedmineSearchResults({ configuration, searchViewState })
             label="Scope"
             setter={setScope}
           />
-        </div>
+        </>
       }
     />
   );

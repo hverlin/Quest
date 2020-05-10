@@ -5,7 +5,7 @@
   "properties": {
     "appearance": {
       "type": "object",
-      "required": ["theme", "highlightResults"],
+      "required": ["theme", "highlightResults", "disposition"],
       "additionalProperties": false,
       "properties": {
         "theme": {
@@ -16,6 +16,11 @@
         "highlightResults": {
           "type": "boolean",
           "default": true
+        },
+        "disposition": {
+          "type": "string",
+          "default": "rows",
+          "enum": ["rows", "columns"]
         }
       },
       "default": {}

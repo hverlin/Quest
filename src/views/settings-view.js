@@ -37,6 +37,7 @@ import { version } from "../../package.json";
 import { ThemeManager, THEMES } from "../services/theme-service";
 import HelpDialog from "../components/help-dialog";
 import { EDITABLE_TEXT, EDITABLE_TEXT_INPUT } from "@blueprintjs/core/lib/cjs/common/classes";
+import { DISPOSITION, DispositionManager } from "../services/disposition-service";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -150,7 +151,7 @@ function SettingCard({ moduleState, onDelete }) {
 function UIPreferences({ store }) {
   const configuration = useStateLink(store);
 
-  const { highlightResults, theme } = configuration.nested;
+  const { highlightResults, theme, disposition } = configuration.nested;
 
   return (
     <Card elevation={Elevation.TWO}>
@@ -176,6 +177,16 @@ function UIPreferences({ store }) {
             } else {
               document.body.classList.add("no-highlight");
             }
+          }}
+        />
+      </FormGroup>
+      <FormGroup label="Disposition" labelFor="disposition-selector">
+        <HTMLSelect
+          id="disposition-selector"
+          value={disposition.get()}
+          options={Object.values(DISPOSITION)}
+          onChange={(e) => {
+            DispositionManager.setDisposition(e.target.value);
           }}
         />
       </FormGroup>

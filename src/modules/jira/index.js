@@ -216,10 +216,10 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
       renderPages={makeJiraRenderer(url)}
       getTotal={(pages) => _.get(pages, [0, "total"], null)}
       filters={
-        <div style={{ flexGrow: 1 }}>
+        <>
           <OwnerFilter value={owner} setter={setOwner} label="Assignee" />
           <DateFilter value={dateFilter} setter={setDateFilter} />
-        </div>
+        </>
       }
     />
   );

@@ -83,11 +83,7 @@ export default function PaperSearchResults({ configuration, searchViewState }) {
       logo={logo}
       configuration={configuration}
       getFetchMore={({ result }) => (result?.cursor?.after ? result?.cursor?.after : null)}
-      filters={
-        <div style={{ flexGrow: 1 }}>
-          <DateFilter label="Last updated" value={dateFilter} setter={setDateFilter} />
-        </div>
-      }
+      filters={<DateFilter label="Last updated" value={dateFilter} setter={setDateFilter} />}
     />
   );
 }
