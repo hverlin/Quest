@@ -15,12 +15,12 @@ import { useStateLink } from "@hookstate/core";
 import { useShortcut } from "../../services/shortcut-manager";
 import { Link, withRouter } from "react-router-dom";
 import { ThemeManager } from "../../services/theme-service";
-import { DISPOSITION, DispositionManager } from "../../services/disposition-service";
+import { LAYOUTS, LayoutManager } from "../../services/layout-service";
 
 function LeftSettings({ configuration }) {
   const state = useStateLink(configuration);
 
-  const { highlightResults, theme, disposition } = state.nested;
+  const { highlightResults, theme, layout } = state.nested;
 
   function toggleHighlighting() {
     highlightResults.set(!highlightResults.get());
@@ -32,6 +32,9 @@ function LeftSettings({ configuration }) {
   }
 
   useShortcut("toggleHighlighting", toggleHighlighting);
+  useShortcut("changeLayout", () =>
+    LayoutManager.setLayout(layout.get() === LAYOUTS.COLUMNS ? LAYOUTS.ROWS : LAYOUTS.COLUMNS)
+  );
 
   return (
     <div style={{ flexGrow: 1 }}>
@@ -63,25 +66,19 @@ function LeftSettings({ configuration }) {
       <Popover
         hasBackdrop
         target={
-          <Tooltip content="Change disposition">
+          <Tooltip content="Change layout">
             <Button icon="list-detail-view" small minimal style={{ margin: 3 }} />
           </Tooltip>
         }
         content={
           <div className={styles.popoverContainer}>
             <RadioGroup
-              onChange={(e) => DispositionManager.setDisposition(e.currentTarget.value)}
-              selectedValue={disposition.get()}
+              onChange={(e) => LayoutManager.setLayout(e.currentTarget.value)}
+              selectedValue={layout.get()}
             >
-              {Object.values(DISPOSITION).map((availableDisposition) => {
-                return (
-                  <Radio
-                    key={availableDisposition}
-                    label={availableDisposition}
-                    value={availableDisposition}
-                  />
-                );
-              })}
+              {Object.values(LAYOUTS).map((availableLayout) => (
+                <Radio key={availableLayout} label={availableLayout} value={availableLayout} />
+              ))}
             </RadioGroup>
           </div>
         }

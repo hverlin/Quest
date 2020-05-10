@@ -41,7 +41,7 @@
   margin-left: 5px;
 }
 
-:global(.disposition-columns) .resultTotal {
+:global(.column-layout) .resultTotal {
   display: none;
 }
 
@@ -49,7 +49,7 @@
   margin-left: auto;
 }
 
-:global(.disposition-columns) .moduleFilters {
+:global(.column-layout) .moduleFilters {
   display: none;
 }
 
@@ -62,7 +62,7 @@
   padding: 3px;
 }
 
-:global(.disposition-columns) .moduleFiltersMore {
+:global(.column-layout) .moduleFiltersMore {
   display: block;
 }
 

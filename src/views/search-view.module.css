@@ -8,11 +8,11 @@
   flex-grow: 1;
 }
 
-:global(.disposition-columns) .searchResults {
+:global(.column-layout) .searchResults {
     grid-auto-flow: column dense;
 }
 
-:global(.disposition-columns) .searchResults > div:last-child {
+:global(.column-layout) .searchResults > div:last-child {
     padding-right: 1rem;
 }
 

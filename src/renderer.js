@@ -18,7 +18,7 @@ import { FocusStyleManager } from "@blueprintjs/core";
 import spatialNavigation from "spatial-navigation-js";
 import { ShortcutPlugin } from "./services/shortcut-manager";
 import { ThemeManager } from "./services/theme-service";
-import { DispositionManager } from "./services/disposition-service";
+import { LayoutManager } from "./services/layout-service";
 
 ThemeManager.setInitialTheme();
 
@@ -61,9 +61,9 @@ ThemeManager.on("change:theme", (theme) =>
   store.access().nested.appearance.nested.theme.set(theme)
 );
 
-DispositionManager.setInitialDisposition(store.access().nested.appearance.nested.disposition.get());
-DispositionManager.on("change:disposition", (disposition) =>
-  store.access().nested.appearance.nested.disposition.set(disposition)
+LayoutManager.setInitialLayout(store.access().nested.appearance.nested.layout.get());
+LayoutManager.on("change:layout", (layout) =>
+  store.access().nested.appearance.nested.layout.set(layout)
 );
 
 if (!store.nested.appearance.nested.highlightResults.get()) {
