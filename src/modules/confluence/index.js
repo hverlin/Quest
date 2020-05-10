@@ -8,6 +8,13 @@ import cheerio from "cheerio";
 import qs from "qs";
 import { PaginatedResults } from "../../components/paginated-results/paginated-results";
 import { useQuery } from "react-query";
+import {
+  DATE_FILTERS,
+  DATE_FILTERS_DESCRIPTION,
+  DateFilter,
+  OwnerFilter,
+  OWNERSHIP_FILTERS,
+} from "../../components/filters/filters";
 
 const appSession = require("electron").remote.session;
 
@@ -139,9 +146,10 @@ function escapeText(text) {
 
 async function confluenceResultsFetcher(
   key,
-  { input, queryObj, filter, pageSize, username, password, baseUrl },
+  { input, queryObj, owner, dateFilter, filter, pageSize, username, password, baseUrl },
   offset
 ) {
+  // https://developer.atlassian.com/server/confluence/advanced-searching-using-cql/
   const cqlQuery = ['type = "page"'];
 
   const siteSearch = [escapeText(input)];
@@ -152,6 +160,16 @@ async function confluenceResultsFetcher(
   cqlQuery.push(`(siteSearch ~ "${siteSearch.join(" ")}")`);
   if (filter) {
     cqlQuery.push(filter);
+  }
+
+  if (dateFilter !== DATE_FILTERS.ANYTIME) {
+    cqlQuery.push(`lastModified > ${DATE_FILTERS_DESCRIPTION[dateFilter].date()}`);
+  }
+
+  if (owner === OWNERSHIP_FILTERS.ME) {
+    cqlQuery.push(`creator = currentUser()`);
+  } else if (owner === OWNERSHIP_FILTERS.OTHERS) {
+    cqlQuery.push(`creator != currentUser()`);
   }
 
   const searchParams = qs.stringify({
@@ -181,6 +199,8 @@ async function confluenceResultsFetcher(
 export default function ConfluenceSearchResults({ configuration, searchViewState }) {
   const searchData = searchViewState.get();
   const { username, password, url, pageSize, filter } = configuration.get();
+  const [owner, setOwner] = React.useState(OWNERSHIP_FILTERS.ANYONE);
+  const [dateFilter, setDateFilter] = React.useState(DATE_FILTERS.ANYTIME);
 
   return (
     <PaginatedResults
@@ -189,6 +209,8 @@ export default function ConfluenceSearchResults({ configuration, searchViewState
         {
           input: searchData.input,
           queryObj: searchData.queryObj,
+          owner,
+          dateFilter,
           username,
           password,
           filter,
@@ -209,6 +231,12 @@ export default function ConfluenceSearchResults({ configuration, searchViewState
         totalSize > start + size ? start + pageSize : null
       }
       getTotal={(pages) => _.get(pages, [0, "totalSize"], null)}
+      filters={
+        <>
+          <OwnerFilter value={owner} setter={setOwner} label="Created by" />
+          <DateFilter value={dateFilter} setter={setDateFilter} />
+        </>
+      }
     />
   );
 }
