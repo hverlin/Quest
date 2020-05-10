@@ -3,9 +3,17 @@
   display: grid;
   grid-gap: 1rem;
   grid-auto-flow: row dense;
-  overflow-y: auto;
-  height: calc(100vh - 81px);
+  overflow: auto;
+  height: calc(100vh - 101px);
   flex-grow: 1;
+}
+
+:global(.column-layout) .searchResults {
+    grid-auto-flow: column dense;
+}
+
+:global(.column-layout) .searchResults > div:last-child {
+    padding-right: 1rem;
 }
 
 .searchResultsSidebar {

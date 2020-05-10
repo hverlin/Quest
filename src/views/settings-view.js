@@ -37,6 +37,7 @@ import { version } from "../../package.json";
 import { ThemeManager, THEMES } from "../services/theme-service";
 import HelpDialog from "../components/help-dialog";
 import { EDITABLE_TEXT, EDITABLE_TEXT_INPUT } from "@blueprintjs/core/lib/cjs/common/classes";
+import { LAYOUTS, LayoutManager } from "../services/layout-service";
 
 const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
   type: item.properties.moduleType.const,
@@ -150,7 +151,7 @@ function SettingCard({ moduleState, onDelete }) {
 function UIPreferences({ store }) {
   const configuration = useStateLink(store);
 
-  const { highlightResults, theme } = configuration.nested;
+  const { highlightResults, theme, layout } = configuration.nested;
 
   return (
     <Card elevation={Elevation.TWO}>
@@ -161,6 +162,16 @@ function UIPreferences({ store }) {
           options={[THEMES.SYSTEM, THEMES.LIGHT, THEMES.DARK]}
           onChange={(e) => {
             ThemeManager.setTheme(e.target.value);
+          }}
+        />
+      </FormGroup>
+      <FormGroup label="Layout" labelFor="layout-selector">
+        <HTMLSelect
+          id="layout-selector"
+          value={layout.get()}
+          options={Object.values(LAYOUTS)}
+          onChange={(e) => {
+            LayoutManager.setLayout(e.target.value);
           }}
         />
       </FormGroup>

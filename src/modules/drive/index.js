@@ -348,7 +348,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
       renderPages={googleDriveResultRenderer}
       getFetchMore={({ nextPageToken } = {}) => nextPageToken ?? null}
       filters={
-        <div style={{ flexGrow: 1 }}>
+        <>
           <Filter
             value={fileType}
             defaultId={TYPE_FILTERS.ANY}
@@ -358,7 +358,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
           />
           <OwnerFilter value={owner} setter={setOwner} />
           <DateFilter value={dateFilter} setter={setDateFilter} />
-        </div>
+        </>
       }
       deps={[fileType, owner, dateFilter]}
     />

@@ -1,17 +1,26 @@
 import _ from "lodash";
 import React from "react";
-import { Button, NonIdealState, Popover, Switch, Tooltip } from "@blueprintjs/core";
+import {
+  Button,
+  NonIdealState,
+  Popover,
+  Radio,
+  RadioGroup,
+  Switch,
+  Tooltip,
+} from "@blueprintjs/core";
 import styles from "./settings-bar.module.css";
 import ButtonLink from "../button-link";
 import { useStateLink } from "@hookstate/core";
 import { useShortcut } from "../../services/shortcut-manager";
 import { Link, withRouter } from "react-router-dom";
 import { ThemeManager } from "../../services/theme-service";
+import { LAYOUTS, LayoutManager } from "../../services/layout-service";
 
 function LeftSettings({ configuration }) {
   const state = useStateLink(configuration);
 
-  const { highlightResults, theme } = state.nested;
+  const { highlightResults, theme, layout } = state.nested;
 
   function toggleHighlighting() {
     highlightResults.set(!highlightResults.get());
@@ -23,6 +32,9 @@ function LeftSettings({ configuration }) {
   }
 
   useShortcut("toggleHighlighting", toggleHighlighting);
+  useShortcut("changeLayout", () =>
+    LayoutManager.setLayout(layout.get() === LAYOUTS.COLUMNS ? LAYOUTS.ROWS : LAYOUTS.COLUMNS)
+  );
 
   return (
     <div style={{ flexGrow: 1 }}>
@@ -51,6 +63,26 @@ function LeftSettings({ configuration }) {
           onClick={() => ThemeManager.toggleTheme()}
         />
       </Tooltip>
+      <Popover
+        hasBackdrop
+        target={
+          <Tooltip content="Change layout">
+            <Button icon="list-detail-view" small minimal style={{ margin: 3 }} />
+          </Tooltip>
+        }
+        content={
+          <div className={styles.popoverContainer}>
+            <RadioGroup
+              onChange={(e) => LayoutManager.setLayout(e.currentTarget.value)}
+              selectedValue={layout.get()}
+            >
+              {Object.values(LAYOUTS).map((availableLayout) => (
+                <Radio key={availableLayout} label={availableLayout} value={availableLayout} />
+              ))}
+            </RadioGroup>
+          </div>
+        }
+      />
     </div>
   );
 }
@@ -59,7 +91,7 @@ function ModuleList({ configuration }) {
   const modules = useStateLink(configuration);
 
   return (
-    <div className={styles.moduleList}>
+    <div className={styles.popoverContainer}>
       {_.isEmpty(modules.nested) && (
         <NonIdealState
           description="No search modules configured"

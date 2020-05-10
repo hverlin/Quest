@@ -5,8 +5,8 @@
   "properties": {
     "appearance": {
       "type": "object",
-      "required": ["theme", "highlightResults"],
-      "additionalProperties": false,
+      "required": ["theme", "highlightResults", "layout"],
+      "additionalProperties": true,
       "properties": {
         "theme": {
           "type": "string",
@@ -16,6 +16,11 @@
         "highlightResults": {
           "type": "boolean",
           "default": true
+        },
+        "layout": {
+          "type": "string",
+          "default": "rows",
+          "enum": ["rows", "columns"]
         }
       },
       "default": {}
@@ -59,6 +64,11 @@
           "description": "Quick module list (enable/disable modules)",
           "type": "string",
           "default": "CommandOrControl+Shift+m"
+        },
+        "changeLayout": {
+          "description": "Change layout",
+          "type": "string",
+          "default": "CommandOrControl+g"
         }
       }
     },
