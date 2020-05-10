@@ -347,11 +347,7 @@ export default function GmailSearchResults({ configuration, searchViewState }) {
       configuration={configuration}
       getFetchMore={({ nextPageToken }) => nextPageToken ?? null}
       itemDetailRenderer={(item) => <GmailDetailComponent item={item} searchData={searchData} />}
-      filters={
-        <div style={{ flexGrow: 1 }}>
-          <DateFilter value={dateFilter} setter={setDateFilter} />
-        </div>
-      }
+      filters={<DateFilter value={dateFilter} setter={setDateFilter} />}
     />
   );
 }

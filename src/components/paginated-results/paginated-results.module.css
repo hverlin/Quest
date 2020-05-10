@@ -21,6 +21,51 @@
   word-break: break-word;
 }
 
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+}
+
+.moduleLogo {
+  height: 1rem;
+  margin-right: 0.4rem;
+}
+
+.moduleTitle {
+  margin-bottom: 0;
+}
+
+.resultTotal {
+  margin-bottom: 0;
+  margin-left: 5px;
+}
+
+:global(.disposition-columns) .resultTotal {
+  display: none;
+}
+
+.moduleFilters {
+  margin-left: auto;
+}
+
+:global(.disposition-columns) .moduleFilters {
+  display: none;
+}
+
+.moduleFiltersMore {
+  display: none;
+  margin-left: auto;
+}
+
+.moduleFiltersMoreContainer {
+  padding: 3px;
+}
+
+:global(.disposition-columns) .moduleFiltersMore {
+  display: block;
+}
+
 .resultList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

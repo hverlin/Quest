@@ -1,6 +1,6 @@
 import _ from "lodash";
 import React from "react";
-import { Button, Callout, Card, H5 } from "@blueprintjs/core";
+import { Button, Callout, Card, H5, Popover, Tooltip } from "@blueprintjs/core";
 import styles from "./paginated-results.module.css";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
 import { useStateLink } from "@hookstate/core";
@@ -81,18 +81,38 @@ export function PaginatedResults({
 
   return (
     <div className={styles.results}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        {logo && (
-          <img style={{ height: "1rem", marginRight: "0.4rem" }} src={logo} alt={`${name} logo`} />
+      <div className={styles.resultsHeader}>
+        {logo && <img className={styles.moduleLogo} src={logo} alt={`${name} logo`} />}
+        {!error && total > 0 ? (
+          <>
+            <Tooltip
+              content={numberFormatter.format(total) + " " + (total === 1 ? "result" : "results")}
+            >
+              <H5 className={styles.moduleTitle}>{name}</H5>
+            </Tooltip>
+            <p className={styles.resultTotal}>
+              ({numberFormatter.format(total)} {total === 1 ? "result" : "results"})
+            </p>
+          </>
+        ) : (
+          <H5 className={styles.moduleTitle}>{name}</H5>
         )}
-        <H5 style={{ marginBottom: 0 }}>{name}</H5>
-        {!error && total > 0 && (
-          <p style={{ marginBottom: 0, marginLeft: 5 }}>
-            ({numberFormatter.format(total)} {total === 1 ? "result" : "results"})
-          </p>
+        {filters && (
+          <>
+            <div className={styles.moduleFilters}>{filters}</div>
+            <Popover
+              className={styles.moduleFiltersMore}
+              hasBackdrop
+              position={"left"}
+              target={
+                <Tooltip content="Filters">
+                  <Button icon="more" small minimal style={{ margin: 3 }} />
+                </Tooltip>
+              }
+              content={<div className={styles.moduleFiltersMoreContainer}>{filters}</div>}
+            />
+          </>
         )}
-        <div style={{ flexGrow: 1 }} />
-        <div style={{ display: "flex", marginLeft: 15 }}>{filters}</div>
       </div>
 
       <div className={styles.resultList}>
