@@ -12,6 +12,7 @@ import SettingsBar from "../components/settings-bar/settings-bar";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
 import SearchString from "../shared/search-query-parser";
+import ScrollContainer from "react-indiana-drag-scroll";
 
 import icon from "../icon.svg";
 import { useShortcut } from "../services/shortcut-manager";
@@ -113,8 +114,13 @@ export function SearchView({ store }) {
         }}
       />
       {searchViewState.nested.rawQuery.get() && hasModules ? (
-        <div style={{ display: "flex" }}>
-          <div className={styles.searchResults}>
+        <div className={styles.searchContainer}>
+          <ScrollContainer
+            vertical={false}
+            horizontal
+            hideScrollbars={false}
+            className={styles.searchResults}
+          >
             {enabledModules.map((moduleState) => {
               const ResultComponent = getModuleView(moduleState.nested.moduleType.get());
               return (
@@ -128,7 +134,7 @@ export function SearchView({ store }) {
                 </Suspense>
               );
             })}
-          </div>
+          </ScrollContainer>
           <Sidebar searchViewState={searchViewState} />
         </div>
       ) : (
