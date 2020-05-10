@@ -22,7 +22,7 @@ exports.parse = function (string, options) {
   if (options.offsets) {
     query.offsets = [];
   }
-  const exclusion = {};
+  const exclusion = { text: [] };
   const terms = [];
   // Get a list of search terms respecting single and double quotes
   const regex = /(\S+:'(?:[^'\\]|\\.)*')|(\S+:"(?:[^"\\]|\\.)*")|(-?"(?:[^"\\]|\\.)*")|(-?'(?:[^'\\]|\\.)*')|\S+|\S+:\S+/g;
@@ -78,17 +78,7 @@ exports.parse = function (string, options) {
       });
 
       if (isExcludedTerm) {
-        if (exclusion["text"]) {
-          if (exclusion["text"] instanceof Array) {
-            exclusion["text"].push(term);
-          } else {
-            exclusion["text"] = [exclusion["text"]];
-            exclusion["text"].push(term);
-          }
-        } else {
-          // First time seeing an excluded text term
-          exclusion["text"] = term;
-        }
+        exclusion["text"] = [].concat(exclusion["text"], term);
       } else {
         terms.push({
           text: term,

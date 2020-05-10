@@ -269,30 +269,34 @@ function generateTypeQuery(fileType) {
 
 const makeGoogleDriveFetcher = (configuration) => async (
   key,
-  { input, fileType, owner, dateFilter },
+  { input, queryObj, fileType, owner, dateFilter },
   cursor
 ) => {
   // https://developers.google.com/drive/api/v3/ref-search-terms
   const text = input.replace(/'/, "\\'");
-  let query = `(name contains '${text}' or fullText contains '${text}')`;
+  const query = [`(name contains '${text}' or fullText contains '${text}')`];
+
+  queryObj.exclude.text.forEach((word) =>
+    query.push(`(not (name contains '${word}' or fullText contains '${word}'))`)
+  );
 
   if (fileType !== "any") {
-    query += ` and ${generateTypeQuery(fileType)}`;
+    query.push(`${generateTypeQuery(fileType)}`);
   }
 
   if (owner === OWNERSHIP_FILTERS.ME) {
-    query += ` and ('me' in owners)`;
+    query.push(`('me' in owners)`);
   } else if (owner === OWNERSHIP_FILTERS.OTHERS) {
-    query += ` and not ('me' in owners)`;
+    query.push(`not ('me' in owners)`);
   }
 
   if (dateFilter !== DATE_FILTERS.ANYTIME) {
     const date = DATE_FILTERS_DESCRIPTION[dateFilter].date();
-    query += ` and (modifiedTime > '${date}' or viewedByMeTime > '${date}')`;
+    query.push(`(modifiedTime > '${date}' or viewedByMeTime > '${date}')`);
   }
 
   const url = `https://www.googleapis.com/drive/v3/files?${qs.stringify({
-    q: query,
+    q: query.join(" and "),
     pageSize: configuration.nested.pageSize.get() ?? 5,
     fields:
       "nextPageToken, files(id, name, iconLink, modifiedTime, webViewLink, thumbnailLink, hasThumbnail, exportLinks)",
@@ -324,7 +328,7 @@ export default function DriveSearchResults({ configuration, searchViewState }) {
     <PaginatedResults
       queryKey={[
         "drive" + hashConfiguration(configuration),
-        { input: searchData.input, fileType, owner, dateFilter },
+        { input: searchData.input, queryObj: searchData.queryObj, fileType, owner, dateFilter },
       ]}
       searchViewState={searchViewState}
       logo={logo}
