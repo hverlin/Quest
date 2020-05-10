@@ -12,8 +12,16 @@ import {
 } from "../../components/filters/filters";
 
 // /conduit/method/differential.revision.search/
-async function revisionSearchFetcher(key, { baseUrl, pageSize, token, input, dateFilter }, cursor) {
-  const constraints = { query: input };
+async function revisionSearchFetcher(
+  key,
+  { baseUrl, pageSize, token, input, queryObj, dateFilter },
+  cursor
+) {
+  const constraints = {};
+
+  const query = [input];
+  queryObj.exclude.text.forEach((word) => query.push(`-${word}`));
+  constraints.query = query.join(" ");
 
   if (dateFilter !== DATE_FILTERS.ANYTIME) {
     constraints.modifiedStart = +new Date(DATE_FILTERS_DESCRIPTION[dateFilter].date()) / 1000;
@@ -75,7 +83,14 @@ export default function PaperSearchResults({ configuration, searchViewState }) {
     <PaginatedResults
       queryKey={[
         "phabricator",
-        { input: searchData.input, token, baseUrl: url, pageSize, dateFilter },
+        {
+          input: searchData.input,
+          queryObj: searchData.queryObj,
+          token,
+          baseUrl: url,
+          pageSize,
+          dateFilter,
+        },
       ]}
       renderPages={makePhabRenderer(url)}
       fetcher={revisionSearchFetcher}

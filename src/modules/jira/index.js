@@ -134,19 +134,28 @@ const makeJiraRenderer = (url) => ({ pages }) => {
   );
 };
 
+function escapeText(text) {
+  return text.replace(/"/, '\\"');
+}
+
 async function jiraResultsFetcher(
   key,
-  { input, owner, dateFilter, pageSize, username, password, baseUrl, filter },
+  { input, queryObj, owner, dateFilter, pageSize, username, password, baseUrl, filter },
   offset
 ) {
   const searchParams = qs.stringify({ startAt: offset || 0, maxResults: pageSize });
-  const text = input.replace(/"/, '\\"');
+  const text = escapeText(input);
 
   const isKey = input.match(/^[A-Z]{2}-.\d+$/);
   const jqlQuery = [];
   if (text.length > 0) {
     jqlQuery.push(`(text+~+"${text}"${isKey ? ` OR key = ${text}` : ""})`);
   }
+
+  queryObj.exclude.text.forEach((word) => {
+    const text = escapeText(word);
+    jqlQuery.push(`(summary !~ "${text}" AND comment !~ "${text}")`);
+  });
 
   if (owner === OWNERSHIP_FILTERS.ME) {
     jqlQuery.push(`assignee = currentUser()`);
@@ -193,6 +202,7 @@ export default function JiraSearchResults({ configuration, searchViewState }) {
         "jira",
         {
           input: searchData.input,
+          queryObj: searchData.queryObj,
           owner,
           dateFilter,
           username,

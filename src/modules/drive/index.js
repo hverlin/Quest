@@ -280,7 +280,7 @@ const makeGoogleDriveFetcher = (configuration) => async (
     query.push(`(not (name contains '${word}' or fullText contains '${word}'))`)
   );
 
-  if (fileType !== "any") {
+  if (fileType !== TYPE_FILTERS.ANY) {
     query.push(`${generateTypeQuery(fileType)}`);
   }
 

@@ -133,13 +133,29 @@ const makeConfluenceRenderer = (url) => ({ pages }) => {
   );
 };
 
+function escapeText(text) {
+  return text.replace(/"/, '\\"');
+}
+
 async function confluenceResultsFetcher(
   key,
-  { input, filter, pageSize, username, password, baseUrl },
+  { input, queryObj, filter, pageSize, username, password, baseUrl },
   offset
 ) {
+  const cqlQuery = ['type = "page"'];
+
+  const siteSearch = [escapeText(input)];
+  queryObj.exclude.text.forEach((word) => {
+    siteSearch.push(`-${escapeText(word)}`);
+  });
+
+  cqlQuery.push(`(siteSearch ~ "${siteSearch.join(" ")}")`);
+  if (filter) {
+    cqlQuery.push(filter);
+  }
+
   const searchParams = qs.stringify({
-    cql: `(siteSearch ~ "${input}" and type = "page"${filter ? ` and ${filter}` : ""})`,
+    cql: `(${cqlQuery.join(" and ")})`,
     expand: "content.metadata.labels",
     start: offset || 0,
     limit: pageSize,
@@ -170,7 +186,15 @@ export default function ConfluenceSearchResults({ configuration, searchViewState
     <PaginatedResults
       queryKey={[
         "confluence",
-        { input: searchData.input, username, password, filter, baseUrl: url, pageSize },
+        {
+          input: searchData.input,
+          queryObj: searchData.queryObj,
+          username,
+          password,
+          filter,
+          baseUrl: url,
+          pageSize,
+        },
       ]}
       searchViewState={searchViewState}
       logo={logo}
