@@ -8,7 +8,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-.wrapper{
+.wrapper {
     overflow-y: auto;
     max-height: calc(100vh - 110px);
 }

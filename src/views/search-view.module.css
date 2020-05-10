@@ -1,11 +1,23 @@
+.searchContainer {
+    display: flex;
+}
+
 .searchResults {
-  padding: 1rem;
-  display: grid;
-  grid-gap: 1rem;
-  grid-auto-flow: row dense;
-  overflow: auto;
-  height: calc(100vh - 101px);
-  flex-grow: 1;
+    padding: 1rem;
+    display: grid;
+    grid-gap: 1rem;
+    grid-auto-flow: row dense;
+    overflow: auto;
+    height: calc(100vh - 101px);
+    flex-grow: 1;
+}
+
+:global(.column-layout .indiana-scroll-container:hover) {
+    cursor: grab;
+}
+
+:global(.column-layout .indiana-scroll-container.indiana-scroll-container--dragging) {
+    cursor: grabbing;
 }
 
 :global(.column-layout) .searchResults {
@@ -17,13 +29,13 @@
 }
 
 .searchResultsSidebar {
-  outline: none !important;
-  padding: 20px;
-  height: calc(100vh - 81px);
-  overflow: auto;
-  word-break: break-word;
+    outline: none !important;
+    padding: 20px;
+    height: calc(100vh - 81px);
+    overflow: auto;
+    word-break: break-word;
 }
 
 .searchResultsSidebar img {
-  max-width: 100%;
+    max-width: 100%;
 }
