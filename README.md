@@ -8,7 +8,6 @@ QUEST
 
 ---
 
-## Introduction
 *Quest* is a meta-search client that can connect to various applications and sources. It will submit a search query to all the configured services and aggregate the results.
 
 You can connect it to various services like JIRA, Confluence, Google Drive, Dropbox paper, Slack, etc.
@@ -62,7 +61,7 @@ Some date filters are also available when the services support it.
 
 > Can I add the same service multiple times?
 
-Yes, you can e.g. add several Gmail accounts or add several times a Confluence/JIRA module, but with a different base filter (e.g., one per space)
+Yes! e.g. you can add several Gmail accounts or add several times a Confluence/JIRA module, but with a different base filter (e.g., one per space)
 
 > Can I override the keyboard shortcuts
 
@@ -72,13 +71,11 @@ Yes, but this a bit advanced. At the bottom of the settings, there is a button c
 
 Probably not yet, the full list is on that page. (See supported modules). You can file an issue if you would like a particular app to be supported.
 
-Feel free to contribute to Quest if you would like a particular service to be supported. There is no guide on how to add a new service yet but you simply copy-paste an existing module and start from there.
+Feel free to contribute to Quest if you would like a particular service to be supported. There are no guides on how to add a new service yet but you can simply copy-paste an existing module and start from there.
 
 > Why is this an Electron app? Electron app are big and often slow.
 
-Without Electron, this application would probably not exist. 
-I wish there would be another way to build a cross-platform app in such an easy way.
-(but obviously, downloading a 70Mb application that renders a simple search UI is far from optimal)
+Without Electron, this application would probably not exist. I wish there would be another way to build a cross-platform app in such an easy way. (but obviously, downloading a 70Mb application that renders a simple search UI is far from optimal)
 
 ## Development
 
@@ -95,6 +92,7 @@ Currently, this library uses `libsecret` on Linux platform, so you may need to i
 * Arch Linux: `sudo pacman -S libsecret`
 
 ### Running
+
 Make sure you have a recent version of NodeJS installed (10+).
 ```
 npm ci
