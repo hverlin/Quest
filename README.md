@@ -45,11 +45,16 @@ Click on the application name in the list above to see how to get instructions o
 - Note that the application is not signed yet, so you might need to [allow it to run](https://www.wikihow.com/Install-Software-from-Unsigned-Developers-on-a-Mac).
 - Auto-update is not yet available as well for that reason. You will need to check the releases page again to download an updated version of the application.
 
-### Brew (MacOS)
+### Using Brew (recommended on MacOS)
 On MacOS, you can also install the application using `brew cask`.
 ```
 brew tap hverlin/quest
 brew cask install quest
+```
+
+To update the application, run
+```
+brew cask upgrade quest
 ```
 
 ## Q&A
