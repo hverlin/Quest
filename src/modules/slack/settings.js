@@ -94,7 +94,7 @@ export default function SlackSettings({ configurationState }) {
     <form>
       <ConfigurationForm
         configuration={config}
-        fields={["clientId", "clientSecret", "pageSize"]}
+        fields={["clientId", "clientSecret", "pageSize", "sortBy"]}
         isForm={false}
       />
       <FormGroup>

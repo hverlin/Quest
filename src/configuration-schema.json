@@ -351,7 +351,7 @@
           },
           {
             "type": "object",
-            "required": ["moduleType", "enabled", "id", "name", "token"],
+            "required": ["moduleType", "enabled", "id", "name", "token", "sortBy"],
             "additionalProperties": false,
             "properties": {
               "moduleType": {
@@ -402,6 +402,16 @@
                 "default": 5,
                 "minimum": 1,
                 "maximum": 50
+              },
+              "sortBy": {
+                "title": "Sort results by",
+                "type": "string",
+                "default": "score",
+                "enum": ["score", "timestamp"],
+                "x-enum-mapping": [
+                  { "value": "score", "label": "Most relevant" },
+                  { "value": "timestamp", "label": "Most recent" }
+                ]
               }
             }
           },

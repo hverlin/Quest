@@ -148,7 +148,7 @@ function SlackDetail({ item, users, emojis }) {
 
 async function fetchMessages(
   key,
-  { input, queryObj, userId, token, pageSize, owner, dateFilter },
+  { input, queryObj, sortBy = "score", userId, token, pageSize, owner, dateFilter },
   offset = 1
 ) {
   const query = [input];
@@ -171,6 +171,7 @@ async function fetchMessages(
     token,
     query: query.join(" "),
     offset,
+    sort: sortBy,
   });
 
   const res = await fetch(`https://slack.com/api/search.messages?${searchParams}`, {
@@ -200,7 +201,7 @@ const slackResultsRenderer = (users, emojis) => ({ pages }) => {
 };
 
 export default function SlackSearchResults({ configuration, searchViewState }) {
-  const { token, pageSize, userId } = configuration.get();
+  const { token, pageSize, userId, sortBy } = configuration.get();
   const searchData = searchViewState.get();
 
   const [users, setUsers] = React.useState([]);
@@ -225,6 +226,7 @@ export default function SlackSearchResults({ configuration, searchViewState }) {
         {
           input: searchData.input,
           queryObj: searchData.queryObj,
+          sortBy,
           token,
           pageSize,
           userId,

@@ -1,5 +1,5 @@
 import React from "react";
-import { FormGroup, InputGroup, NumericInput, Switch } from "@blueprintjs/core";
+import { FormGroup, HTMLSelect, InputGroup, NumericInput, Switch } from "@blueprintjs/core";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
 import configurationSchema from "../configuration-schema.json";
@@ -29,14 +29,25 @@ export default function ConfigurationForm({ configuration, fields = [], isForm =
         />
       );
     } else if (fieldSchema.type === "string") {
-      return (
-        <InputGroup
-          id={inputId}
-          placeholder={placeholder}
-          value={state.nested[fieldId].get() || ""}
-          onChange={(e) => state.nested[fieldId].set(e.target.value)}
-        />
-      );
+      if (fieldSchema.enum) {
+        return (
+          <HTMLSelect
+            id="theme-selector"
+            value={state.nested[fieldId].get() || fieldSchema.default}
+            options={fieldSchema["x-enum-mapping"]}
+            onChange={(e) => state.nested[fieldId].set(e.target.value)}
+          />
+        );
+      } else {
+        return (
+          <InputGroup
+            id={inputId}
+            placeholder={placeholder}
+            value={state.nested[fieldId].get() || ""}
+            onChange={(e) => state.nested[fieldId].set(e.target.value)}
+          />
+        );
+      }
     } else if (fieldSchema.type === "integer") {
       return (
         <NumericInput
@@ -77,7 +88,9 @@ export default function ConfigurationForm({ configuration, fields = [], isForm =
             key={fieldId}
             label={fieldSchema.title}
             labelFor={inputId}
-            labelInfo={_.includes(required, fieldId) ? "(required)" : undefined}
+            labelInfo={
+              _.includes(required, fieldId) && !fieldSchema.enum ? "(required)" : undefined
+            }
           >
             {getInputForType(fieldId, inputId, fieldSchema)}
           </FormGroup>
