@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React from "react";
+import React, { useState } from "react";
 import { Button, Callout, Card, H5, Popover, Tooltip } from "@blueprintjs/core";
 import styles from "./paginated-results.module.css";
 import { SKELETON } from "@blueprintjs/core/lib/cjs/common/classes";
@@ -22,7 +22,7 @@ const loader = (
   </FocusableCard>
 );
 
-function renderResults({ key, component, item, state, itemDetailRenderer }) {
+function renderResults({ key, component, item, state, itemDetailRenderer } = {}) {
   const focusKey = uuidv4();
 
   return (
@@ -43,7 +43,11 @@ function renderResults({ key, component, item, state, itemDetailRenderer }) {
       }
       className={styles.resultItem}
     >
-      {component ? <Highlighter text={state.nested.input.get()}>{component}</Highlighter> : null}
+      {component ? (
+        <Highlighter text={state.nested.input.get()}>{component}</Highlighter>
+      ) : (
+        "Unable to render results."
+      )}
     </FocusableCard>
   );
 }
@@ -62,6 +66,7 @@ export function PaginatedResults({
   globalError,
 }) {
   const state = useStateLink(searchViewState);
+  const [listRef, setListRef] = useState(null);
 
   const {
     status,
@@ -115,7 +120,7 @@ export function PaginatedResults({
         )}
       </div>
 
-      <div className={styles.resultList}>
+      <div className={styles.resultList} ref={setListRef}>
         {globalError ? (
           <Callout intent="danger" className={styles.resultItem}>
             {globalError}
@@ -127,7 +132,7 @@ export function PaginatedResults({
         ) : _.isEmpty(pages) ? (
           <Card className={styles.resultItem}>No results.</Card>
         ) : (
-          pages.map(({ key, component, item }) =>
+          pages.map(({ key, component, item } = {}) =>
             renderResults({ key, component, item, state, itemDetailRenderer })
           )
         )}
@@ -145,7 +150,11 @@ export function PaginatedResults({
             minimal
             intent="primary"
             rightIcon="arrow-right"
-            onClick={() => fetchMore()}
+            onClick={() => {
+              const nodes = listRef.querySelectorAll(".focusable");
+              nodes[nodes.length - 1].focus();
+              fetchMore();
+            }}
           >
             Load More
           </Button>

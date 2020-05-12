@@ -143,13 +143,12 @@ async function jiraResultsFetcher(
   { input, queryObj, owner, dateFilter, pageSize, username, password, baseUrl, filter },
   offset
 ) {
-  const searchParams = qs.stringify({ startAt: offset || 0, maxResults: pageSize });
   const text = escapeText(input);
 
   const isKey = input.match(/^[A-Z]{2}-.\d+$/);
   const jqlQuery = [];
   if (text.length > 0) {
-    jqlQuery.push(`(text+~+"${text}"${isKey ? ` OR key = ${text}` : ""})`);
+    jqlQuery.push(`(text ~ "${text}"${isKey ? ` OR key = ${text}` : ""})`);
   }
 
   queryObj.exclude.text.forEach((word) => {
@@ -171,8 +170,13 @@ async function jiraResultsFetcher(
     jqlQuery.push(`(${filter})`);
   }
 
-  const url = `${baseUrl}/rest/api/2/search?${searchParams}&jql=${jqlQuery.join(" AND ")}`;
+  const searchParams = qs.stringify({
+    startAt: offset || 0,
+    maxResults: pageSize,
+    jql: jqlQuery.join(" AND "),
+  });
 
+  const url = `${baseUrl}/rest/api/2/search?${searchParams}`;
   const res = await fetch(url, {
     credentials: "omit",
     headers: {

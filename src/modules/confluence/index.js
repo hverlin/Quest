@@ -141,7 +141,7 @@ const makeConfluenceRenderer = (url) => ({ pages }) => {
 };
 
 function escapeText(text) {
-  return text.replace(/"/, '\\"');
+  return text.replace(/"/g, '\\"');
 }
 
 async function confluenceResultsFetcher(

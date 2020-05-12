@@ -13,6 +13,7 @@ import {
   Filter,
 } from "../../components/filters/filters";
 import { PaginatedResults } from "../../components/paginated-results/paginated-results";
+import qs from "qs";
 
 const OWNERSHIP_FILTERS = {
   ANYONE: "anyone",
@@ -28,11 +29,16 @@ const emojiConverter = new EmojiJS();
 const rx_colons = new RegExp(":([a-zA-Z0-9-_+]+):", "g");
 
 function slackMessageParser(message, usersById, emojis) {
-  if (!message?.text) {
+  const messageText = [message.text]
+    .concat(message.attachments?.map(({ text }) => text))
+    .filter(Boolean)
+    .join("<hr/>");
+
+  if (!messageText) {
     return "";
   }
 
-  const renderedMessage = message.text
+  const renderedMessage = messageText
     .replace(/```([\s\S]*?)```/g, `<pre style="white-space: pre-wrap; padding: 5px">$1</pre>`)
     .replace(
       /`([\s\S]*?)`/g,
@@ -81,6 +87,17 @@ const getEmojisMemo = _.memoize(getEmojis);
 
 function SlackMessage({ message = {}, users, emojis, showChannel = false }) {
   const timestamp = message?.ts?.split(".")[0];
+  const permalink = new URL(message.permalink);
+  const { thread_ts } = qs.parse(permalink.search.substring(1));
+
+  const messageLinkParams = qs.stringify({
+    id: message?.channel?.id,
+    team: message.team,
+    message: message.ts,
+    thread_ts,
+  });
+
+  const channelLinkParams = qs.stringify({ id: message?.channel?.id, team: message.team });
 
   return (
     <>
@@ -95,15 +112,11 @@ function SlackMessage({ message = {}, users, emojis, showChannel = false }) {
       {showChannel && (
         <p>
           in{" "}
-          <ExternalLink href={`slack://channel?id=${message?.channel?.id}&team=${message.team}`}>
+          <ExternalLink href={`slack://channel?${channelLinkParams}`}>
             {_.get(users, [message?.channel?.name, "real_name"], message?.channel?.name)}
           </ExternalLink>{" "}
           | {timestamp && <Time seconds={timestamp} />} |{" "}
-          <ExternalLink
-            href={`slack://channel?id=${message?.channel?.id}&team=${message.team}&message=${message.ts}`}
-          >
-            View in Slack
-          </ExternalLink>
+          <ExternalLink href={`slack://channel?${messageLinkParams}`}>View in Slack</ExternalLink>
         </p>
       )}
     </>
@@ -153,12 +166,16 @@ async function fetchMessages(
     query.push("after:1990"); // return most recent messages in case the query is empty
   }
 
-  const res = await fetch(
-    `https://slack.com/api/search.messages?query=${query.join(" ")}&token=${token}&count=${
-      pageSize || 5
-    }&page=${offset}`,
-    { headers: { accept: "application/json" } }
-  );
+  const searchParams = qs.stringify({
+    count: pageSize || 0,
+    token,
+    query: query.join(" "),
+    offset,
+  });
+
+  const res = await fetch(`https://slack.com/api/search.messages?${searchParams}`, {
+    headers: { accept: "application/json" },
+  });
   return res.json();
 }
 

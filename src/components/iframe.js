@@ -18,11 +18,12 @@ export default function IFrame({
     } else {
       setIframeHeight(initialSize);
     }
-  });
+  }, [children, contentRef]);
 
   return (
     <iframe
       {...props}
+      sandbox=""
       ref={setContentRef}
       style={Object.assign({}, style, { height: iframeHeight })}
     >
