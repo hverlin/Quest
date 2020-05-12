@@ -19,6 +19,9 @@ import spatialNavigation from "spatial-navigation-js";
 import { ShortcutPlugin } from "./services/shortcut-manager";
 import { ThemeManager } from "./services/theme-service";
 import { LayoutManager } from "./services/layout-service";
+import contextMenu from "electron-context-menu";
+
+contextMenu({ showSearchWithGoogle: false, showCopyImage: false });
 
 ThemeManager.setInitialTheme();
 
