@@ -2,13 +2,8 @@ import React from "react";
 import { FormGroup, HTMLSelect, InputGroup, NumericInput, Switch } from "@blueprintjs/core";
 import { useStateLink } from "@hookstate/core";
 import _ from "lodash";
-import configurationSchema from "../configuration-schema.json";
 import PasswordInput from "./password-input";
-
-const moduleSchemaByType = _.keyBy(
-  configurationSchema.properties.modules.items.oneOf,
-  "properties.moduleType.const"
-);
+import { moduleSchemaByType } from "../shared/configuration-utils";
 
 export default function ConfigurationForm({ configuration, fields = [], isForm = true }) {
   const state = useStateLink(configuration);

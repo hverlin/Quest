@@ -23,9 +23,8 @@ import { useStateLink } from "@hookstate/core";
 import ButtonLink from "../components/button-link";
 import ErrorBoundary from "../components/error-boundary";
 import { Select } from "@blueprintjs/select";
-import configurationSchema from "../configuration-schema.json";
-import { v4 as uuidv4 } from "uuid";
 import configSchema from "../configuration-schema.json";
+import { v4 as uuidv4 } from "uuid";
 import { Shortcut } from "shortcuts";
 import { useShortcut } from "../services/shortcut-manager";
 import { Redirect } from "react-router-dom";
@@ -37,17 +36,12 @@ import { version } from "../../package.json";
 import { ThemeManager, THEMES } from "../services/theme-service";
 import HelpDialog from "../components/help-dialog";
 import { EDITABLE_TEXT, EDITABLE_TEXT_INPUT } from "@blueprintjs/core/lib/cjs/common/classes";
-import { LAYOUTS, LayoutManager } from "../services/layout-service";
-
-const availableModules = configurationSchema.properties.modules.items.oneOf.map((item) => ({
-  type: item.properties.moduleType.const,
-  name: item.properties.name.default,
-}));
-
-const moduleSchemaByType = _.keyBy(
-  configurationSchema.properties.modules.items.oneOf,
-  "properties.moduleType.const"
-);
+import { LayoutManager, LAYOUTS } from "../services/layout-service";
+import {
+  availableModules,
+  getDefaultForProperty,
+  moduleSchemaByType,
+} from "../shared/configuration-utils";
 
 function createDefaultValuesForModule(moduleType) {
   const moduleSchema = moduleSchemaByType[moduleType];
@@ -135,10 +129,7 @@ function SettingCard({ moduleState, onDelete }) {
           <ModuleView configurationState={moduleConfiguration} />
         </Suspense>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <HelpDialog
-            helpText={helpText}
-            title={moduleSchemaByType[moduleType].properties.name.default}
-          />
+          <HelpDialog helpText={helpText} title={getDefaultForProperty(moduleType, "name")} />
           <Button icon="trash" minimal intent="danger" onClick={() => onDelete(id)}>
             Remove
           </Button>

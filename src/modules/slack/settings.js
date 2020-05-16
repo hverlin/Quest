@@ -7,11 +7,16 @@ import { parse } from "url";
 import { useStateLink } from "@hookstate/core";
 import { notify } from "../../services/notification-service";
 import log from "electron-log";
+import { getDefaultForProperty } from "../../shared/configuration-utils";
 
 function signInWithPopup(configuration) {
   const http = require("http");
 
-  const { clientId, clientSecret, redirectPort = 9289 } = configuration.get();
+  const {
+    clientId,
+    clientSecret,
+    redirectPort = getDefaultForProperty("slack", "redirectPort"),
+  } = configuration.get();
 
   const authWindow = new remote.BrowserWindow({ width: 600, height: 800, show: true });
   const redirectUri = `http://localhost:${redirectPort}`;
