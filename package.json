@@ -2,7 +2,7 @@
   "name": "quest",
   "productName": "quest",
   "private": true,
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Meta search client",
   "main": ".webpack/main",
   "license": "MIT",
