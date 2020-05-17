@@ -170,7 +170,7 @@ async function fetchMessages(
     count: pageSize || 0,
     token,
     query: query.join(" "),
-    offset,
+    page: offset,
     sort: sortBy,
   });
 
