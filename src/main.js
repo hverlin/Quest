@@ -6,7 +6,6 @@ const {
   globalShortcut,
   shell,
   nativeTheme,
-  systemPreferences,
 } = require("electron");
 
 const crypto = require("crypto");
@@ -26,8 +25,6 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-let isAuthenticated = false;
-
 function centerAndFocus(window) {
   window.show();
   window.focus();
@@ -42,19 +39,6 @@ const createWindow = async () => {
     encryptionKey = (await promisify(crypto.randomBytes)(256)).toString("hex");
     await keytar.setPassword(SERVICE_NAME, "encryptionKey", encryptionKey);
   }
-
-  if (
-    !isDev &&
-    !isAuthenticated &&
-    encryptionKey &&
-    systemPreferences &&
-    systemPreferences.canPromptTouchID &&
-    systemPreferences.canPromptTouchID()
-  ) {
-    await systemPreferences.promptTouchID("access your keychain");
-  }
-
-  isAuthenticated = true;
 
   // override user agent to by-pass some CSRF checks
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -94,12 +78,8 @@ const createWindow = async () => {
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
-  } else {
-    const devToolShortcuts = "CommandOrControl+Option+i";
-    if (!globalShortcut.isRegistered(devToolShortcuts)) {
-      globalShortcut.register(devToolShortcuts, () => mainWindow.webContents.openDevTools());
-    }
   }
+
   centerAndFocus(mainWindow);
 
   // force opening the link with target=_blank in a browser window
@@ -188,7 +168,7 @@ function makeMenu() {
     {
       label: "View",
       submenu: [
-        ...(isDev ? devTools : []),
+        ...(isDev ? devTools : [{ role: "toggledevtools" }]),
         { role: "resetzoom" },
         { role: "zoomin" },
         { role: "zoomout" },
