@@ -3,6 +3,7 @@
 Tested with Nextcloud 16, 17 and 18.
 
 You need to install this [Quest-nextcloud](https://github.com/antitoine/Quest-nextcloud) application on your Nextcloud Server, in order to connect Quest to Nextcloud.
+The application is available on Nextcloud Store apps (search for "quest" on your server): https://apps.nextcloud.com/apps/quest
 
 ## Authentication
 
