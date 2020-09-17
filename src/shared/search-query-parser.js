@@ -36,7 +36,7 @@ exports.parse = function (string, options) {
       // Strip surrounding quotes
       val = val.replace(/^"|"$|^'|'$/g, "");
       // Strip backslashes respecting escapes
-      val = (val + "").replace(/\\(.?)/g, function (s, n1) {
+      val = (val + "").replace(/\\(.?)/g, (s, n1) => {
         switch (n1) {
           case "\\":
             return "\\";
@@ -64,7 +64,7 @@ exports.parse = function (string, options) {
       // Strip surrounding quotes
       term = term.replace(/^"|"$|^'|'$/g, "");
       // Strip backslashes respecting escapes
-      term = (term + "").replace(/\\(.?)/g, function (s, n1) {
+      term = (term + "").replace(/\\(.?)/g, (s, n1) => {
         switch (n1) {
           case "\\":
             return "\\";
